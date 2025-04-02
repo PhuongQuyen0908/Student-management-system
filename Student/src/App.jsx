@@ -8,12 +8,17 @@ import {
 import Login from './components/Login/Login.jsx'
 import AppRoutes from './routes/AppRoutes.jsx'
 
+import ModalAddStudent from './components/Modal/ModalAddStudent.jsx';
+import ModalUpdateStudent from './components/Modal/ModalUpdateStudent.jsx';
+
 function App() {
 
   return (
     <Router>
       <div className="app-container">
         {/* App Route */}
+        <ModalAddStudent />
+        <ModalAddStudent />
         <AppRoutes />
       </div>
       <ToastContainer

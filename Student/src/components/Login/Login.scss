@@ -32,15 +32,13 @@
             text-align:center;
             font-weight:600;
         }
-        .toggle-password {
-            font-size: 18px;
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
+
+        .position-relative{
+            .toggle-password {
+                font-size: 18px;
+                cursor: pointer;
+            }
         }
-        
     }
     .forgot-password
     {

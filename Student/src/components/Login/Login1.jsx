@@ -63,8 +63,8 @@ const Login1 = props => {
                                 onKeyDown={handlePressEnter}
                             />
                             <span
-                                className="toggle-password position-absolute end-0 me-3"
-                                style={{ cursor: "pointer", top: "50%", transform: "translateY(-50%)" }}
+                                className="toggle-password position-absolute  me-3"
+                                style={{ cursor: "pointer", top: "50%", right:"10px", transform: "translateY(-50%)" }}
                                 onClick={() => setShowPassword(!showPassword)}
                             >
                                 👁
