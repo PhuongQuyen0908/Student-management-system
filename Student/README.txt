@@ -1,3 +1,8 @@
+Hướng dẫn sử dụng:
++npm install
++cd Student
++npm run dev
+
 +Download SASS :
 npm install sass --save-exact sass@1.48.0
 
