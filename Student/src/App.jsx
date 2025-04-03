@@ -18,7 +18,7 @@ function App() {
       <div className="app-container">
         {/* App Route */}
         <ModalAddStudent />
-        <ModalAddStudent />
+        <ModalUpdateStudent />
         <AppRoutes />
       </div>
       <ToastContainer
