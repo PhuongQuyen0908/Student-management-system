@@ -10,15 +10,14 @@ import AppRoutes from './routes/AppRoutes.jsx'
 
 import ModalAddStudent from './components/Modal/ModalAddStudent.jsx';
 import ModalUpdateStudent from './components/Modal/ModalUpdateStudent.jsx';
-
+import Taskbar from './components/Taskbar/Taskbar.jsx';
 function App() {
 
   return (
     <Router>
       <div className="app-container">
         {/* App Route */}
-        <ModalAddStudent />
-        <ModalAddStudent />
+        <Taskbar/>
         <AppRoutes />
       </div>
       <ToastContainer
