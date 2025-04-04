@@ -18,6 +18,8 @@ function App() {
       <div className="app-container">
         {/* App Route */}
         <Taskbar/>
+        <ModalAddStudent />
+        <ModalUpdateStudent />
         <AppRoutes />
       </div>
       <ToastContainer

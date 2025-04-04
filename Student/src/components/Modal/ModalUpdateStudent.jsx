@@ -87,9 +87,21 @@ const ModalUpdateStudent = (props) => {
 
       <Modal show={isShowModalUpdate} onHide={handleClose} centered >
         <Modal.Header closeButton>
-          <Modal.Title>Thêm học sinh</Modal.Title>
+          <Modal.Title>Sửa học sinh</Modal.Title>
         </Modal.Header>
         <Modal.Body>
+
+        <div className="mb-3">
+            <label htmlFor="studentId" className="form-label">Mã học sinh</label>
+            <input
+              type="text"
+              className={objValidInput.isValidStudentName ? "form-control" : "is-invalid form-control"}
+              id="studentId"
+              placeholder="Không được sửa"
+              //value={studentName}
+              //onChange={(e) => setStudentName(e.target.value)}
+            />
+          </div>
 
           <div className="mb-3">
             <label htmlFor="studentName" className="form-label">Tên học sinh</label>
@@ -97,7 +109,7 @@ const ModalUpdateStudent = (props) => {
               type="text"
               className={objValidInput.isValidStudentName ? "form-control" : "is-invalid form-control"}
               id="studentName"
-              placeholder="Nhập tên học sinh"
+              placeholder="bao phuc"
               value={studentName}
               onChange={(e) => setStudentName(e.target.value)}
             />
@@ -166,7 +178,7 @@ const ModalUpdateStudent = (props) => {
               type="email"
               className={objValidInput.isValidStudentEmail ? "form-control" : "is-invalid form-control"}
               id="studentEmail"
-              placeholder="Nhập email học sinh"
+              placeholder="nguyenlam.baophuc@gmail.com"
               value={studentEmail}
               onChange={(e) => setStudentEmail(e.target.value)}
             />
