@@ -17,7 +17,7 @@ function App() {
     <Router>
       <div className="app-container">
         {/* App Route */}
-        <Taskbar/>
+        {/* <Taskbar/> */}
         <ModalAddStudent />
         <ModalUpdateStudent />
         <AppRoutes />
