@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../../components/Taskbar/Taskbar';
-import Header from '../components/Header';
+import Taskbar from '../../components/Taskbar/Taskbar';
+import Header from '../../components/Header'
 
 const AdminPage = () => {
     return (
         <div className="flex min-h-screen">
-            <Sidebar />
+            <Taskbar />
             <div className="flex-1 flex flex-col">
                 <Header />
                 <main className="p-4 bg-gray-100 flex-1">

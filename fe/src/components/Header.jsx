@@ -8,7 +8,7 @@ const Header = () => {
                     <p className="font-semibold text-sm">Nguyễn Phương Quyên</p>
                     <p className="text-xs text-gray-500">admin</p>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-center justify-center font-bold text-lg">
+                <div className="w-10 h-10 rounded-full bg-red-500 text-white flex items-cente   r justify-center font-bold text-lg">
                     A
                 </div>
             </div>

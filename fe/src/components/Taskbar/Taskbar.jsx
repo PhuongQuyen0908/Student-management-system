@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../styles/Taskbar.scss';
-import { Nav } from 'react-bootstrap';
+import { NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faHome,
@@ -23,39 +23,39 @@ const Taskbar = () => {
       </div>
       <div className="taskbar-section">
         <p className="section-title">MENU</p>
-        <Nav.Link className="taskbar-item">
+        <NavLink to="/admin" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faHome} /> Dashboard
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/teachers" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faUserTie} /> Teachers
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/students" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faGraduationCap} /> Students
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/subjects" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faBookOpen} /> Subjects
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/classes" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faSchool} /> Classes
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/parents" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faUserFriends} /> Parents
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/reports" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faChartBar} /> Reports
-        </Nav.Link>
+        </NavLink>
       </div>
       <div className="taskbar-section">
         <p className="section-title">OTHER</p>
-        <Nav.Link className="taskbar-item">
+        <NavLink to="/admin/settings" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faCog} /> Setting
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/admin/profile" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faUser} /> Profile
-        </Nav.Link>
-        <Nav.Link className="taskbar-item">
+        </NavLink>
+        <NavLink to="/logout" className="taskbar-item">
           <FontAwesomeIcon icon={faSignOutAlt} /> Logout
-        </Nav.Link>
+        </NavLink>
       </div>
     </nav>
   );
