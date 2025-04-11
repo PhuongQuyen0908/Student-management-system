@@ -12,6 +12,7 @@ import ModalAddStudent from './components/Modal/ModalAddStudent.jsx';
 import ModalUpdateStudent from './components/Modal/ModalUpdateStudent.jsx';
 import Taskbar from './components/Taskbar/Taskbar.jsx';
 import Login1 from './pages/Login/LoginPage1.jsx';
+import AdminPage from './pages/Admin/AdminPage.jsx';
 function App() {
 
   return (
@@ -34,7 +35,7 @@ function App() {
     //     pauseOnHover
     //   />
     // </Router>
-    <Login1></Login1>
+    <AdminPage></AdminPage>
   )
 }
 
