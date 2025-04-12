@@ -1,19 +1,16 @@
 import { useRoutes } from 'react-router-dom';
 import AdminRoutes from './AdminRoutes';
+import Login1 from '../pages/Login/LoginPage1';
 
 const AppRoutes = () => {
     const routes = [
-        // {
-        //     path: '/login1',
-        //     element: <Login1 />
-        // },
-        // {
-        //     path: '/login',
-        //     element: <Login />
-        // },
+        {
+            path: '/',
+            element: <Login1 />
+        },
         // {
         //     path: '/',
-        //     element: <h1>Home</h1>
+        //     element: <Home />
         // },
         AdminRoutes,
         {

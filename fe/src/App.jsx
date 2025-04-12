@@ -15,6 +15,7 @@ import Login1 from './pages/Login/LoginPage1.jsx';
 import AdminPage from './pages/Admin/AdminPage.jsx';
 import AdminRoutes from './routes/AdminRoutes.jsx';
 import LoginPage from './pages/Login/LoginPage.jsx';
+import StudentsPage from './pages/Admin/StudentsPage.jsx';
 function App() {
 
   return (
