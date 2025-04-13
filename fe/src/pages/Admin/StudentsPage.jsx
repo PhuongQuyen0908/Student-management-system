@@ -1,9 +1,11 @@
-import '../../components/StudentTable';
+import React from 'react';
+import StudentTable from '../../components/StudentTable';
+import '../../styles/StudentsPage.scss'
 
 const StudentsPage = () => {
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-4">Danh sách học sinh</h2>
+        <div className="students-page-container">
+            <h2 className="students-title">Danh sách học sinh</h2>
             <StudentTable />
         </div>
     );
