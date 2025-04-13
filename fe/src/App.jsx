@@ -38,8 +38,7 @@ function App() {
     //     pauseOnHover
     //   />
     // </Router>
-    //<AppRoutes></AppRoutes>
-    <Taskbar></Taskbar>
+    <AppRoutes></AppRoutes>
   )
 }
 
