@@ -52,8 +52,8 @@ const StudentTable = () => {
 
         <div className="student-table-wrapper">
             <TableHeaderAction
-                onAdd={handleOpenAddModal}
-                onSearch={(value) => console.log('Tìm kiếm:', value)}
+                onAddClick={handleOpenAddModal}
+                onSearchChange={(value) => console.log('Tìm kiếm:', value)}
                 placeholder="Tìm kiếm học sinh..."
                 addLabel="Thêm học sinh"
             />
