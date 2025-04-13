@@ -23,7 +23,7 @@ const Taskbar = () => {
       </div>
       <div className="taskbar-section">
         <p className="section-title">MENU</p>
-        <NavLink to="/admin" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
+        <NavLink to="/admin" end className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faHome} /> Dashboard
         </NavLink>
         <NavLink to="/admin/teachers" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>

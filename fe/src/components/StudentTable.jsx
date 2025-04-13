@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
 import '../styles/StudentTable.scss';
 import TableHeaderAction from './TableHeaderAction';
 import ModalAddStudent from './Modal/ModalAddStudent';
+import { FaEdit, FaLock } from 'react-icons/fa';
+import useModal from '../hooks/useModal';
+import ModalUpdateStudent from './Modal/ModalUpdateStudent';
 const dummyData = [
     {
         id: 'K23521327',
@@ -39,20 +41,13 @@ const dummyData = [
 ];
 
 const StudentTable = () => {
-    const [isShowModalAdd, setIsShowModalAdd] = useState(false);
-
-    const handleOpenAddModal = () => {
-        setIsShowModalAdd(true);
-    };
-
-    const handleCloseAddModal = () => {
-        setIsShowModalAdd(false);
-    };
+    const addModal = useModal();
+    const updateModal = useModal();
     return (
 
         <div className="student-table-wrapper">
             <TableHeaderAction
-                onAddClick={handleOpenAddModal}
+                onAddClick={addModal.open}
                 onSearchChange={(value) => console.log('Tìm kiếm:', value)}
                 placeholder="Tìm kiếm học sinh..."
                 addLabel="Thêm học sinh"
@@ -68,6 +63,7 @@ const StudentTable = () => {
                             <th>Giới tính</th>
                             <th>Địa chỉ</th>
                             <th>Email</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -79,15 +75,31 @@ const StudentTable = () => {
                                 <td>{student.gender}</td>
                                 <td>{student.address}</td>
                                 <td>{student.email}</td>
+                                <td>
+                                    <div className="action-buttons">
+                                        <button className="icon-button edit" onClick={updateModal.open} title="Chỉnh sửa">
+                                            <FaEdit />
+                                        </button>
+                                        <button className="icon-button lock" title="Khóa">
+                                            <FaLock />
+                                        </button>
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-            {isShowModalAdd && (
+            {addModal.isOpen && (
                 <ModalAddStudent
-                    show={isShowModalAdd}
-                    handleClose={handleCloseAddModal}
+                    show={addModal.isOpen}
+                    handleClose={addModal.close}
+                />
+            )}
+            {updateModal.isOpen && (
+                <ModalUpdateStudent
+                    show={updateModal.isOpen}
+                    handleClose={updateModal.close}
                 />
             )}
         </div>
