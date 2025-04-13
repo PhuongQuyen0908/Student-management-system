@@ -30,7 +30,7 @@ const ForgotPasswordPage = () => {
                         </button>
 
                         <span className="text-center">
-                            <Link className="forgot-password" to="/login">
+                            <Link className="forgot-password" to="/">
                                 Back to Login
                             </Link>
                         </span>

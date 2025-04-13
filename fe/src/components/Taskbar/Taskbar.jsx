@@ -1,39 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import '../../styles/Taskbar.scss';
 import logo from '../../assets/School-logo.png';
 import { Nav } from 'react-bootstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faHome,
-  faUserTie,
-  faGraduationCap,
-  faBookOpen,
-  faSchool,
-  faChartBar,
-  faCog,
-  faUser,
-  faSignOutAlt,
-  faChevronDown,
-  faChevronRight,
-  faClipboardList
+  faHome, faUserTie, faGraduationCap, faBookOpen, faSchool,
+  faChartBar, faCog, faUser, faSignOutAlt, faChevronDown,
+  faChevronRight, faClipboardList
 } from '@fortawesome/free-solid-svg-icons';
+import useTaskbar from '../../hooks/useTaskbar';
 
 const Taskbar = () => {
-  const [expandedMenus, setExpandedMenus] = useState({
-    studentManagement: false,
-    classManagement: false,
-    subjectManagement: false,
-    reportManagement: false,
-    systemSettings: false,
-    teacherManagement: false
-  });
-
-  const toggleMenu = (menu) => {
-    setExpandedMenus(prev => ({
-      ...prev,
-      [menu]: !prev[menu]
-    }));
-  };
+  const { expandedMenus, toggleMenu } = useTaskbar();
 
   return (
     <nav className="taskbar-container">
@@ -44,9 +22,11 @@ const Taskbar = () => {
 
       <div className="taskbar-section">
         <p className="section-title">MENU CHÍNH</p>
+
         <Nav.Link className="taskbar-item">
           <FontAwesomeIcon icon={faHome} /> Trang chủ
         </Nav.Link>
+
         <Nav.Link className="taskbar-item" onClick={() => toggleMenu('teacherManagement')}>
           <FontAwesomeIcon icon={faUserTie} /> Quản lý giáo viên
           <FontAwesomeIcon
@@ -101,7 +81,6 @@ const Taskbar = () => {
             <Nav.Link className="taskbar-subitem">Tạo lớp</Nav.Link>
           </div>
         )}
-
 
         <Nav.Link className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>
           <FontAwesomeIcon icon={faChartBar} /> Báo cáo
