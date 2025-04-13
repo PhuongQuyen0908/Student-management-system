@@ -8,8 +8,7 @@ import {
 import Login from './pages/Login/LoginPage.jsx'
 import AppRoutes from './routes/AppRoutes.jsx'
 
-import ModalAddStudent from './components/Modal/ModalAddStudent.jsx';
-import ModalUpdateStudent from './components/Modal/ModalUpdateStudent.jsx';
+
 import Taskbar from './components/Taskbar/Taskbar.jsx';
 import Login1 from './pages/Login/LoginPage1.jsx';
 import AdminPage from './pages/Admin/AdminPage.jsx';
@@ -27,18 +26,21 @@ function App() {
     //     <ModalUpdateStudent />
     //     <AppRoutes />
     //   </div>
-    //   <ToastContainer
-    //     position="top-right"
-    //     autoClose={5000}
-    //     hideProgressBar={false}
-    //     newestOnTop={false}
-    //     rtl={false}
-    //     pauseOnFocusLoss
-    //     draggable
-    //     pauseOnHover
-    //   />
+    //  
     // </Router>
+    <>
     <AppRoutes></AppRoutes>
+    <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+      </>
   )
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import StudentTable from '../../components/StudentTable';
+import StudentTable from '../../components/StudentTable/StudentTable';
 import '../../styles/StudentsPage.scss'
 
 const StudentsPage = () => {

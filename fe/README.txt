@@ -28,3 +28,11 @@ npm install --save-exact react-toastify
 
 +Lodash : Hàm check _isEmpty()
 npm install --save-exact lodash@4.17.21
+
+
+13/04/2025
+npm install --save-exact react-paginate@8.1.0
+
+npm install --save @fortawesome/fontawesome-svg-core
+npm install --save @fortawesome/free-solid-svg-icons
+npm install --save @fortawesome/react-fontawesome
