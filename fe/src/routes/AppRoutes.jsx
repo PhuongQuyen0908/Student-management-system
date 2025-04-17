@@ -1,6 +1,7 @@
 import { useRoutes } from 'react-router-dom';
 import AdminRoutes from './AdminRoutes';
 import Login1 from '../pages/Login/LoginPage1';
+import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 
 const AppRoutes = () => {
     const routes = [
@@ -12,6 +13,10 @@ const AppRoutes = () => {
         //     path: '/',
         //     element: <Home />
         // },
+        {
+            path: '/forgot-password',
+            element: <ForgotPasswordPage />
+        },
         AdminRoutes,
         {
             path: '*',

@@ -2,6 +2,7 @@ import React from 'react';
 import '../../styles/Login.scss';
 import education from '../../assets/education.jpg';
 import useLogin from '../../hooks/useLogin';
+import { Link } from 'react-router-dom';
 
 const Login1 = props => {
     const {
@@ -53,9 +54,9 @@ const Login1 = props => {
                         <button className="btn btn-primary" onClick={handleLogin}>Login</button>
 
                         <span className="text-center">
-                            <a className="forgot-password" href="#">
+                            <Link className="forgot-password" to="/forgot-password">
                                 Forgot your password?
-                            </a>
+                            </Link>
                         </span>
                     </div>
 
