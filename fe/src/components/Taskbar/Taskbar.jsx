@@ -57,8 +57,8 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.classManagement && (
           <div className="submenu">
-            <NavLink className="taskbar-subitem">Lập danh sách lớp</NavLink>
-            <NavLink className="taskbar-subitem">Tạo lớp</NavLink>
+            <NavLink to="/admin/classes" className="taskbar-subitem">Quản lý lớp học</NavLink>
+            <NavLink className="taskbar-subitem">Danh sách lớp</NavLink>
           </div>
         )}
         <NavLink className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>
