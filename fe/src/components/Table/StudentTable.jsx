@@ -1,9 +1,9 @@
-import '../styles/StudentTable.scss';
-import TableHeaderAction from './TableHeaderAction';
-import ModalAddStudent from './Modal/ModalAddStudent';
+import '../../styles/Table/StudentTable.scss';
+import TableHeaderAction from '../TableHeaderAction';
+import ModalAddStudent from '../Modal/ModalAddStudent';
 import { FaEdit, FaLock } from 'react-icons/fa';
-import useModal from '../hooks/useModal';
-import ModalUpdateStudent from './Modal/ModalUpdateStudent';
+import useModal from '../../hooks/useModal';
+import ModalUpdateStudent from '../Modal/ModalUpdateStudent';
 const dummyData = [
     {
         id: 'K23521327',

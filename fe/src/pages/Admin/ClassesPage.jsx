@@ -1,6 +1,6 @@
 import React from 'react';
-import ClassTable from '../../components/ClassTable';
-import '../../styles/ClassesPage.scss'
+import ClassTable from '../../components/Table/ClassTable';
+import '../../styles/Page/ClassesPage.scss'
 
 const ClassesPage = () => {
     return (

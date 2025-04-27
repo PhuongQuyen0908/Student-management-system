@@ -1,5 +1,5 @@
 import React from 'react';
-import '../../styles/Login.scss';
+import '../../styles/Page/Login.scss';
 import education from '../../assets/education.jpg';
 import useLogin from '../../hooks/useLogin';
 

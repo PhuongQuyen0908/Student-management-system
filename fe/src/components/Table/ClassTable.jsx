@@ -1,6 +1,10 @@
-import '../styles/ClassTable.scss';
+import '../../styles/Table/ClassTable.scss';
 import { FaEdit, FaTrash } from 'react-icons/fa';
-import useModal from '../hooks/useModal';
+import useModal from '../../hooks/useModal';
+import ModalAddClass from '../Modal/ModalAddClass';
+import ModalUpdateClass from '../Modal/ModalUpdateClass';
+import TableHeaderAction from '../TableHeaderAction';
+
 const dummyClassData = [
     { name: 'Lớp 10A1', grade: '10' },
     { name: 'Lớp 11B2', grade: '11' },
@@ -13,12 +17,12 @@ const ClassTable = () => {
 
     return (
         <div className="class-table-wrapper">
-            {/* <TableHeaderAction
-            onAddClick={addModal.open}
-            onSearchChange={(value) => console.log('Tìm kiếm:', value)}
-            placeholder="Tìm kiếm lớp học..."
-            addLabel="Thêm lớp học"
-            /> */}
+            <TableHeaderAction
+                onAddClick={addModal.open}
+                onSearchChange={(value) => console.log('Tìm kiếm:', value)}
+                placeholder="Tìm kiếm lớp học..."
+                addLabel="Thêm lớp học"
+            />
 
             <div className="class-table-container">
                 <table className="class-table">
@@ -51,7 +55,7 @@ const ClassTable = () => {
                     </tbody>
                 </table>
             </div>
-            {/* 
+
             {addModal.isOpen && (
                 <ModalAddClass
                     show={addModal.isOpen}
@@ -63,7 +67,7 @@ const ClassTable = () => {
                     show={updateModal.isOpen}
                     handleClose={updateModal.close}
                 />
-            )} */}
+            )}
         </div>
     );
 };
