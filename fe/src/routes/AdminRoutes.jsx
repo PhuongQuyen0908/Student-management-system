@@ -1,4 +1,5 @@
 import AdminPage from '../pages/Admin/AdminPage'
+import ClassesPage from '../pages/Admin/ClassesPage';
 import StudentsPage from '../pages/Admin/StudentsPage'
 
 const AdminRoutes = {
@@ -8,6 +9,10 @@ const AdminRoutes = {
         {
             path: 'students',
             element: <StudentsPage />,
+        },
+        {
+            path: 'classes',
+            element: <ClassesPage />,
         },
     ],
 };

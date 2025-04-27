@@ -1,6 +1,6 @@
 import React from 'react';
-import StudentTable from '../../components/StudentTable';
-import '../../styles/StudentsPage.scss'
+import StudentTable from '../../components/Table/StudentTable';
+import '../../styles/Page/StudentsPage.scss'
 
 const StudentsPage = () => {
     return (
