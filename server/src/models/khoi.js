@@ -1,4 +1,4 @@
-import sequelize from "sequelize";
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('khoi', {
     MaKhoi: {
@@ -9,8 +9,8 @@ module.exports = function(sequelize, DataTypes) {
     },
     TenKhoi: {
       type: DataTypes.STRING(255),
-      allowNull: false
-    },
+      allowNull: true
+    }
   }, {
     sequelize,
     tableName: 'khoi',
@@ -23,7 +23,7 @@ module.exports = function(sequelize, DataTypes) {
         fields: [
           { name: "MaKhoi" },
         ]
-      }
+      },
     ]
   });
 };

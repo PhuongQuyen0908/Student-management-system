@@ -1,15 +1,23 @@
-import sequelize from "sequelize";
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('namhoc', {
-    MaNam: {
+    MaNamHoc: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
       allowNull: false,
       primaryKey: true
     },
-    NamHoc: {
-      type: DataTypes.STRING(255),
-      allowNull: true
+    TenNamHoc: {
+      type: DataTypes.STRING(10),
+      allowNull: false
+    },
+    Nam1: {
+      type: DataTypes.STRING(4),
+      allowNull: false
+    },
+    Nam2: {
+      type: DataTypes.STRING(4),
+      allowNull: false
     }
   }, {
     sequelize,
@@ -21,7 +29,7 @@ module.exports = function(sequelize, DataTypes) {
         unique: true,
         using: "BTREE",
         fields: [
-          { name: "MaNam" },
+          { name: "MaNamHoc" },
         ]
       },
     ]

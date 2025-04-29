@@ -1,21 +1,19 @@
 const { Sequelize } = require('sequelize');
-require("dotenv").config();
+require('dotenv').config();
 
-//Kết nối database
-const sequelize = new Sequelize('studentmanagementsystem', 'root', null, {
-   host: 'localhost',
-   dialect: 'mysql',
-   port: 3307
- });
+const sequelize = new Sequelize('quanlyhocsinh', 'root', null, {
+  host: 'localhost',
+  dialect: 'mysql',
+  port: 3306
+});
 
-// Kiểm tra xem kết nối đã thành công chưa
-const connection = async () =>{
- try {
-   await sequelize.authenticate();
-   console.log('Connection has been established successfully.');
- } catch (error) {
-   console.error('Unable to connect to the database:', error);
- }
-}
+const connection = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Connection has been established successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+  }
+};
 
-export default connection
+module.exports = { sequelize, connection };  // 👉 Export đúng CommonJS

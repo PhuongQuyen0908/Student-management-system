@@ -1,4 +1,4 @@
-import sequelize from "sequelize";
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('monhoc', {
     MaMonHoc: {
@@ -8,13 +8,13 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     TenMonHoc: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(50),
       allowNull: false
     },
     HeSo: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        defaultValue: 1
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 1
     }
   }, {
     sequelize,

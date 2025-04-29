@@ -1,10 +1,9 @@
-// src/routes/gradesRoute.js
 const express = require('express');
-const gradesController = require('../controller/gradeController');
+const gradesController = require('../controller/gradesController');
 
 const router = express.Router();
 
-// API lấy bảng điểm môn học
-router.get('/grades', gradesController.getGrades);
+// API lập báo cáo tổng kết môn học
+router.get('/subject-summary', gradesController.getSubjectSummary);
 
 module.exports = router;

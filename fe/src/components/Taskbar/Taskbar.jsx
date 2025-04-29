@@ -35,6 +35,7 @@ const Taskbar = () => {
         <NavLink to="/admin/students" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faGraduationCap} /> Học sinh
         </NavLink>
+
         <NavLink className="taskbar-item" onClick={() => toggleMenu('subjectManagement')}>
           <FontAwesomeIcon icon={faBookOpen} /> Môn học
           <FontAwesomeIcon
@@ -48,6 +49,7 @@ const Taskbar = () => {
             <NavLink className="taskbar-subitem">Tạo môn học</NavLink>
           </div>
         )}
+
         <NavLink className="taskbar-item" onClick={() => toggleMenu('classManagement')}>
           <FontAwesomeIcon icon={faSchool} /> Lớp học
           <FontAwesomeIcon
@@ -61,6 +63,7 @@ const Taskbar = () => {
             <NavLink className="taskbar-subitem">Tạo lớp</NavLink>
           </div>
         )}
+
         <NavLink className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>
           <FontAwesomeIcon icon={faChartBar} /> Báo cáo
           <FontAwesomeIcon
@@ -75,6 +78,7 @@ const Taskbar = () => {
             <NavLink className="taskbar-subitem">Lập báo cáo kết quả học tập</NavLink>
           </div>
         )}
+
         <NavLink className="taskbar-item">
           <FontAwesomeIcon icon={faClipboardList} /> Thay đổi quy định
         </NavLink>

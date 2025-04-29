@@ -1,4 +1,4 @@
-import sequelize from "sequelize";
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
   return sequelize.define('lop', {
     MaLop: {
@@ -8,8 +8,8 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     TenLop: {
-      type: DataTypes.STRING(255),
-      allowNull: true
+      type: DataTypes.STRING(50),
+      allowNull: false
     },
     MaKhoi: {
       type: DataTypes.INTEGER,
@@ -18,7 +18,7 @@ module.exports = function(sequelize, DataTypes) {
         model: 'khoi',
         key: 'MaKhoi'
       }
-    },
+    }
   }, {
     sequelize,
     tableName: 'lop',

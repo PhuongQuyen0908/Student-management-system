@@ -1,8 +1,6 @@
-import { Sequelize } from "sequelize";
-import db from '../models/index';
-
+const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  const DanhSachLop = sequelize.define('danhsachlop', {
+  return sequelize.define('danhsachlop', {
     MaDanhSachLop: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
@@ -11,17 +9,25 @@ module.exports = function(sequelize, DataTypes) {
     },
     MaNamHoc: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'namhoc',
+        key: 'MaNamHoc'
+      }
     },
     MaLop: {
-        type: DataTypes.INTEGER,
-        allowNull: false
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'lop',
+        key: 'MaLop'
+      }
     },
     SiSo: {
-        type: DataTypes.INTEGER,
-        allowNull: true
+      type: DataTypes.INTEGER,
+      allowNull: false
     }
-}, {
+  }, {
     sequelize,
     tableName: 'danhsachlop',
     timestamps: false,
@@ -33,13 +39,21 @@ module.exports = function(sequelize, DataTypes) {
         fields: [
           { name: "MaDanhSachLop" },
         ]
-      }
+      },
+      {
+        name: "fk_dslop_namhoc",
+        using: "BTREE",
+        fields: [
+          { name: "MaNamHoc" },
+        ]
+      },
+      {
+        name: "fk_dslop_lop",
+        using: "BTREE",
+        fields: [
+          { name: "MaLop" },
+        ]
+      },
     ]
   });
-  DanhSachLop.associate = (models) => {
-    DanhSachLop.belongsTo(models.namhoc, { foreignKey: 'MaNamHoc', as: 'fk_namhoc' });
-    DanhSachLop.belongsTo(models.lop, { foreignKey: 'MaLop', as: 'fk_lop' });
-  };
-  return DanhSachLop;
-
 };

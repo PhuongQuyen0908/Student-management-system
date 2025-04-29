@@ -9,16 +9,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     TenLoaiKiemTra: {
       type: DataTypes.STRING(255),
-      allowNull: false
+      allowNull: true
     },
     HeSo: {
       type: DataTypes.DECIMAL(5,2),
-      allowNull: false,
-      defaultValue: 1.0
-    },
-    ThoiGianKT: {
-      type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true
     }
   }, {
     sequelize,

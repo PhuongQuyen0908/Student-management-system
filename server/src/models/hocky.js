@@ -8,7 +8,7 @@ module.exports = function(sequelize, DataTypes) {
       primaryKey: true
     },
     TenHocKy: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.STRING(10),
       allowNull: true
     }
   }, {
@@ -23,7 +23,7 @@ module.exports = function(sequelize, DataTypes) {
         fields: [
           { name: "MaHocKy" },
         ]
-      }
+      },
     ]
   });
 };
