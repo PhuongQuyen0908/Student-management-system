@@ -28,3 +28,8 @@ npm install --save-exact react-toastify
 
 +Lodash : Hàm check _isEmpty()
 npm install --save-exact lodash@4.17.21
+
++Lodash : Hàm check _isEmpty()
+npm install --save-exact lodash@4.17.21
+
+npm install --save-exact react-paginate@8.1.0

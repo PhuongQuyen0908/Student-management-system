@@ -72,4 +72,47 @@
     }
     
   }
+
+  /* CSS tùy chỉnh cho ReactPaginate (01/05/2025)*/
+.pagination {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.page-item {
+  margin: 0 15px;
+}
+
+a.number.page-link {
+  border-radius:50%;
+  margin:0 -10px;
+}
+
+.page-item.active .page-link {
+  z-index: 3;
+  color: #fff;
+  background-color: #FFB332;
+  border:none;
+}
+
+
+a.next.page-link , a.prev.page-link{
+  background-color:#FFB332;
+  color:black;
+  font-weight:bold;
+  margin:0 10px;
+  width:100px;
+  text-align:center;
+  border:10px 10px;
+}
+a.prev.page-link{
+  margin-right:-2px;
+}
+a.break.page-link {
+  border-radius:50%;
+  border:none;
   
+}
+

@@ -3,71 +3,90 @@ import Modal from 'react-bootstrap/Modal';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 
-const ModalAddStudent = ({ show, handleClose }) => {
-  const [studentName, setStudentName] = useState("");
-  const [studentBirth, setStudentBirth] = useState("");
-  const [studentAddress, setStudentAddress] = useState("");
-  const [studentEmail, setStudentEmail] = useState("");
-  const [Gender, setGender] = useState("Male");
+import { createStudent } from '../../services/studentServices.js'
+import _, { set } from "lodash";  // dùng lodash để deep clone object
 
-  const defaultValidInput = {
-    isValidStudentName: true,
-    isValidStudentBirth: true,
-    isValidStudentAddress: true,
-    isValidStudentEmail: true,
+
+const ModalAddStudent = ({ show, handleClose , fetchStudents }) => {
+  // const [studentName, setStudentName] = useState("");
+  // const [studentBirth, setStudentBirth] = useState("");
+  // const [studentAddress, setStudentAddress] = useState("");
+  // const [studentEmail, setStudentEmail] = useState("");
+  // const [Gender, setGender] = useState("Male");
+
+  const defaultStudentData = {
+    studentId:"",
+    studentName: "",
+    studentBirth: "",
+    studentAddress: "",
+    studentEmail: "",
+    studentGender: "Nam"
+  }
+
+  const defaultValidInputs = {
+    studentName: true,
+    studentBirth: true,
+    studentAddress: true,
+    studentEmail: true,
   };
+  
+  const [validInputs, setValidInputs] = useState(defaultValidInputs);
+  const [studentData, setStudentData] = useState(defaultStudentData);
 
-  const [objValidInput, setObjValidInput] = useState(defaultValidInput);
+  const handleOnChangeInput = (value, name) => {
+    let _studentData = _.cloneDeep(studentData); // deep clone object
+    _studentData[name] = value;
+    setStudentData(_studentData);
+  }
 
   const isValidInputs = () => {
-    setObjValidInput(defaultValidInput);
 
-    if (!studentName) {
-      toast.error("Tên học sinh là bắt buộc");
-      setObjValidInput({ ...defaultValidInput, isValidStudentName: false });
-      return false;
-    }
-
-    if (!studentBirth) {
-      toast.error("Ngày sinh là bắt buộc");
-      setObjValidInput({ ...defaultValidInput, isValidStudentBirth: false });
-      return false;
-    }
-
-    if (!studentAddress) {
-      toast.error("Địa chỉ là bắt buộc");
-      setObjValidInput({ ...defaultValidInput, isValidStudentAddress: false });
-      return false;
-    }
-
-    if (!studentEmail) {
-      toast.error("Email là bắt buộc");
-      setObjValidInput({ ...defaultValidInput, isValidStudentEmail: false });
-      return false;
-    }
-
+    setValidInputs(defaultValidInputs);
     const re = /\S+@\S+\.\S+/;
-    if (!re.test(studentEmail)) {
-      toast.error("Email không hợp lệ");
-      setObjValidInput({ ...defaultValidInput, isValidStudentEmail: false });
-      return false;
+    let arr = ["studentName", "studentBirth", "studentEmail", "studentAddress"]
+    let isValid = true;
+    for (let i = 0; i < arr.length; i++) {
+      let name = arr[i];
+      if (!studentData[name]) { // nếu không có giá trị
+        toast.error(`${name} là bắt buộc`);
+        setValidInputs({
+          ...defaultValidInputs,
+          [name]: false
+        });
+        isValid = false;
+        break;
+      }
+      else  if (!re.test(studentData.studentEmail)) { //emai không đúng định dạng @....
+        toast.error("Email không hợp lệ");
+        setValidInputs({ ...defaultValidInputs,studentEmail: false });
+        isValid= false;
+      }
     }
 
-    return true;
+    return isValid;
   };
 
-  const confirmAddStudent = () => {
+  const confirmAddStudent = async () => {
     const isValid = isValidInputs();
     if (isValid) {
-      toast.success("Thêm học sinh thành công");
-      handleClose();
+      let response =  await createStudent(studentData);
+      console.log("response", response);
+      let serverData = response.data;
+      if (response && response.data && +response.data.EC === 0) {
+        toast.success(serverData.EM);
+        await fetchStudents(); // load lại page
+        handleClose(); // đóng modal
+        setValidInputs(defaultValidInputs); // reset lại validInputs
+        setStudentData(defaultStudentData); // reset lại studentData
+      }
+      else {
+        toast.error(serverData.EM); // thông báo lỗi từ server
+        // nếu không thành công thì set lại validInputs để hiển thị lỗi ( có thể email trùng , ... )
+        let _validInputs = _.cloneDeep(defaultValidInputs);
+        _validInputs[response.data.DT] = false;
+        setValidInputs(_validInputs);
+      }
 
-      // Reset form
-      setStudentName("");
-      setStudentBirth("");
-      setStudentAddress("");
-      setStudentEmail("");
-      setGender("Male");
     }
   };
 
@@ -81,10 +100,10 @@ const ModalAddStudent = ({ show, handleClose }) => {
           <label htmlFor="studentName" className="form-label">Tên học sinh</label>
           <input
             type="text"
-            className={objValidInput.isValidStudentName ? "form-control" : "form-control is-invalid"}
+            className={validInputs.studentName ? "form-control" : "form-control is-invalid"}
             id="studentName"
-            value={studentName}
-            onChange={(e) => setStudentName(e.target.value)}
+            value={studentData.studentName}
+            onChange={(event) =>handleOnChangeInput(event.target.value, "studentName")}
           />
         </div>
 
@@ -92,10 +111,10 @@ const ModalAddStudent = ({ show, handleClose }) => {
           <label htmlFor="studentBirth" className="form-label">Ngày sinh</label>
           <input
             type="date"
-            className={objValidInput.isValidStudentBirth ? "form-control" : "form-control is-invalid"}
+            className={validInputs.studentBirth ? "form-control" : "form-control is-invalid"}
             id="studentBirth"
-            value={studentBirth}
-            onChange={(e) => setStudentBirth(e.target.value)}
+            value={studentData.studentBirth}
+            onChange={(event) => handleOnChangeInput(event.target.value, "studentBirth")}
           />
         </div>
 
@@ -107,10 +126,10 @@ const ModalAddStudent = ({ show, handleClose }) => {
                 className="form-check-input"
                 type="radio"
                 name="Gender"
-                value="Male"
+                value="Nam"
                 id="Male"
-                checked={Gender === "Male"}
-                onChange={(e) => setGender(e.target.value)}
+                checked={studentData.studentGender === "Nam"}
+                onChange={(event) => handleOnChangeInput(event.target.value, "studentGender")}
               />
               <label className="form-check-label" htmlFor="Male">Nam</label>
             </div>
@@ -119,10 +138,10 @@ const ModalAddStudent = ({ show, handleClose }) => {
                 className="form-check-input"
                 type="radio"
                 name="Gender"
-                value="Female"
+                value="Nữ"
                 id="Female"
-                checked={Gender === "Female"}
-                onChange={(e) => setGender(e.target.value)}
+                checked={studentData.studentGender === "Nữ"}
+                onChange={(event)=>handleOnChangeInput(event.target.value, "studentGender")}
               />
               <label className="form-check-label" htmlFor="Female">Nữ</label>
             </div>
@@ -133,10 +152,10 @@ const ModalAddStudent = ({ show, handleClose }) => {
           <label htmlFor="studentAddress" className="form-label">Địa chỉ</label>
           <input
             type="text"
-            className={objValidInput.isValidStudentAddress ? "form-control" : "form-control is-invalid"}
+            className={validInputs.studentAddress ? "form-control" : "form-control is-invalid"}
             id="studentAddress"
-            value={studentAddress}
-            onChange={(e) => setStudentAddress(e.target.value)}
+            value={studentData.studentAddress}
+            onChange={(event) => handleOnChangeInput(event.target.value, "studentAddress")}
           />
         </div>
 
@@ -144,10 +163,10 @@ const ModalAddStudent = ({ show, handleClose }) => {
           <label htmlFor="studentEmail" className="form-label">Email</label>
           <input
             type="email"
-            className={objValidInput.isValidStudentEmail ? "form-control" : "form-control is-invalid"}
+            className={validInputs.studentEmail ? "form-control" : "form-control is-invalid"}
             id="studentEmail"
-            value={studentEmail}
-            onChange={(e) => setStudentEmail(e.target.value)}
+            value={studentData.studentEmail}
+            onChange={(event) => handleOnChangeInput(event.target.value, "studentEmail")}
           />
         </div>
       </Modal.Body>
