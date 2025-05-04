@@ -1,6 +1,7 @@
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import useModal from '../../hooks/useModal';
 import TableHeaderAction from '../TableHeaderAction';
+import ModalStudentList from '../Modal/ModalStudentList';
 
 const dummyStudentData = [
     {
@@ -27,13 +28,11 @@ const dummyStudentData = [
 ];
 
 const ClassListTable = () => {
-    const addModal = useModal();
-    const updateModal = useModal();
-
+    const showlistModal = useModal();
     return (
         <div className="classlist-table-wrapper">
             <TableHeaderAction
-                onAddClick={addModal.open}
+                onAddClick={showlistModal.open}
                 onSearchChange={(value) => console.log('Tìm kiếm:', value)}
                 placeholder="Tìm kiếm học sinh..."
                 addLabel="Thêm học sinh"
@@ -75,18 +74,12 @@ const ClassListTable = () => {
                 </table>
             </div>
 
-            {/* {addModal.isOpen && (
-                    <ModalAddStudent
-                        show={addModal.isOpen}
-                        handleClose={addModal.close}
-                    />
-                )}
-                {updateModal.isOpen && (
-                    <ModalUpdateStudent
-                        show={updateModal.isOpen}
-                        handleClose={updateModal.close}
-                    />
-                )} */}
+            {showlistModal.isOpen && (
+                <ModalStudentList
+                    show={showlistModal.isOpen}
+                    handleClose={showlistModal.close}
+                />
+            )}
         </div>
     );
 };
