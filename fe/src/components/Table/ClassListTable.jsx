@@ -63,9 +63,7 @@ const ClassListTable = () => {
                                 <td>{student.email}</td>
                                 <td>
                                     <div className="action-buttons">
-                                        <button className="icon-button edit" onClick={updateModal.open} title="Chỉnh sửa">
-                                            <FaEdit />
-                                        </button>
+
                                         <button className="icon-button delete" title="Xoá">
                                             <FaTrash />
                                         </button>
