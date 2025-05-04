@@ -2,21 +2,21 @@ import { sequelize } from '../config/connectDB.js';
 import { Sequelize } from 'sequelize';
 const { Op } = require('sequelize');
 
-const DanhSachLop = require('../models/danhsachlop')(sequelize, Sequelize.DataTypes);
-const Lop = require('../models/lop')(sequelize, Sequelize.DataTypes);
-const NamHoc = require('../models/namhoc')(sequelize, Sequelize.DataTypes);
-const HocSinh = require('../models/hocsinh')(sequelize, Sequelize.DataTypes);
-const CT_DSL = require('../models/ct_dsl')(sequelize, Sequelize.DataTypes);
-const QuaTrinhHoc = require('../models/quatrinhhoc')(sequelize, Sequelize.DataTypes);
-const HocKy = require('../models/hocky')(sequelize, Sequelize.DataTypes);
-const BDMonHoc = require('../models/bdmonhoc')(sequelize, Sequelize.DataTypes);
-const MonHoc = require('../models/monhoc')(sequelize, Sequelize.DataTypes);
-const BDChiTietMonHoc = require('../models/bdchitietmonhoc')(sequelize, Sequelize.DataTypes);
-const LoaiKiemTra = require('../models/loaikiemtra')(sequelize, Sequelize.DataTypes);
+const DanhSachLop = require('../models/danhsachlop.js')(sequelize, Sequelize.DataTypes);
+const Lop = require('../models/lop.js')(sequelize, Sequelize.DataTypes);
+const NamHoc = require('../models/namhoc.js')(sequelize, Sequelize.DataTypes);
+const HocSinh = require('../models/hocsinh.js')(sequelize, Sequelize.DataTypes);
+const CT_DSL = require('../models/ct_dsl.js')(sequelize, Sequelize.DataTypes);
+const QuaTrinhHoc = require('../models/quatrinhhoc.js')(sequelize, Sequelize.DataTypes);
+const HocKy = require('../models/hocky.js')(sequelize, Sequelize.DataTypes);
+const BDMonHoc = require('../models/bdmonhoc.js')(sequelize, Sequelize.DataTypes);
+const MonHoc = require('../models/monhoc.js')(sequelize, Sequelize.DataTypes);
+const BDChiTietMonHoc = require('../models/bdchitietmonhoc.js')(sequelize, Sequelize.DataTypes);
+const LoaiKiemTra = require('../models/loaikiemtra.js')(sequelize, Sequelize.DataTypes);
 
 CT_DSL.belongsTo(HocSinh, { foreignKey: 'MaHocSinh' });
 BDChiTietMonHoc.belongsTo(LoaiKiemTra, { foreignKey: 'MaLoaiKiemTra' });
-
+//The Luan
 const getSubjectSummary = async (req, res) => {
   try {
     const { tenLop, tenHocKy, tenNamHoc, tenMonHoc } = req.query;

@@ -5,7 +5,7 @@ const Lop = require('../models/lop')(sequelize, Sequelize.DataTypes);
 const HocKy = require('../models/hocky')(sequelize, Sequelize.DataTypes);
 const NamHoc = require('../models/namhoc')(sequelize, Sequelize.DataTypes);
 const MonHoc = require('../models/monhoc')(sequelize, Sequelize.DataTypes);
-
+//TheLuan
 
 const getOptions = async (req, res) => {
   try {
