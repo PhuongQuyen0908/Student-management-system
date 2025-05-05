@@ -1,15 +1,14 @@
 import { sequelize } from '../config/connectDB.js';
 import { Sequelize } from 'sequelize';
+//const { generateBaoCaoTongKetMonTheoTen } = require('../service/baocaoService');
 
 const Lop = require('../models/lop')(sequelize, Sequelize.DataTypes);
 const HocKy = require('../models/hocky')(sequelize, Sequelize.DataTypes);
 const NamHoc = require('../models/namhoc')(sequelize, Sequelize.DataTypes);
 const MonHoc = require('../models/monhoc')(sequelize, Sequelize.DataTypes);
 
-
 const getOptions = async (req, res) => {
   try {
-    // Lấy tất cả các tên lớp, học kỳ, năm học, môn học từ 
     const lop = await Lop.findAll();
     const hocKy = await HocKy.findAll();
     const namHoc = await NamHoc.findAll();
@@ -27,6 +26,9 @@ const getOptions = async (req, res) => {
   }
 };
 
+
+
+
 module.exports = {
-  getOptions,
+  getOptions, 
 };
