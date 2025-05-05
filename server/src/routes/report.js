@@ -1,6 +1,5 @@
 import express from 'express';
 import gradesController from '../controller/gradesController.js';
-import reportController from '../controller/reportController.js';
 //const { baoCaoTongKetMonTheoTen } = require('../controller/baoCaoController');
 
 const router = express.Router();
@@ -9,7 +8,7 @@ const router = express.Router();
 router.get('/subject-summary', gradesController.getSubjectSummary);
 
 // API lấy danh sách lớp, năm học, học kỳ, môn học
-router.get('/options', reportController.getOptions);
+router.get('/options', gradesController.getOptions);
 
 
 // ✅ Sửa lại như sau:

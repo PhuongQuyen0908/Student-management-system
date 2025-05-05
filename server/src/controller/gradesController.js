@@ -20,6 +20,25 @@ const ThamSo = require('../models/thamso')(sequelize, Sequelize.DataTypes);
 CT_DSL.belongsTo(HocSinh, { foreignKey: 'MaHocSinh' });
 BDChiTietMonHoc.belongsTo(LoaiKiemTra, { foreignKey: 'MaLoaiKiemTra' });
 
+const getOptions = async (req, res) => {
+  try {
+    const lop = await Lop.findAll();
+    const hocKy = await HocKy.findAll();
+    const namHoc = await NamHoc.findAll();
+    const monHoc = await MonHoc.findAll();
+
+    res.status(200).json({
+      lop: lop.map(item => ({ value: item.TenLop, label: item.TenLop })),
+      hocKy: hocKy.map(item => ({ value: item.TenHocKy, label: item.TenHocKy })),
+      namHoc: namHoc.map(item => ({ value: item.TenNamHoc, label: item.TenNamHoc })),
+      monHoc: monHoc.map(item => ({ value: item.TenMonHoc, label: item.TenMonHoc })),
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Lỗi khi tải dữ liệu.' });
+  }
+};
+
 async function getThamSo(tenThamSo) {
   const param = await ThamSo.findOne({ where: { TenThamSo: tenThamSo } });
   return param ? param.GiaTri : null;
@@ -332,5 +351,6 @@ module.exports = {
   editScore,
   calculateAndUpdateDiemTB,
   getThamSo,
+  getOptions,
 };
 
