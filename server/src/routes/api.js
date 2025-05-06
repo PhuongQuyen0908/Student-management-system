@@ -2,7 +2,6 @@ import express from "express";
 import apiController from "../controller/apiController.js";
 import studentController from "../controller/studentController.js";
 import classListController from "..//controller/classListController";
-const gradesController = require("../controller/getGradesController.js");
 import semesterController from "../controller/semesterController";
 // import gradeController from "../controller/gradeController" //fix sau
 import testController from "../controller/testController";
@@ -10,8 +9,10 @@ import testController from "../controller/testController";
 import classController from "../controller/classController";
 import subjectController from "../controller/subjectController";
 import yearController from "../controller/yearController";
-import getGradesController from '../controller/getGradesController.js';
-import reportController from '../controller/reportController.js';
+
+import gradesController from '../controller/gradesController.js';
+import subjectreportController from '../controller/subjectreportController.js';
+import semesterReportController from '../controller/semesterReportController.js';
 
 const router = express.Router();
 
@@ -39,8 +40,7 @@ const initApiRoutes = (app) => {
   router.put("/classList/update/:id", classListController.updateClassList);
   router.delete("/classList/delete/:id", classListController.deleteClassList);
 
-  //grades
-  router.get("/grades//subject-summary", gradesController.getSubjectSummary);
+
 
   //học kỳ
   router.get("/semester/read", semesterController.readSemester);
@@ -84,11 +84,14 @@ const initApiRoutes = (app) => {
   router.put('/year/update/:id', yearController.updateSchoolYear);
   router.delete('/year/delete/:id', yearController.deleteSchoolYear);
   
-  //report
-  // API lấy báo cáo tổng kết môn học
-  router.get('/grades/subject-summary', getGradesController.getSubjectSummary);
-  // API lấy danh sách lớp, năm học, học kỳ, môn học
-  router.get('/report/options', reportController.getOptions);
+
+  router.get('/subject-summary', gradesController.getSubjectSummary);
+  router.get('/options', gradesController.getOptions);
+  router.post('/add-score', gradesController.addScore);
+  router.post('/delete-score', gradesController.deleteScore);
+  router.post('/edit-score', gradesController.editScore);
+  router.post('/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
+  router.post('/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
 
   return app.use("/api/", router);
 };
