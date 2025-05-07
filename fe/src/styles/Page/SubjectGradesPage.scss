@@ -1,0 +1,36 @@
+.subjectgrades-page-container {
+    margin-left: 250px;
+    padding: 20px;
+    background-color: white;
+    min-height: calc(100vh - 60px);
+  }
+  
+  .subjectgrades-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+  }
+  
+  .subjectgrades-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1f2937;
+  }
+  
+  .filter-group {
+    display: flex;
+    gap: 12px;
+  }
+  
+  .filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background-color: #f3f4f6;
+    font-size: 14px;
+    color: #111827;
+  }
+  
