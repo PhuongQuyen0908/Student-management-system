@@ -61,7 +61,6 @@ app.use('/api/report', reportRoute);
 //const baoCaoRoutes = require('./src/routes/baoCao');
 //app.use('/api/baocao', baoCaoRoutes);
 
-
 app.listen(PORT, () => {
   console.log(">>> JWT Backend is running on the port =" + PORT);
 });
