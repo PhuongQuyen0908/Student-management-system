@@ -81,7 +81,7 @@ const Taskbar = () => {
         {expandedMenus.reportManagement && (
           <div className="submenu">
             <NavLink to="/admin/subjectreport" className="taskbar-subitem">Lập báo cáo tổng kết môn</NavLink>
-            <NavLink className="taskbar-subitem">Lập báo cáo tổng kết học kỳ</NavLink>
+            <NavLink to="/admin/semesterreport" className="taskbar-subitem">Lập báo cáo tổng kết học kỳ</NavLink>
             <NavLink className="taskbar-subitem">Lập báo cáo kết quả học tập</NavLink>
           </div>
         )}

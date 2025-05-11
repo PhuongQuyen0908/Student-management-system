@@ -1,0 +1,40 @@
+.semesterreport-table-wrapper {
+  .semesterreport-table-container {
+    overflow-x: auto;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin: 20px 0;
+  }
+
+  .semesterreport-table {
+    min-width: 100%;
+    color: #4b5563;
+    border-collapse: collapse;
+
+    thead {
+      background-color: #e8eaf6;
+      color: #1f2937;
+      font-size: 16px;
+    }
+
+    th,
+    td {
+      padding: 12px;
+      text-align: left;
+      border: 1px solid #d1d5db;
+    }
+
+    tr:hover {
+      background-color: #f9fafb;
+    }
+
+    th {
+      font-weight: bold;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+  }
+}
