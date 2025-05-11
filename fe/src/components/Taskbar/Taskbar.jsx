@@ -32,9 +32,19 @@ const Taskbar = () => {
           <FontAwesomeIcon icon={faHome} /> Trang chủ
         </NavLink>
 
-        <NavLink to="/admin/students" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
+        <NavLink className="taskbar-item" onClick={() => toggleMenu('studentManagement')}>
           <FontAwesomeIcon icon={faGraduationCap} /> Học sinh
+          <FontAwesomeIcon
+            icon={expandedMenus.studentManagement ? faChevronDown : faChevronRight}
+            className="menu-arrow"
+          />
         </NavLink>
+        {expandedMenus.studentManagement && (
+          <div className="submenu">
+            <NavLink to="/admin/students" className="taskbar-subitem">Danh sách học sinh</NavLink>
+            <NavLink to="/admin/studentadmission" className="taskbar-subitem">Tiếp nhận học sinh</NavLink>
+          </div>
+        )}
         <NavLink className="taskbar-item" onClick={() => toggleMenu('subjectManagement')}>
           <FontAwesomeIcon icon={faBookOpen} /> Môn học
           <FontAwesomeIcon

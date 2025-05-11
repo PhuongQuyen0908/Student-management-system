@@ -5,7 +5,7 @@ import '../../styles/Page/StudentsPage.scss'
 const StudentsPage = () => {
     return (
         <div className="students-page-container">
-            <h2 className="students-title">Danh sách học sinh</h2>
+            <h2 className="students-title">Tiếp nhận học sinh</h2>
             <StudentTable />
         </div>
     );

@@ -4,12 +4,13 @@ import StudentsPage from '../pages/Admin/StudentsPage'
 import SubjectsPage from '../pages/Admin/SubjectsPage'
 import ClassesListPage from '../pages/Admin/ClassesListPage';
 import SubjectGradesPage from '../pages/Admin/SubjectGradesPage';
+import StudentsListPage from '../pages/Admin/StudentsListPage';
 const AdminRoutes = {
     path: '/admin',
     element: <AdminPage />,
     children: [
         {
-            path: 'students',
+            path: 'studentadmission',
             element: <StudentsPage />,
         },
         {
@@ -27,6 +28,10 @@ const AdminRoutes = {
         {
             path: 'subjectgrades',
             element: <SubjectGradesPage />,
+        },
+        {
+            path: 'students',
+            element: <StudentsListPage />,
         },
     ],
 };
