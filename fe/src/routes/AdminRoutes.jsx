@@ -6,6 +6,7 @@ import ClassesListPage from '../pages/Admin/ClassesListPage';
 import SubjectGradesPage from '../pages/Admin/SubjectGradesPage';
 import StudentsListPage from '../pages/Admin/StudentsListPage';
 import SubjectReportPage from '../pages/Admin/SubjectReportPage';
+import SemesterReportPage from '../pages/Admin/SemesterReportPage';
 const AdminRoutes = {
     path: '/admin',
     element: <AdminPage />,
@@ -37,6 +38,10 @@ const AdminRoutes = {
         {
             path: 'subjectreport',
             element: <SubjectReportPage />,
+        },
+        {
+            path: 'semesterreport',
+            element: <SemesterReportPage />,
         },
     ],
 };
