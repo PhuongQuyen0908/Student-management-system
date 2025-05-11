@@ -1,43 +1,34 @@
-// src/services/reportService.js
-import axios from 'axios';
+import axios from "../setup/axios";
 
-// Địa chỉ baseURL của backend
-const BASE_URL = 'http://localhost:8083';
-
-// Lấy danh sách options (tên lớp, năm học, học kỳ, môn học)
-const getOptions = () => {
-  return axios.get(`${BASE_URL}/api/report/options`);
-};
-
-const TongKetMon = {
-  getOptions: () => axios.get(`http://localhost:8083/options`), // bạn phải tạo API này riêng nếu chưa có
-  getMonTheoTen: ({ mon, hocky, namhoc }) =>
-    axios.get(`${API_BASE}/mon-theo-ten`, {
-      params: { mon, hocky, namhoc },
-    }),
-};
-
-const getSubjectSummary = (formValues) => {
-    return axios.get('http://localhost:8083/api/report/subject-summary', {
-      params: {
-        tenLop: formValues.lopId,
-        tenHocKy: formValues.hocKyId,
-        tenNamHoc: formValues.namHocId,
-        tenMonHoc: formValues.monHocId,
-      }
-    });
-  };
-
-  const updateStudentScores = (data) => {
-    return axios.post(`${BASE_URL}/api/report/update-student-scores`, data);
-  };
-  
-// Export service
 const reportService = {
-  getOptions,
-  getSubjectSummary,
-  updateStudentScores, 
-  TongKetMon,
+  // 1. Lấy danh sách lớp, học kỳ, năm học, môn học
+  getOptions: () => axios.get('/api/report/options'),
+
+  // 2. Lấy bảng điểm theo môn học của học sinh (BM5.1 - subject summary)
+  getSubjectSummary: ({ tenLop, tenHocKy, tenNamHoc, tenMonHoc }) =>
+    axios.get('/api/report/subject-summary', {
+      params: { tenLop, tenHocKy, tenNamHoc, tenMonHoc }
+    }),
+
+  // 3. Thêm điểm kiểm tra cho học sinh
+  addScore: ({ HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
+    axios.post('/api/report/add-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
+
+  // 4. Xoá điểm kiểm tra
+  deleteScore: ({ HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
+    axios.post('/api/report/delete-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
+
+  // 5. Chỉnh sửa điểm kiểm tra
+  editScore: ({ HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
+    axios.post('/api/report/edit-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
+
+  // 6. Tính báo cáo tổng kết học kỳ (BM5.2)
+  getSemesterReport: ({ tenHocKy, tenNamHoc }) =>
+    axios.post('/api/report/semester-report', { tenHocKy, tenNamHoc }),
+
+  // 7. Tính báo cáo tổng kết môn học (BM5.1)
+  getSubjectReport: ({ tenMonHoc, tenHocKy, tenNamHoc }) =>
+    axios.post('/api/report/subject-report', { tenMonHoc, tenHocKy, tenNamHoc })
 };
 
 export default reportService;

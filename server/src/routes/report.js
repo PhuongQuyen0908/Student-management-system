@@ -1,8 +1,7 @@
 import express from 'express';
 import gradesController from '../controller/gradesController.js';
-import subjectreportController from '../controller/subjectreportController.js';
 import semesterReportController from '../controller/semesterReportController.js';
-//const { baoCaoTongKetMonTheoTen } = require('../controller/baoCaoController');
+import subjectreportController from '../controller/subjectreportController.js'
 
 const router = express.Router();
 
@@ -16,8 +15,8 @@ router.post('/delete-score', gradesController.deleteScore);
 
 router.post('/edit-score', gradesController.editScore);
 
-router.post('/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
-
 router.post('/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
+
+router.post('/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
 
 export default router;

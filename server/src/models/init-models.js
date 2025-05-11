@@ -3,6 +3,7 @@ var _bctk_hocky = require("./bctk_hocky");
 var _bctk_monhoc = require("./bctk_monhoc");
 var _bdchitietmonhoc = require("./bdchitietmonhoc");
 var _bdmonhoc = require("./bdmonhoc");
+var _chucnang = require("./chucnang");
 var _ct_dsl = require("./ct_dsl");
 var _ctbctk_mon = require("./ctbctk_mon");
 var _danhsachlop = require("./danhsachlop");
@@ -13,6 +14,9 @@ var _loaikiemtra = require("./loaikiemtra");
 var _lop = require("./lop");
 var _monhoc = require("./monhoc");
 var _namhoc = require("./namhoc");
+var _nguoidung = require("./nguoidung");
+var _nhomnguoidung = require("./nhomnguoidung");
+var _phanquyen = require("./phanquyen");
 var _quatrinhhoc = require("./quatrinhhoc");
 var _thamso = require("./thamso");
 
@@ -21,6 +25,7 @@ function initModels(sequelize) {
   var bctk_monhoc = _bctk_monhoc(sequelize, DataTypes);
   var bdchitietmonhoc = _bdchitietmonhoc(sequelize, DataTypes);
   var bdmonhoc = _bdmonhoc(sequelize, DataTypes);
+  var chucnang = _chucnang(sequelize, DataTypes);
   var ct_dsl = _ct_dsl(sequelize, DataTypes);
   var ctbctk_mon = _ctbctk_mon(sequelize, DataTypes);
   var danhsachlop = _danhsachlop(sequelize, DataTypes);
@@ -31,13 +36,22 @@ function initModels(sequelize) {
   var lop = _lop(sequelize, DataTypes);
   var monhoc = _monhoc(sequelize, DataTypes);
   var namhoc = _namhoc(sequelize, DataTypes);
+  var nguoidung = _nguoidung(sequelize, DataTypes);
+  var nhomnguoidung = _nhomnguoidung(sequelize, DataTypes);
+  var phanquyen = _phanquyen(sequelize, DataTypes);
   var quatrinhhoc = _quatrinhhoc(sequelize, DataTypes);
   var thamso = _thamso(sequelize, DataTypes);
 
   ctbctk_mon.belongsTo(bctk_monhoc, { as: "MaBCTKMonHoc_bctk_monhoc", foreignKey: "MaBCTKMonHoc"});
   bctk_monhoc.hasMany(ctbctk_mon, { as: "ctbctk_mons", foreignKey: "MaBCTKMonHoc"});
+  bdchitietmonhoc.belongsTo(bdmonhoc, { as: "MaBDMonHoc_bdmonhoc", foreignKey: "MaBDMonHoc"});
+  bdmonhoc.hasMany(bdchitietmonhoc, { as: "bdchitietmonhocs", foreignKey: "MaBDMonHoc"});
+  phanquyen.belongsTo(chucnang, { as: "MaChucNang_chucnang", foreignKey: "MaChucNang"});
+  chucnang.hasMany(phanquyen, { as: "phanquyens", foreignKey: "MaChucNang"});
   quatrinhhoc.belongsTo(ct_dsl, { as: "MaCT_DSL_ct_dsl", foreignKey: "MaCT_DSL"});
   ct_dsl.hasMany(quatrinhhoc, { as: "quatrinhhocs", foreignKey: "MaCT_DSL"});
+  bctk_hocky.belongsTo(danhsachlop, { as: "MaDanhSachLop_danhsachlop", foreignKey: "MaDanhSachLop"});
+  danhsachlop.hasMany(bctk_hocky, { as: "bctk_hockies", foreignKey: "MaDanhSachLop"});
   ct_dsl.belongsTo(danhsachlop, { as: "MaDanhSachLop_danhsachlop", foreignKey: "MaDanhSachLop"});
   danhsachlop.hasMany(ct_dsl, { as: "ct_dsls", foreignKey: "MaDanhSachLop"});
   ctbctk_mon.belongsTo(danhsachlop, { as: "MaDanhSachLop_danhsachlop", foreignKey: "MaDanhSachLop"});
@@ -66,6 +80,10 @@ function initModels(sequelize) {
   namhoc.hasMany(bctk_monhoc, { as: "bctk_monhocs", foreignKey: "MaNamHoc"});
   danhsachlop.belongsTo(namhoc, { as: "MaNamHoc_namhoc", foreignKey: "MaNamHoc"});
   namhoc.hasMany(danhsachlop, { as: "danhsachlops", foreignKey: "MaNamHoc"});
+  nguoidung.belongsTo(nhomnguoidung, { as: "MaNhom_nhomnguoidung", foreignKey: "MaNhom"});
+  nhomnguoidung.hasMany(nguoidung, { as: "nguoidungs", foreignKey: "MaNhom"});
+  phanquyen.belongsTo(nhomnguoidung, { as: "MaNhom_nhomnguoidung", foreignKey: "MaNhom"});
+  nhomnguoidung.hasMany(phanquyen, { as: "phanquyens", foreignKey: "MaNhom"});
   bdmonhoc.belongsTo(quatrinhhoc, { as: "MaQuaTrinhHoc_quatrinhhoc", foreignKey: "MaQuaTrinhHoc"});
   quatrinhhoc.hasMany(bdmonhoc, { as: "bdmonhocs", foreignKey: "MaQuaTrinhHoc"});
 
@@ -74,6 +92,7 @@ function initModels(sequelize) {
     bctk_monhoc,
     bdchitietmonhoc,
     bdmonhoc,
+    chucnang,
     ct_dsl,
     ctbctk_mon,
     danhsachlop,
@@ -84,6 +103,9 @@ function initModels(sequelize) {
     lop,
     monhoc,
     namhoc,
+    nguoidung,
+    nhomnguoidung,
+    phanquyen,
     quatrinhhoc,
     thamso,
   };

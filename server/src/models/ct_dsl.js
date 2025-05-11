@@ -52,4 +52,17 @@ module.exports = function(sequelize, DataTypes) {
       },
     ]
   });
+
+  CT_DSL.associate = function(models) {
+    CT_DSL.belongsTo(models.hocsinh, {
+      foreignKey: 'MaHocSinh',
+      targetKey: 'MaHocSinh'
+    });
+    CT_DSL.belongsTo(models.danhsachlop, {
+      foreignKey: 'MaDanhSachLop',
+      targetKey: 'MaDanhSachLop'
+    });
+  };
+
+  return CT_DSL;
 };

@@ -12,7 +12,7 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: true
     },
     HeSo: {
-      type: DataTypes.DECIMAL(5,2),
+      type: DataTypes.INTEGER,
       allowNull: true
     }
   }, {

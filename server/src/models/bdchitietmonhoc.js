@@ -7,10 +7,6 @@ module.exports = function(sequelize, DataTypes) {
       allowNull: false,
       primaryKey: true
     },
-    MaBDMonHoc: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
     MaLoaiKiemTra: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -19,8 +15,16 @@ module.exports = function(sequelize, DataTypes) {
         key: 'MaLoaiKiemTra'
       }
     },
-    DiemTPMonHoc: {
+    MaBDMonHoc: {
       type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: 'bdmonhoc',
+        key: 'MaBDMonHoc'
+      }
+    },
+    DiemTPMonHoc: {
+      type: DataTypes.FLOAT(4,2),
       allowNull: false
     }
   }, {
@@ -37,17 +41,17 @@ module.exports = function(sequelize, DataTypes) {
         ]
       },
       {
-        name: "fk_bdctmonhoc_bdmonhoc",
-        using: "BTREE",
-        fields: [
-          { name: "MaBDMonHoc" },
-        ]
-      },
-      {
         name: "fk_bdctmonhoc_loaikiemtra",
         using: "BTREE",
         fields: [
           { name: "MaLoaiKiemTra" },
+        ]
+      },
+      {
+        name: "fk_bdctmonhoc_bdmonhoc",
+        using: "BTREE",
+        fields: [
+          { name: "MaBDMonHoc" },
         ]
       },
     ]

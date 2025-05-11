@@ -37,7 +37,7 @@ const SubjectReportPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await reportService.getSubjectSummary({ lopId, hocKyId, namHocId, monHocId });
+      const response = await reportService.getSubjectSummary({ tenLop, tenHocKy, tenNamHoc, tenMonHoc });
       if (response?.data) {
         setReportData(response.data);
         setEditableData(response.data.DiemChiTiet);

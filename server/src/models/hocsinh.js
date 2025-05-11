@@ -42,4 +42,13 @@ module.exports = function(sequelize, DataTypes) {
       },
     ]
   });
+
+  HOCSINH.associate = function(models) {
+    HOCSINH.hasMany(models.ct_dsl, {
+      foreignKey: 'MaHocSinh',
+      sourceKey: 'MaHocSinh'
+    });
+  };
+
+  return HOCSINH;
 };
