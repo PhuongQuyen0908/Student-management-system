@@ -9,7 +9,11 @@ module.exports = function(sequelize, DataTypes) {
     },
     MaDanhSachLop: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'danhsachlop',
+        key: 'MaDanhSachLop'
+      }
     },
     MaNamHoc: {
       type: DataTypes.INTEGER,
@@ -64,6 +68,13 @@ module.exports = function(sequelize, DataTypes) {
         using: "BTREE",
         fields: [
           { name: "MaNamHoc" },
+        ]
+      },
+      {
+        name: "fk_bctkhocky_danhsachlop",
+        using: "BTREE",
+        fields: [
+          { name: "MaDanhSachLop" },
         ]
       },
     ]

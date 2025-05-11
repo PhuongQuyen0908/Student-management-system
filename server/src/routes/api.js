@@ -2,7 +2,6 @@ import express from "express";
 import apiController from "../controller/apiController.js";
 import studentController from "../controller/studentController.js";
 import classListController from "..//controller/classListController";
-const gradesController = require("../controller/getGradesController.js");
 import semesterController from "../controller/semesterController";
 // import gradeController from "../controller/gradeController" //fix sau
 import testController from "../controller/testController";
@@ -12,6 +11,9 @@ import subjectController from "../controller/subjectController";
 import yearController from "../controller/yearController";
 import getGradesController from '../controller/getGradesController.js';
 import reportController from '../controller/reportController.js';
+import gradesController from '../controller/gradesController.js';
+import semesterReportController from '../controller/semesterReportController.js';
+import subjectreportController from '../controller/subjectreportController.js'
 
 const router = express.Router();
 
@@ -40,8 +42,7 @@ const initApiRoutes = (app) => {
   router.delete("/classList/delete/:id", classListController.deleteClassList);
 
   //grades
-  router.get("/grades//subject-summary", gradesController.getSubjectSummary);
-
+  router.get('/grades/subject-summary', gradesController.getSubjectSummary);
   //học kỳ
   router.get("/semester/read", semesterController.readSemester);
   router.get("/semester/getByID/:id", semesterController.getSemesterById);
@@ -86,9 +87,13 @@ const initApiRoutes = (app) => {
   
   //report
   // API lấy báo cáo tổng kết môn học
-  router.get('/grades/subject-summary', getGradesController.getSubjectSummary);
-  // API lấy danh sách lớp, năm học, học kỳ, môn học
-  router.get('/report/options', reportController.getOptions);
+  router.get('/report/subject-summary', gradesController.getSubjectSummary);
+  router.get('/report/options', gradesController.getOptions);
+  router.post('/report/add-score', gradesController.addScore);
+  router.post('/report/delete-score', gradesController.deleteScore);
+  router.post('/report/edit-score', gradesController.editScore);
+  router.post('/report/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
+  router.post('/report/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
 
   return app.use("/api/", router);
 };
