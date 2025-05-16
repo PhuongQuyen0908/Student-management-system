@@ -1,6 +1,6 @@
 // src/components/Table/SemesterReportTable.jsx
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SemesterReportTable.scss';
+import '../../styles/Table.scss';
 
 const dummySemesterReport = [
     {
@@ -25,8 +25,8 @@ const SemesterReportTable = () => {
                 placeholder="Tìm kiếm lớp..."
                 hideAdd={true}
             />
-            <div className="semesterreport-table-container">
-                <table className="semesterreport-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>STT</th>

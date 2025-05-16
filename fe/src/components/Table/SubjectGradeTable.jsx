@@ -3,7 +3,7 @@ import useModal from '../../hooks/useModal';
 import ModalEditGrade from '../Modal/ModalUpdateGrade';
 import ModalAddGrade from '../Modal/ModalAddGrade';
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SubjectGradeTable.scss';
+import '../../styles/Table.scss';
 
 const dummyGradesData = [
     {
@@ -30,8 +30,8 @@ const SubjectGradeTable = () => {
                 placeholder="Tìm kiếm học sinh..."
                 hideAdd={true}
             />
-            <div className="subjectgrade-table-container">
-                <table className="subjectgrade-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>Họ và tên</th>

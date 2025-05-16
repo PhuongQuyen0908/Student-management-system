@@ -1,5 +1,5 @@
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SubjectReportTable.scss';
+import '../../styles/Table.scss';
 
 const dummySubjectReport = [
     {
@@ -24,8 +24,8 @@ const SubjectReportTable = () => {
                 placeholder="Tìm kiếm lớp..."
                 hideAdd={true}
             />
-            <div className="subjectreport-table-container">
-                <table className="subjectreport-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>STT</th>

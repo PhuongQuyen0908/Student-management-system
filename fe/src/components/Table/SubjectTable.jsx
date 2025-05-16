@@ -1,4 +1,4 @@
-import '../../styles/Table/SubjectTable.scss';
+import '../../styles/Table.scss';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import useModal from '../../hooks/useModal';
 import ModalAddSubject from '../Modal/ModalAddSubject';
@@ -24,8 +24,8 @@ const SubjectTable = () => {
                 addLabel="Thêm môn học"
             />
 
-            <div className="subject-table-container">
-                <table className="subject-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>Mã môn học</th>
