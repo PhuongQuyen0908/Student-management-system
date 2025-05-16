@@ -15,8 +15,8 @@ import getGradesController from '../controller/getGradesController.js';
 import reportController from '../controller/reportController.js';
 import gradesController from '../controller/gradesController.js';
 import semesterReportController from '../controller/semesterReportController.js';
-import subjectreportController from '../controller/subjectreportController.js'
-
+import subjectreportController from '../controller/subjectreportController.js';
+import paramenterController from "../controller/paramenterController.js"
 const router = express.Router();
 
 /**
@@ -72,6 +72,10 @@ const initApiRoutes = (app) => {
   router.post("/class/create", classController.createClass);
   router.put("/class/update/:id", classController.updateClass);
   router.delete("/class/delete/:id", classController.deleteClass);
+
+  // //Tham số
+  router.get("/paramenter/read", paramenterController.getAllParamenters); 
+  router.put("/paramenter/update/:id", paramenterController.updateParamenter);
 
   // môn học
   router.get("/subject/read", subjectController.readSubject);
