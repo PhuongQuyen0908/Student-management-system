@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/Page/SubjectReportPage.scss'
 import SubjectReportTable from '../../components/Table/SubjectReportTable';
-
+import '../../styles/FilterGroup.scss';
 const SubjectReportPage = () => {
     return (
         <div className="subjectreport-page-container">
