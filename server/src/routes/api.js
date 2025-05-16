@@ -4,6 +4,8 @@ import studentController from "../controller/studentController.js";
 import classListController from "..//controller/classListController";
 import semesterController from "../controller/semesterController";
 // import gradeController from "../controller/gradeController" //fix sau
+//Fix lại đổi gradeController thành classController
+import classGradeController from "../controller/classGradeController";
 import testController from "../controller/testController";
 
 import classController from "../controller/classController";
@@ -51,11 +53,11 @@ const initApiRoutes = (app) => {
   router.delete("/semester/delete/:id", semesterController.deleteSemester);
 
   // khối
-  // router.get('/read', gradeController.readGrade);
-  // router.get('/getByID/:id', gradeController.getGradeById);
-  // router.post('/create', gradeController.createGrade);
-  // router.put('/update/:id', gradeController.updateGrade);
-  // router.delete('/delete/:id', gradeController.deleteGrade);
+  router.get("/classGrade/read", classGradeController.readClassGrade);
+  router.get("/classGrade/getByID/:id", classGradeController.getClassGradeByName);  
+  router.post("/classGrade/create", classGradeController.createClassGrade);
+  router.put("/classGrade/update/:id", classGradeController.updateClassGrade);
+  router.delete("/classGrade/delete/:id", classGradeController.deleteClassGrade);
 
   //bài kiểm tra
   router.get("/test/read", testController.readTest);
