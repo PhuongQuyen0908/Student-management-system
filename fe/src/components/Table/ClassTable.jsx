@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import "../../styles/Table/ClassTable.scss";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import useModal from "../../hooks/useModal";

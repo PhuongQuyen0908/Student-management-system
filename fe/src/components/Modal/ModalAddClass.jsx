@@ -4,8 +4,16 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { useEffect } from "react";
 import _ from "lodash";
-import { createClass } from "../../services/classService";
-import { fetchAllGrades } from "../../services/classService";
+
+//Data của lớp học
+const defaultClassData = {
+  className: "",
+  classGrade: "",
+};
+const defaultValidInput = {
+  isValidClassName: true,
+  isValidClassGrade: true,
+};
 
 const ModalAddClass = ({
   show,
@@ -16,16 +24,6 @@ const ModalAddClass = ({
 }) => {
   // const [className, setClassName] = useState("");
   // const [classGrade, setClassGrade] = useState("");
-
-  //Data của lớp học
-  const defaultClassData = {
-    className: "",
-    classGrade: "",
-  };
-  const defaultValidInput = {
-    isValidClassName: true,
-    isValidClassGrade: true,
-  };
 
   //Form state
   const [classData, setClassData] = useState(defaultClassData);
