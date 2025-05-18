@@ -31,7 +31,7 @@ const Taskbar = () => {
       <div className="taskbar-section">
         <p className="section-title">MENU</p>
 
-        <NavLink to="/admin" end className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
+        <NavLink to="/admin/home" end className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faHome} /> Trang chủ
         </NavLink>
 
