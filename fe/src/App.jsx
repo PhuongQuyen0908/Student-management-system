@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import React from "react";
 import './App.scss'
+import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
 import {
+  Route,
   BrowserRouter as Router,
 } from "react-router-dom";
 import Login from './pages/Login/LoginPage.jsx'
@@ -29,7 +31,9 @@ function App() {
     //   </div>
     //   
     // </Router>
+
     <AppRoutes></AppRoutes>
+
   )
 }
 
