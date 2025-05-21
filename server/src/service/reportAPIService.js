@@ -359,7 +359,7 @@ const editScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) 
           where: {
             MaBDMonHoc: bd.MaBDMonHoc,
             MaLoaiKiemTra: loai.MaLoaiKiemTra,
-            DiemTPMonHoc: item.Diem, 
+            //DiemTPMonHoc: item.Diem,
           },
         }
       );

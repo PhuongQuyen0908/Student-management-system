@@ -1,24 +1,36 @@
 import { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { getFinalTestType } from '../../hooks/useSubjectGradeTable';
 
-const ModalUpdateGrade = ({ show, handleClose }) => {
-    const [studentName, setStudentName] = useState('');
+const ModalUpdateGrade = ({ show, handleClose, grade, onSave }) => {
     const [grade15min, setGrade15min] = useState('');
     const [grade1period, setGrade1period] = useState('');
     const [gradeFinal, setGradeFinal] = useState('');
 
     useEffect(() => {
-        if (show) {
-            setStudentName('Nguyễn Văn A');
-            setGrade15min('8');
-            setGrade1period('7');
-            setGradeFinal('9');
+        if (show && grade) {
+            setGrade15min(
+                grade.diemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 15 phút")?.Diem ?? ''
+            );
+            setGrade1period(
+                grade.diemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 1 tiết")?.Diem ?? ''
+            );
+            setGradeFinal(
+                grade.diemTP?.find(d => d.LoaiKiemTra === getFinalTestType(grade.semester || grade.TenHocKy))?.Diem ?? ''
+            );
         }
-    }, [show]);
+    }, [show, grade]);
 
     const handleSave = () => {
-        // Gửi dữ liệu tại đây
+        onSave({
+            HoTen: grade.name,
+            DiemTP: [
+                { LoaiKiemTra: "Kiểm tra 15 phút", Diemmoi: grade15min },
+                { LoaiKiemTra: "Kiểm tra 1 tiết", Diemmoi: grade1period },
+                { LoaiKiemTra: "Thi học kỳ", Diemmoi: gradeFinal }
+            ]
+        });
         handleClose();
     };
 
@@ -33,7 +45,7 @@ const ModalUpdateGrade = ({ show, handleClose }) => {
                     <input
                         type="text"
                         className="form-control"
-                        value={studentName}
+                        value={grade?.name || ''}
                         disabled
                     />
                 </div>

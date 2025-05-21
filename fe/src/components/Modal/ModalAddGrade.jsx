@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-const ModalAddGrade = ({ show, handleClose }) => {
+const ModalAddGrade = ({ show, handleClose, onAdd, student, context }) => {
     const [grade15min, setGrade15min] = useState('');
     const [grade1period, setGrade1period] = useState('');
     const [gradeFinal, setGradeFinal] = useState('');
@@ -16,7 +16,18 @@ const ModalAddGrade = ({ show, handleClose }) => {
     }, [show]);
 
     const handleAdd = () => {
-        // Gửi dữ liệu tại đây
+        onAdd({
+            HoTen: student?.name,
+            TenLop: context?.class,
+            TenMonHoc: context?.subject,
+            TenHocKy: context?.semester,
+            TenNamHoc: context?.year,
+            DiemTP: [
+                { LoaiKiemTra: "Kiểm tra 15 phút", Diem: grade15min },
+                { LoaiKiemTra: "Kiểm tra 1 tiết", Diem: grade1period },
+                { LoaiKiemTra: "Thi học kỳ", Diem: gradeFinal }
+            ]
+        });
         handleClose();
     };
 
@@ -26,6 +37,15 @@ const ModalAddGrade = ({ show, handleClose }) => {
                 <Modal.Title>Thêm điểm</Modal.Title>
             </Modal.Header>
             <Modal.Body>
+                <div className="mb-3">
+                    <label className="form-label">Họ và tên học sinh</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={student?.name || ''}
+                        disabled
+                    />
+                </div>
                 <div className="mb-3">
                     <label className="form-label">Điểm 15 phút</label>
                     <input

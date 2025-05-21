@@ -25,7 +25,7 @@ module.exports = function(sequelize, DataTypes) {
     },
     DiemTBMonHoc: {
       type: DataTypes.FLOAT(4,2),
-      allowNull: false
+      allowNull: true
     }
   }, {
     sequelize,
