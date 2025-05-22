@@ -14,6 +14,7 @@ import reportController from '../controller/reportController.js';
 import gradesController from '../controller/gradesController.js';
 import semesterReportController from '../controller/semesterReportController.js';
 import subjectreportController from '../controller/subjectreportController.js'
+import sortSubjectController from '../controller/sortSubjectController';
 
 const router = express.Router();
 
@@ -94,6 +95,7 @@ const initApiRoutes = (app) => {
   router.post('/report/edit-score', gradesController.editScore);
   router.post('/report/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
   router.post('/report/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
+  router.post('/report/sort-subject-report', sortSubjectController.sortSubjectReport);
 
   return app.use("/api/", router);
 };

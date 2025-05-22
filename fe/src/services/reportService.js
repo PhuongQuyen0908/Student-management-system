@@ -28,7 +28,15 @@ const reportService = {
 
   // 7. Tính báo cáo tổng kết môn học (BM5.1)
   getSubjectReport: ({ tenMonHoc, tenHocKy, tenNamHoc }) =>
-    axios.post('/api/report/subject-report', { tenMonHoc, tenHocKy, tenNamHoc })
+    axios.post('/api/report/subject-report', { tenMonHoc, tenHocKy, tenNamHoc }),
+
+  sortSubjectReport: ({ data, sortBy, order }) =>
+     axios.post('/api/report/sort-subject-report', {
+    data, sortBy, order,
+  })
 };
+  
+  
+  
 
 export default reportService;
