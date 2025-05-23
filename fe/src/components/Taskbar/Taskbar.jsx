@@ -85,7 +85,7 @@ const Taskbar = () => {
             <NavLink className="taskbar-subitem">Lập báo cáo kết quả học tập</NavLink>
           </div>
         )}
-        <NavLink className="taskbar-item">
+        <NavLink to="/admin/ruleschange" className="taskbar-item">
           <FontAwesomeIcon icon={faClipboardList} /> Thay đổi quy định
         </NavLink>
       </div>
