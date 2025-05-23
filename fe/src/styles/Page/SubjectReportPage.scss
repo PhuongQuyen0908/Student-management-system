@@ -35,3 +35,13 @@
   font-size: 14px;
   color: #111827;
 }
+
+.subjectreport-table th {
+  font-weight: bold;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.subjectreport-table th:hover {
+  color: #1976d2;
+}
