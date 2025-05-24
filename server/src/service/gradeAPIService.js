@@ -1,87 +1,93 @@
 import db from '../models/index.js';
 
-// Hàm lấy tất cả các khối
+const buildResponse = (EM, EC, DT) => ({ EM, EC, DT });
 const getAllGrades = async () => {
   try {
     const grades = await db.khoi.findAll();
-    if (!grades || grades.length === 0) {
-      throw new Error('Cơ sở dữ liệu trống');
-    }
-    return grades;
+    return buildResponse("Lấy danh sách khối thành công", 0, grades);
   } catch (error) {
-    throw new Error('Lỗi khi lấy danh sách khối: ' + error.message);
-  }
-};
+    console.error("Lỗi khi lấy danh sách khối:", error);
+    return buildResponse("Lỗi phía server. Lấy danh sách khối thất bại", -1, []);
+  } 
+}
 
-// Hàm lấy khối học theo ID
-const getGradeById = async (id) => {
+const getGradeByName = async (gradeName) => {
   try {
-    const oneGrade = await db.khoi.findByPk(id);
-    if (!oneGrade) {
-      throw new Error(`Không tìm thấy khối với ID: ${id}`);
+    const grade = await db.khoi.findAll({ where: { TenKhoi: gradeName } });
+    if (!grade) {
+      return buildResponse("Khối không tồn tại", 1, []);
     }
-    return oneGrade;
+    return buildResponse("Lấy thông tin khối thành công", 0, grade);
   } catch (error) {
-    throw new Error('Lỗi khi tìm khối theo ID: ' + error.message);
+    console.error("Lỗi khi lấy thông tin khối:", error);
+    return buildResponse("Lỗi phía server. Lấy thông tin khối thất bại", -1, []);
   }
-};
+}
 
-// Kiểm tra khối đã tồn tại chưa (dựa trên tên khối)
-const checkGradeExists = async (GradeName) => {
+
+const checkGradeExists = async (gradeName) => {
   try {
-    const existingGrade = await db.khoi.findOne({
-      where: { TenKhoi: GradeName }
-    });
-    return existingGrade !== null; // Trả về true nếu khối đã tồn tại, ngược lại trả về false
+    const grade = await db.khoi.findOne({ where: { TenKhoi: gradeName } });
+    return !!grade;
   } catch (error) {
-    throw new Error('Lỗi khi kiểm tra khối: ' + error.message);
+    console.error("Lỗi khi kiểm tra khối tồn tại:", error);
+    return false;
   }
-};
+}   
 
-// Hàm tạo khối học mới
 const createGrade = async (data) => {
   try {
-    const newGrade = await db.khoi.create(data);
-    return newGrade;
+    const newGrade = await db.khoi.create({
+      TenKhoi: data.GradeName,
+    });
+    return buildResponse("Tạo khối học thành công", 0, newGrade);
   } catch (error) {
-    throw new Error('Lỗi khi tạo khối mới: ' + error.message);
+    console.error("Lỗi khi tạo khối:", error);
+    return buildResponse("Lỗi phía server. Tạo khối thất bại", -1, []);
   }
-};
-
-
-
-// Hàm cập nhật khối học
+}     
 const updateGrade = async (id, data) => {
   try {
-    const GradeToUpdate = await db.khoi.findByPk(id);
-    if (!GradeToUpdate) {
-      throw new Error('khối không tồn tại');
+    const gradeToUpdate = await db.khoi.findByPk(id);
+    if (!gradeToUpdate) {
+      return buildResponse("Khối không tồn tại", 1, []);
     }
-    await GradeToUpdate.update(data);
-    return GradeToUpdate;
+    await gradeToUpdate.update({
+      TenKhoi: data.GradeName,
+    });
+    return buildResponse("Cập nhật khối học thành công", 0, gradeToUpdate);
   } catch (error) {
-    throw new Error('Lỗi khi cập nhật khối: ' + error.message);
+    console.error("Lỗi khi cập nhật khối:", error);
+    return buildResponse("Lỗi phía server. Cập nhật khối thất bại", -1, []);
   }
-};
-
-// Hàm xóa khối học
+} 
 const deleteGrade = async (id) => {
   try {
     const deleted = await db.khoi.destroy({ where: { MaKhoi: id } });
     if (!deleted) {
-      throw new Error('khối không tồn tại');
+      return buildResponse("Khối không tồn tại để xóa", 1, []);
     }
-    return deleted;
+    return buildResponse("Xóa khối thành công", 0, { id });
   } catch (error) {
-    throw new Error('Lỗi khi xóa khối: ' + error.message);
+    console.error("Lỗi khi xóa khối:", error);
+    return buildResponse("Lỗi phía server. Xóa khối thất bại", -1, []);
   }
-};
-
-module.exports = { 
+} 
+const checkClassExists = async (className) => {
+  try {
+    const existed = await db.lop.findOne({ where: { TenLop: className } });
+    return !!existed;
+  } catch (error) {
+    console.error("Lỗi khi kiểm tra lớp tồn tại:", error);
+    return false;
+  }
+} 
+module.exports = {
   getAllGrades,
-  getGradeById,
+  getGradeByName,
   checkGradeExists,
   createGrade,
   updateGrade,
-  deleteGrade 
+  deleteGrade,
+  checkClassExists,
 };

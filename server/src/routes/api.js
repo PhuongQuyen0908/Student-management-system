@@ -4,6 +4,8 @@ import studentController from "../controller/studentController.js";
 import classListController from "..//controller/classListController";
 import semesterController from "../controller/semesterController";
 // import gradeController from "../controller/gradeController" //fix sau
+//Fix lại đổi gradeController thành classController
+import classGradeController from "../controller/classGradeController";
 import testController from "../controller/testController";
 
 import classController from "../controller/classController";
@@ -13,8 +15,10 @@ import getGradesController from '../controller/getGradesController.js';
 import reportController from '../controller/reportController.js';
 import gradesController from '../controller/gradesController.js';
 import semesterReportController from '../controller/semesterReportController.js';
-import subjectreportController from '../controller/subjectreportController.js'
 
+import sortSubjectController from '../controller/sortSubjectController';
+import subjectreportController from '../controller/subjectreportController.js';
+import paramenterController from "../controller/paramenterController.js"
 const router = express.Router();
 
 /**
@@ -51,11 +55,11 @@ const initApiRoutes = (app) => {
   router.delete("/semester/delete/:id", semesterController.deleteSemester);
 
   // khối
-  // router.get('/read', gradeController.readGrade);
-  // router.get('/getByID/:id', gradeController.getGradeById);
-  // router.post('/create', gradeController.createGrade);
-  // router.put('/update/:id', gradeController.updateGrade);
-  // router.delete('/delete/:id', gradeController.deleteGrade);
+  router.get("/classGrade/read", classGradeController.readClassGrade);
+  router.get("/classGrade/getByID/:id", classGradeController.getClassGradeByName);  
+  router.post("/classGrade/create", classGradeController.createClassGrade);
+  router.put("/classGrade/update/:id", classGradeController.updateClassGrade);
+  router.delete("/classGrade/delete/:id", classGradeController.deleteClassGrade);
 
   //bài kiểm tra
   router.get("/test/read", testController.readTest);
@@ -70,6 +74,10 @@ const initApiRoutes = (app) => {
   router.post("/class/create", classController.createClass);
   router.put("/class/update/:id", classController.updateClass);
   router.delete("/class/delete/:id", classController.deleteClass);
+
+  // //Tham số
+  router.get("/paramenter/read", paramenterController.getAllParamenters); 
+  router.put("/paramenter/update/:id", paramenterController.updateParamenter);
 
   // môn học
   router.get("/subject/read", subjectController.readSubject);
@@ -94,6 +102,7 @@ const initApiRoutes = (app) => {
   router.post('/report/edit-score', gradesController.editScore);
   router.post('/report/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
   router.post('/report/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
+  router.post('/report/sort-subject-report', sortSubjectController.sortSubjectReport);
 
   return app.use("/api/", router);
 };
