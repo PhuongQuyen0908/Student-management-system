@@ -92,16 +92,9 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
 
 const getAllStudent = async () => {
   try {
-    let students = await db.hocsinh.findAll({
-      attributes: [
-        "MaHocSinh",
-        "HoTen",
-        "Email",
-        "GioiTinh",
-        "DiaChi",
-        "NgaySinh",
-      ],
-    });
+   let students = await db.hocsinh.findAll({
+      attributes: ["MaHocSinh", "HoTen", "Email", "GioiTinh", "DiaChi", "NgaySinh"]
+   });
     if (students) {
       return {
         EM: "Lấy dữ liệu thành công",
@@ -206,7 +199,7 @@ const updateStudent = async (data) => {
       return {
         EM: "Cập nhập học sinh thành công",
         EC: 0,
-        DT: "",
+        DT: '',
       };
     } else {
       return {
