@@ -1,5 +1,4 @@
-/* eslint-disable no-unused-vars */
-import "../../styles/Table/ClassTable.scss";
+import "../../styles/Table.scss";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import useModal from "../../hooks/useModal";
 import ModalAddClass from "../Modal/ModalAddClass";
@@ -34,6 +33,7 @@ const ClassTable = () => {
     setCurrentPage(selectedPage);
   };
 
+
   return (
     <div className="class-table-wrapper">
       <TableHeaderAction
@@ -43,8 +43,9 @@ const ClassTable = () => {
         addLabel="Thêm lớp học"
       />
 
-      <div className="class-table-container">
-        <table className="class-table">
+
+      <div className="table-container">
+        <table className="table">
           <thead>
             <tr>
               <th>STT</th>

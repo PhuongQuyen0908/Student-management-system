@@ -1,22 +1,19 @@
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SubjectReportTable.scss';
+import '../../styles/Table.scss';
 
-const SubjectReportTable = ({ data, meta, onSort, sortConfig}) => {
+const SubjectReportTable = ({ data, meta, onSort, sortConfig }) => {
 
     const renderSortableHeader = (label, key) => (
-    <th onClick={() => onSort(key)} style={{ cursor: 'pointer' }}>
-      {label}{' '}
-      {sortConfig?.sortBy === key &&
-        (sortConfig.order === 'asc' ? '▲' : '▼')}
-    </th>
-  );
+        <th onClick={() => onSort(key)} style={{ cursor: 'pointer' }}>
+            {label}{' '}
+            {sortConfig?.sortBy === key &&
+                (sortConfig.order === 'asc' ? '▲' : '▼')}
+        </th>
+    );
 
     return (
-        <div className="subjectreport-table-wrapper">
-        <div className="subjectreport-table-container">
-            
-            <div className="subjectreport-table-container">
-            <table className="subjectreport-table">
+        <div className="table-container">
+            <table className="table">
                 <thead>
                     <tr>
                         <th>STT</th>
@@ -44,9 +41,6 @@ const SubjectReportTable = ({ data, meta, onSort, sortConfig}) => {
                     )}
                 </tbody>
             </table>
-            </div>
-        </div>
-
         </div>
     );
 };

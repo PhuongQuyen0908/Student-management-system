@@ -4,7 +4,7 @@ import StudentListTable from '../../components/Table/StudentListTable';
 //các import mới
 import { useState, useEffect } from 'react';
 import useStudentListPage from '../../hooks/useStudentListPage';
-
+import '../../styles/FilterGroup.scss';
 const StudentsListPage = () => {
 
     const { years, selectedYear, setSelectedYear, fetchYears } = useStudentListPage();

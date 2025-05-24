@@ -20,19 +20,3 @@
   font-weight: 700;
   color: #1f2937;
 }
-
-.filter-group {
-  display: flex;
-  gap: 12px;
-  width:115px;
-}
-
-.filter-group select,
-.filter-group input {
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  background-color: #f3f4f6;
-  font-size: 14px;
-  color: #111827;
-}

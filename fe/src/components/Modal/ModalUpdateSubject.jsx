@@ -2,62 +2,91 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { toast } from 'react-toastify';
 import { useState, useEffect } from 'react';
+import _ from 'lodash';
+import { updateCurrentSubject } from '../../services/subjectServices';
 
-const ModalUpdateSubject = ({ show, handleClose }) => {
-    const [subjectCode, setSubjectCode] = useState('');
-    const [subjectName, setSubjectName] = useState('');
-    const [passingScore, setPassingScore] = useState('');
-    const [coefficient, setCoefficient] = useState('');
-
-    const defaultValidInput = {
-        isValidSubjectName: true,
-        isValidPassingScore: true,
-        isValidCoefficient: true,
+const ModalUpdateSubject = ({ show, handleClose, dataModalSubject, fetchSubjects }) => {
+    const defaultSubjectData = {
+        subjectCode: '',
+        subjectName: '',
+        // passingScore: '',
+        coefficient: '',
     };
 
-    const [objValidInput, setObjValidInput] = useState(defaultValidInput);
+    const defaultValidInputs = {
+        subjectName: true,
+        // passingScore: true,
+        coefficient: true,
+    };
+
+    const [subjectData, setSubjectData] = useState(defaultSubjectData);
+    const [validInputs, setValidInputs] = useState(defaultValidInputs);
+
+    useEffect(() => {
+        if (dataModalSubject && show) {
+            setSubjectData({
+                subjectCode: dataModalSubject.MaMonHoc || '',
+                subjectName: dataModalSubject.TenMonHoc || '',
+                // passingScore: dataModalSubject.DiemDat || '',
+                coefficient: dataModalSubject.HeSo || '',
+            });
+        }
+    }, [dataModalSubject, show]);
+
+    const handleOnChangeInput = (value, name) => {
+        let _subjectData = _.cloneDeep(subjectData);
+        _subjectData[name] = value;
+        setSubjectData(_subjectData);
+    };
 
     const isValidInputs = () => {
-        setObjValidInput(defaultValidInput);
+        setValidInputs(defaultValidInputs);
+        let isValid = true;
 
-        if (!subjectName) {
-            toast.error("Tên môn học là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidSubjectName: false });
-            return false;
+        if (!subjectData.subjectName) {
+            toast.error('Tên môn học là bắt buộc');
+            setValidInputs({ ...defaultValidInputs, subjectName: false });
+            isValid = false;
+        }
+        // else if (!subjectData.passingScore) {
+        // toast.error('Số điểm đạt là bắt buộc');
+        // setValidInputs({ ...defaultValidInputs, passingScore: false });
+        // isValid = false;}
+        else if (!subjectData.coefficient) {
+            toast.error('Hệ số là bắt buộc');
+            setValidInputs({ ...defaultValidInputs, coefficient: false });
+            isValid = false;
         }
 
-        if (!passingScore) {
-            toast.error("Số điểm đạt là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidPassingScore: false });
-            return false;
-        }
-
-        if (!coefficient) {
-            toast.error("Hệ số là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidCoefficient: false });
-            return false;
-        }
-
-        return true;
+        return isValid;
     };
 
     const confirmUpdateSubject = async () => {
-        if (isValidInputs()) {
-            toast.success("Cập nhật môn học thành công");
-            handleClose();
+        const isValid = isValidInputs();
+        if (isValid) {
+            try {
+                let response = await updateCurrentSubject({
+                    MaMonHoc: subjectData.subjectCode,
+                    TenMonHoc: subjectData.subjectName,
+                    HeSo: subjectData.coefficient,
+                });
+
+                if (response && response.status === 200) {
+                    toast.success(response.data.message || 'Cập nhật thành công');
+                    await fetchSubjects();
+                    handleClose();
+                    setSubjectData(defaultSubjectData);
+                    setValidInputs(defaultValidInputs);
+                } else {
+                    toast.error(response?.data?.message || 'Cập nhật thất bại');
+                }
+            } catch (error) {
+                console.error('Lỗi khi cập nhật môn học:', error);
+                toast.error('Lỗi máy chủ (500): Vui lòng kiểm tra lại dữ liệu gửi lên hoặc server API.');
+            }
         }
     };
 
-    useEffect(() => {
-        if (show) {
-            // Reset fields when modal opens
-            setSubjectCode('');
-            setSubjectName('');
-            setPassingScore('');
-            setCoefficient('');
-            setObjValidInput(defaultValidInput);
-        }
-    }, [show]);
 
     return (
         <Modal show={show} onHide={handleClose} centered>
@@ -71,9 +100,8 @@ const ModalUpdateSubject = ({ show, handleClose }) => {
                         type="text"
                         className="form-control"
                         id="subjectCode"
-                        placeholder="Không thể sửa"
+                        value={subjectData.subjectCode}
                         disabled
-                        value={subjectCode}
                     />
                 </div>
 
@@ -81,32 +109,32 @@ const ModalUpdateSubject = ({ show, handleClose }) => {
                     <label htmlFor="subjectName" className="form-label">Tên môn học</label>
                     <input
                         type="text"
-                        className={objValidInput.isValidSubjectName ? "form-control" : "form-control is-invalid"}
+                        className={validInputs.subjectName ? 'form-control' : 'form-control is-invalid'}
                         id="subjectName"
-                        value={subjectName}
-                        onChange={(e) => setSubjectName(e.target.value)}
+                        value={subjectData.subjectName}
+                        onChange={(e) => handleOnChangeInput(e.target.value, 'subjectName')}
                     />
                 </div>
 
-                <div className="mb-3">
+                {/* <div className="mb-3">
                     <label htmlFor="passingScore" className="form-label">Số điểm đạt</label>
                     <input
                         type="number"
-                        className={objValidInput.isValidPassingScore ? "form-control" : "form-control is-invalid"}
+                        className={validInputs.passingScore ? 'form-control' : 'form-control is-invalid'}
                         id="passingScore"
-                        value={passingScore}
-                        onChange={(e) => setPassingScore(e.target.value)}
+                        value={subjectData.passingScore}
+                        onChange={(e) => handleOnChangeInput(e.target.value, 'passingScore')}
                     />
-                </div>
+                </div> */}
 
                 <div className="mb-3">
                     <label htmlFor="coefficient" className="form-label">Hệ số</label>
                     <input
                         type="number"
-                        className={objValidInput.isValidCoefficient ? "form-control" : "form-control is-invalid"}
+                        className={validInputs.coefficient ? 'form-control' : 'form-control is-invalid'}
                         id="coefficient"
-                        value={coefficient}
-                        onChange={(e) => setCoefficient(e.target.value)}
+                        value={subjectData.coefficient}
+                        onChange={(e) => handleOnChangeInput(e.target.value, 'coefficient')}
                     />
                 </div>
             </Modal.Body>

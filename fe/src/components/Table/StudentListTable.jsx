@@ -1,5 +1,5 @@
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/StudentListTable.scss';
+import '../../styles/Table.scss';
 
 //các import mới
 import { useState, useEffect } from "react";
@@ -31,8 +31,8 @@ const StudentListTable = ({ selectedYear }) => {
                 placeholder="Tìm kiếm học sinh..."
                 hideAdd={true}
             />
-            <div className="studentlist-table-container">
-                <table className="studentlist-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>Mã học sinh</th>
