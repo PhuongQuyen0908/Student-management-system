@@ -1,7 +1,7 @@
 import React from 'react';
 import '../../styles/Page/SemesterReportPage.scss';
 import SemesterReportTable from '../../components/Table/SemesterReportTable';
-
+import '../../styles/FilterGroup.scss';
 const SemesterReportPage = () => {
     return (
         <div className="semesterreport-page-container">

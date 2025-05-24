@@ -1,5 +1,5 @@
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/StudentListTable.scss';
+import '../../styles/Table.scss';
 
 const dummyStudentList = [
     {
@@ -24,8 +24,8 @@ const StudentListTable = () => {
                 placeholder="Tìm kiếm học sinh..."
                 hideAdd={true}
             />
-            <div className="studentlist-table-container">
-                <table className="studentlist-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>STT</th>

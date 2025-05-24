@@ -1,7 +1,7 @@
 import React from 'react';
 import ClassListTable from '../../components/Table/ClassListTable';
 import '../../styles/Page/ClassesListPage.scss';
-
+import '../../styles/FilterGroup.scss';
 const ClassesListPage = () => {
     return (
         <div className="classeslist-page-container">

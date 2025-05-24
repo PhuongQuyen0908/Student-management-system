@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SubjectGradeTable from '../../components/Table/SubjectGradeTable';
 import '../../styles/Page/SubjectGradesPage.scss';
-
+import '../../styles/FilterGroup.scss';
 const SubjectGradesPage = () => {
     const [filters, setFilters] = useState({
         year: '',
