@@ -1,22 +1,29 @@
 import TableHeaderAction from '../TableHeaderAction';
 import '../../styles/Table.scss';
 
-const dummyStudentList = [
-    {
-        name: 'Nguyễn Văn A',
-        class: '10A1',
-        avgTerm1: 7.8,
-        avgTerm2: 8.2,
-    },
-    {
-        name: 'Trần Thị B',
-        class: '10A2',
-        avgTerm1: 8.5,
-        avgTerm2: 8.9,
-    },
-];
+//các import mới
+import { useState, useEffect } from "react";
+import ReactPaginate from 'react-paginate';
+import useStudentListTable from '../../hooks/useStudentListTable';
 
-const StudentListTable = () => {
+
+
+const StudentListTable = ({ selectedYear }) => {
+
+    const {
+        listStudents,
+        handlePageClick,
+        totalPages,
+        fetchStudents,
+        currentPage,
+    } = useStudentListTable(selectedYear);
+
+    useEffect(() => {
+        fetchStudents();
+    }, [currentPage, selectedYear]);
+
+    
+
     return (
         <div className="studentlist-table-wrapper">
             <TableHeaderAction
@@ -28,7 +35,7 @@ const StudentListTable = () => {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>STT</th>
+                            <th>Mã học sinh</th>
                             <th>Họ và tên</th>
                             <th>Lớp</th>
                             <th>Điểm TB học kỳ I</th>
@@ -36,18 +43,52 @@ const StudentListTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {dummyStudentList.map((student, index) => (
-                            <tr key={index}>
-                                <td>{index + 1}</td>
-                                <td>{student.name}</td>
-                                <td>{student.class}</td>
-                                <td>{student.avgTerm1}</td>
-                                <td>{student.avgTerm2}</td>
-                            </tr>
-                        ))}
+                        {
+                            listStudents && listStudents.length > 0 ?
+                                <>
+                                    {listStudents.map((student, index) => (
+                                        <tr key={`student-${index}`}>
+                                            <td>{student.MaHocSinh}</td>
+                                            <td>{student.HoTen}</td>
+                                            <td>{student.TenLop}</td>
+                                            <td>{student.DiemTB_HK1}</td>
+                                            <td>{student.DiemTB_HK2}</td>
+                                        </tr>
+                                    ))}
+                                </>
+                                :
+                                <tr>
+                                    <td colSpan="5">Không có học sinh nào</td>
+                                </tr>
+                        }
                     </tbody>
                 </table>
             </div>
+            {/* pagination */}
+            {totalPages > 0 &&
+                <div className="student-footer">
+                    <ReactPaginate
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={3}
+                        marginPagesDisplayed={2}
+                        pageCount={totalPages}
+                        previousLabel="Previous"
+                        pageClassName="page-item"
+                        pageLinkClassName="number page-link"
+                        previousClassName="page-item"
+                        previousLinkClassName="prev page-link"
+                        nextClassName="page-item"
+                        nextLinkClassName="next page-link"
+                        nextLabel="Next"
+                        breakLabel="..."
+                        breakClassName="page-item"
+                        breakLinkClassName="break page-link"
+                        containerClassName="pagination"
+                        activeClassName="active"
+                        renderOnZeroPageCount={null}
+                    />
+                </div>
+            }
         </div>
     );
 };
