@@ -1,30 +1,16 @@
 import React from 'react';
 import '../../styles/Page/StudentsListPage.scss'
 import StudentListTable from '../../components/Table/StudentListTable';
-// sẽ sửa sau 
+//các import mới
 import { useState, useEffect } from 'react';
-import { featchAllYear } from '../../services/studentServices';
+import useStudentListPage from '../../hooks/useStudentListPage';
 
 const StudentsListPage = () => {
-    const [years, setYears] = useState([]); // 2014-2015 , ....
-    const [selectedYear, setSelectedYear] = useState(''); // mã năm học để lọc 
 
+    const { years, selectedYear, setSelectedYear, fetchYears } = useStudentListPage();
     useEffect(() => {
         fetchYears();
     }, [])
-    const fetchYears = async () => {
-        try {
-            let response = await featchAllYear();
-            console.log('response', response);
-            if (response && response.data) {
-                setYears(response.data.data);
-                setSelectedYear(response.data.data[0].MaNamHoc); // set year đầu tiên là mặc định
-            }
-        } catch (error) {
-            console.error('Error fetching years:', error);
-        }
-    };
-
 
     return (
         <div className="studentslist-page-container">
