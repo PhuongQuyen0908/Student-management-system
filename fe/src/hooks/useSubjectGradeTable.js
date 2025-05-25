@@ -1,13 +1,6 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
-import reportService from "../services/reportService";
+import reportService from "../services/subjectGradeService";
 import { toast } from "react-toastify";
-
-export const getFinalTestType = (semester) => {
-  if (!semester) return "Thi học kỳ I";
-  if (semester.trim().match(/2|II/i)) return "Thi học kỳ II";
-  return "Thi học kỳ I";
-};
 
 const useSubjectGradeTable = (filters) => {
   const [grades, setGrades] = useState([]);
@@ -15,9 +8,17 @@ const useSubjectGradeTable = (filters) => {
   const [error, setError] = useState("");
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
-  const [currentEditGrade, setCurrentEditGrade] = useState(null);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [currentTarget, setCurrentTarget] = useState(null);
   const [refreshFlag, setRefreshFlag] = useState(0);
+  const [testTypes, setTestTypes] = useState([]);
+
+  // Fetch test types from DB
+  useEffect(() => {
+    reportService.getTests().then(res => {
+      if (Array.isArray(res.data?.data)) setTestTypes(res.data.data);
+    });
+  }, []);
 
   useEffect(() => {
     if (!filters || !filters.class || !filters.semester || !filters.year || !filters.subject) {
@@ -40,9 +41,6 @@ const useSubjectGradeTable = (filters) => {
           setGrades(
             diemChiTiet.map((item) => ({
               name: item.HoTen,
-              test15: item.DiemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 15 phút")?.Diem ?? "",
-              test1period: item.DiemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 1 tiết")?.Diem ?? "",
-              final: item.DiemTP?.find(d => d.LoaiKiemTra === getFinalTestType(filters.semester))?.Diem ?? "",
               diemTP: item.DiemTP,
               diemTB: item.DiemTB,
             }))
@@ -59,45 +57,55 @@ const useSubjectGradeTable = (filters) => {
       }
     };
     fetchData();
-  }, [filters, refreshFlag]);
+  }, [filters, refreshFlag, testTypes]);
 
-  const openEditModal = (grade) => {
-    setCurrentEditGrade(grade);
+  const openEditModal = (student) => {
+    setCurrentTarget(student);
     setEditModalOpen(true);
   };
   const closeEditModal = () => {
     setEditModalOpen(false);
-    setCurrentEditGrade(null);
+    setCurrentTarget(null);
   };
   const openAddModal = (student) => {
-    setSelectedStudent(student);
+    setCurrentTarget(student);
     setAddModalOpen(true);
   };
   const closeAddModal = () => {
     setAddModalOpen(false);
-    setSelectedStudent(null);
+    setCurrentTarget(null);
+  };
+  const openDeleteModal = (student) => {
+    setCurrentTarget(student);
+    setDeleteModalOpen(true);
+  };
+  const closeDeleteModal = () => {
+    setDeleteModalOpen(false);
+    setCurrentTarget(null);
   };
 
-  // Always send full context and correct test type names
+  // Dynamic addGrade
   const addGrade = async (data) => {
     try {
+      const filledScores = testTypes
+        .filter(type => data.DiemTP?.[type.TenLoaiKiemTra] !== "" && data.DiemTP?.[type.TenLoaiKiemTra] !== null && data.DiemTP?.[type.TenLoaiKiemTra] !== undefined)
+        .map(type => ({
+          LoaiKiemTra: type.TenLoaiKiemTra,
+          Diem: data.DiemTP[type.TenLoaiKiemTra]
+        }));
       const payload = {
         HoTen: data.HoTen,
         TenLop: filters.class,
         TenMonHoc: filters.subject,
         TenHocKy: filters.semester,
         TenNamHoc: filters.year,
-        DiemTP: [
-          { LoaiKiemTra: "Kiểm tra 15 phút", Diem: data.DiemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 15 phút")?.Diem ?? "" },
-          { LoaiKiemTra: "Kiểm tra 1 tiết", Diem: data.DiemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 1 tiết")?.Diem ?? "" },
-          { LoaiKiemTra: getFinalTestType(filters.semester), Diem: data.DiemTP?.find(d => d.LoaiKiemTra === "Thi học kỳ" || d.LoaiKiemTra === "Thi học kỳ I" || d.LoaiKiemTra === "Thi học kỳ II")?.Diem ?? "" }
-        ]
+        DiemTP: filledScores
       };
       const res = await reportService.addScore(payload);
       if (res?.data?.EC === 0) {
         toast.success("Thêm điểm thành công");
         closeAddModal();
-        setRefreshFlag(f => f + 1); // trigger refresh
+        setRefreshFlag(f => f + 1);
       } else {
         toast.error(res?.data?.EM || "Không thể thêm điểm");
       }
@@ -106,25 +114,28 @@ const useSubjectGradeTable = (filters) => {
     }
   };
 
+  // Dynamic updateGrade
   const updateGrade = async (data) => {
     try {
+      const filledScores = testTypes
+        .filter(type => data.DiemTP?.find(d => d.LoaiKiemTra === type.TenLoaiKiemTra && d.Diemmoi !== "" && d.Diemmoi !== null && d.Diemmoi !== undefined))
+        .map(type => ({
+          LoaiKiemTra: type.TenLoaiKiemTra,
+          Diemmoi: data.DiemTP.find(d => d.LoaiKiemTra === type.TenLoaiKiemTra)?.Diemmoi
+        }));
       const payload = {
         HoTen: data.HoTen || data.name,
         TenLop: filters.class,
         TenMonHoc: filters.subject,
         TenHocKy: filters.semester,
         TenNamHoc: filters.year,
-        DiemTP: [
-          { LoaiKiemTra: "Kiểm tra 15 phút", Diemmoi: data.DiemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 15 phút")?.Diemmoi ?? data.test15 ?? "" },
-          { LoaiKiemTra: "Kiểm tra 1 tiết", Diemmoi: data.DiemTP?.find(d => d.LoaiKiemTra === "Kiểm tra 1 tiết")?.Diemmoi ?? data.test1period ?? "" },
-          { LoaiKiemTra: getFinalTestType(filters.semester), Diemmoi: data.DiemTP?.find(d => d.LoaiKiemTra === "Thi học kỳ" || d.LoaiKiemTra === "Thi học kỳ I" || d.LoaiKiemTra === "Thi học kỳ II")?.Diemmoi ?? data.final ?? "" }
-        ]
+        DiemTP: filledScores
       };
       const res = await reportService.editScore(payload);
       if (res?.data?.EC === 0) {
         toast.success("Cập nhật điểm thành công");
         closeEditModal();
-        setRefreshFlag(f => f + 1); // trigger refresh
+        setRefreshFlag(f => f + 1);
       } else {
         toast.error(res?.data?.EM || "Không thể cập nhật điểm");
       }
@@ -138,6 +149,7 @@ const useSubjectGradeTable = (filters) => {
       const res = await reportService.deleteScore(data);
       if (res?.data?.EC === 0) {
         toast.success("Xóa điểm thành công");
+        setRefreshFlag(f => f + 1);
       } else {
         toast.error(res?.data?.EM || "Không thể xóa điểm");
       }
@@ -150,17 +162,20 @@ const useSubjectGradeTable = (filters) => {
     grades,
     loading,
     error,
+    currentTarget,
     editModalOpen,
     addModalOpen,
-    currentEditGrade,
+    deleteModalOpen,
     openEditModal,
     closeEditModal,
     openAddModal,
     closeAddModal,
+    openDeleteModal,
+    closeDeleteModal,
     addGrade,
     updateGrade,
     removeGrade,
-    selectedStudent
+    testTypes
   };
 };
 

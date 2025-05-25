@@ -2,18 +2,16 @@ import { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-const ModalAddGrade = ({ show, handleClose, onAdd, student, context }) => {
-    const [grade15min, setGrade15min] = useState('');
-    const [grade1period, setGrade1period] = useState('');
-    const [gradeFinal, setGradeFinal] = useState('');
+const ModalAddGrade = ({ show, handleClose, onAdd, student, context, testTypes }) => {
+    const [grades, setGrades] = useState({});
 
     useEffect(() => {
-        if (show) {
-            setGrade15min('');
-            setGrade1period('');
-            setGradeFinal('');
-        }
+        if (show) setGrades({});
     }, [show]);
+
+    const handleChange = (type, value) => {
+        setGrades(prev => ({ ...prev, [type]: value }));
+    };
 
     const handleAdd = () => {
         onAdd({
@@ -22,11 +20,7 @@ const ModalAddGrade = ({ show, handleClose, onAdd, student, context }) => {
             TenMonHoc: context?.subject,
             TenHocKy: context?.semester,
             TenNamHoc: context?.year,
-            DiemTP: [
-                { LoaiKiemTra: "Kiểm tra 15 phút", Diem: grade15min },
-                { LoaiKiemTra: "Kiểm tra 1 tiết", Diem: grade1period },
-                { LoaiKiemTra: "Thi học kỳ", Diem: gradeFinal }
-            ]
+            DiemTP: {...grades}
         });
         handleClose();
     };
@@ -46,33 +40,17 @@ const ModalAddGrade = ({ show, handleClose, onAdd, student, context }) => {
                         disabled
                     />
                 </div>
-                <div className="mb-3">
-                    <label className="form-label">Điểm 15 phút</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        value={grade15min}
-                        onChange={(e) => setGrade15min(e.target.value)}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Điểm 1 tiết</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        value={grade1period}
-                        onChange={(e) => setGrade1period(e.target.value)}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Điểm học kỳ</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        value={gradeFinal}
-                        onChange={(e) => setGradeFinal(e.target.value)}
-                    />
-                </div>
+                {testTypes.map(type => (
+                    <div className="mb-3" key={type.MaLoaiKiemTra}>
+                        <label className="form-label">{type.TenLoaiKiemTra}</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={grades[type.TenLoaiKiemTra] || ""}
+                            onChange={e => handleChange(type.TenLoaiKiemTra, e.target.value)}
+                        />
+                    </div>
+                ))}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>
