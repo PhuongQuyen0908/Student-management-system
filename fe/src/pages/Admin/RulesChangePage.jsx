@@ -4,7 +4,7 @@ import TableHeaderAction from "../../components/TableHeaderAction";
 import { useState } from "react";
 import useParamenterTable from "../../hooks/useParamenter";
 import { useEffect } from "react";
-
+import '../../styles/FilterGroup.scss';
 const PARAMS = [
   { key: "TuoiToiThieu", label: "Số tuổi tối thiểu" },
   { key: "TuoiToiDa", label: "Số tuổi tối đa" },
@@ -52,18 +52,6 @@ const RulesChangePage = () => {
   } = values;
   return (
     <div className="ruleschange-page-container">
-      <div className="ruleschange-header">
-        <h2 className="ruleschange-title">Thay đổi quy định</h2>
-      </div>
-
-      <div className="ruleschange-search-wrapper">
-        <TableHeaderAction
-          onSearchChange={(value) => console.log("Tìm kiếm:", value)}
-          placeholder="Tìm kiếm..."
-          hideAdd={true}
-        />
-      </div>
-
       <div className="ruleschange-card full">
         <div className="ruleschange-two-column">
           <div className="half">
@@ -76,11 +64,13 @@ const RulesChangePage = () => {
           </div>
           <div className="half align-right">
             <h3>Danh sách năm học đã học</h3>
-            <select className="schoolyear-dropdown">
-              <option>2024 - 2025</option>
-              <option>2023 - 2024</option>
-              <option>2022 - 2023</option>
-            </select>
+            <div className="filter-group">
+              <select>
+                <option>2024 - 2025</option>
+                <option>2023 - 2024</option>
+                <option>2022 - 2023</option>
+              </select>
+            </div>
           </div>
         </div>
       </div>

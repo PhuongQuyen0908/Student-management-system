@@ -7,8 +7,9 @@
 
 .filter-group select,
 .filter-group input {
+  width: 125px;
   padding: 10px 14px;
-  padding-right: 36px;
+  padding-right: 28px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
   background-color: #fff;
@@ -19,8 +20,8 @@
   appearance: none; 
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='%236b7280' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 16px;
+  background-position: right 10px center;
+  background-size: 14px;
   line-height: 1.5;
 }
 
