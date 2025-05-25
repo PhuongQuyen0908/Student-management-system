@@ -136,3 +136,15 @@
   color: #9ca3af;
   cursor: default;
 }
+.sort-button {
+  background: none;
+  border: none;
+  margin-left: 5px;
+  cursor: pointer;
+  color: #888;
+
+  &:hover {
+    color: #333;
+  }
+}
+

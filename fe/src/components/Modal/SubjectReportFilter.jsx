@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import reportService from '../../services/reportService';
+import '../../styles/FilterGroup.scss';
 
 const SubjectReportFilters = ({ onSubmit }) => {
     const [yearOptions, setYearOptions] = useState([]);
@@ -35,7 +36,7 @@ const SubjectReportFilters = ({ onSubmit }) => {
     };
 
     return (
-        <div className="filters">
+        <div className="filter-group">
             <label>
                 Năm học:
                 <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
