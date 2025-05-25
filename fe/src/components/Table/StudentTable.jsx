@@ -1,4 +1,4 @@
-import '../../styles/Table/StudentTable.scss';
+import '../../styles/Table.scss';
 import TableHeaderAction from '../TableHeaderAction';
 import ModalAddStudent from '../Modal/ModalAddStudent';
 import { FaEdit, FaLock } from 'react-icons/fa';
@@ -44,8 +44,8 @@ const StudentTable = () => {
                 addLabel="Thêm học sinh"
             />
 
-            <div className="student-table-container">
-                <table className="student-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>Mã học sinh</th>

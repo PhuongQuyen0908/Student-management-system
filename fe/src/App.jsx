@@ -2,7 +2,6 @@
 import { useState } from "react";
 import React from "react";
 import "./App.scss";
-//Import mới
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router } from "react-router-dom";

@@ -3,8 +3,17 @@
 
 const readFunc = async (req, res) => {
   try {
-    
-    if (req.query.page && req.query.limit) {
+    if(req.query.MaNamHoc && req.query.page && req.query.limit) {
+      let page = req.query.page;
+      let limit = req.query.limit;
+      let data = await studentApiService.getAllStudentWithYear(req.query.MaNamHoc , +page , +limit ); // chuyển thành số để dùng sql
+      console.log("check data", data);
+      return res.status(200).json({
+        EM: data.EM,
+        EC: data.EC, //error code
+        DT: data.DT, //data
+      });} 
+    else if (req.query.page && req.query.limit) {
       let page = req.query.page;
       let limit = req.query.limit;
 

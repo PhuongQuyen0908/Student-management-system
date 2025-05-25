@@ -20,15 +20,18 @@ import logo from '../../assets/School-logo.png';
 
 const Taskbar = () => {
   const { expandedMenus, toggleMenu } = useTaskbar();
+
   return (
     <nav className="taskbar-container">
       <div className="taskbar-header">
         <img src={logo} alt="Group6 Logo" className="header-logo" />
         <h3>Group6 - CSSE</h3>
       </div>
+
       <div className="taskbar-section">
         <p className="section-title">MENU</p>
-        <NavLink to="/admin" end className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
+
+        <NavLink to="/admin/home" end className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
           <FontAwesomeIcon icon={faHome} /> Trang chủ
         </NavLink>
 
@@ -41,10 +44,21 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.studentManagement && (
           <div className="submenu">
-            <NavLink to="/admin/students" className="taskbar-subitem">Danh sách học sinh</NavLink>
-            <NavLink to="/admin/studentadmission" className="taskbar-subitem">Tiếp nhận học sinh</NavLink>
+            <NavLink
+              to="/admin/students"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Danh sách học sinh
+            </NavLink>
+            <NavLink
+              to="/admin/studentadmission"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Tiếp nhận học sinh
+            </NavLink>
           </div>
         )}
+
         <NavLink className="taskbar-item" onClick={() => toggleMenu('subjectManagement')}>
           <FontAwesomeIcon icon={faBookOpen} /> Môn học
           <FontAwesomeIcon
@@ -54,10 +68,21 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.subjectManagement && (
           <div className="submenu">
-            <NavLink to="/admin/subjects" className="taskbar-subitem">Danh sách môn học</NavLink>
-            <NavLink to="/admin/subjectgrades" className="taskbar-subitem">Bảng điểm môn học</NavLink>
+            <NavLink
+              to="/admin/subjects"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Danh sách môn học
+            </NavLink>
+            <NavLink
+              to="/admin/subjectgrades"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Bảng điểm môn học
+            </NavLink>
           </div>
         )}
+
         <NavLink className="taskbar-item" onClick={() => toggleMenu('classManagement')}>
           <FontAwesomeIcon icon={faSchool} /> Lớp học
           <FontAwesomeIcon
@@ -67,10 +92,21 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.classManagement && (
           <div className="submenu">
-            <NavLink to="/admin/classmanagement" className="taskbar-subitem">Quản lý lớp học</NavLink>
-            <NavLink to="/admin/classlist" className="taskbar-subitem">Danh sách lớp</NavLink>
+            <NavLink
+              to="/admin/classmanagement"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Quản lý lớp học
+            </NavLink>
+            <NavLink
+              to="/admin/classlist"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Danh sách lớp
+            </NavLink>
           </div>
         )}
+
         <NavLink className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>
           <FontAwesomeIcon icon={faChartBar} /> Báo cáo
           <FontAwesomeIcon
@@ -80,21 +116,42 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.reportManagement && (
           <div className="submenu">
-            <NavLink to="/admin/subjectreport" className="taskbar-subitem">Lập báo cáo tổng kết môn</NavLink>
-            <NavLink to="/admin/semesterreport" className="taskbar-subitem">Lập báo cáo tổng kết học kỳ</NavLink>
-            <NavLink className="taskbar-subitem">Lập báo cáo kết quả học tập</NavLink>
+            <NavLink
+              to="/admin/subjectreport"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Lập báo cáo tổng kết môn
+            </NavLink>
+            <NavLink
+              to="/admin/semesterreport"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Lập báo cáo tổng kết học kỳ
+            </NavLink>
           </div>
         )}
-        <NavLink to="/admin/ruleschange" className="taskbar-item">
+
+        <NavLink
+          to="/admin/ruleschange"
+          className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
+        >
           <FontAwesomeIcon icon={faClipboardList} /> Thay đổi quy định
         </NavLink>
       </div>
+
       <div className="taskbar-section">
         <p className="section-title">KHÁC</p>
-        <NavLink to="/admin/settings" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
+
+        <NavLink
+          to="/admin/settings"
+          className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
+        >
           <FontAwesomeIcon icon={faCog} /> Cài đặt
         </NavLink>
-        <NavLink to="/admin/profile" className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}>
+        <NavLink
+          to="/admin/profile"
+          className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
+        >
           <FontAwesomeIcon icon={faUser} /> Hồ sơ
         </NavLink>
         <NavLink to="/logout" className="taskbar-item">

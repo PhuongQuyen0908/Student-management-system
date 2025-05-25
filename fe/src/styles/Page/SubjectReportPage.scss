@@ -21,6 +21,7 @@
   color: #1f2937;
 }
 
+
 .filter-group {
   display: flex;
   gap: 12px;
@@ -34,4 +35,14 @@
   background-color: #f3f4f6;
   font-size: 14px;
   color: #111827;
+}
+
+.subjectreport-table th {
+  font-weight: bold;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.subjectreport-table th:hover {
+  color: #1976d2;
 }

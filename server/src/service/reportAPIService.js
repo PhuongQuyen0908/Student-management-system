@@ -69,7 +69,8 @@ const calculateAndUpdateDiemTB = async (MaBDMonHoc) => {
       weight += heso;
     }
   });
-
+  console.log(total);
+  console.log(weight);
   const diemTB = weight ? parseFloat((total / weight).toFixed(2)) : null;
 
   await db.bdmonhoc.update(
@@ -456,6 +457,17 @@ const tinhBaoCaoTongKetHocKy = async (tenHocKy, tenNamHoc) => {
           }
         });
 
+        if (!qt) continue;
+
+        // ✅ Tính và cập nhật điểm trung bình từng môn học trước
+        const bdMonList = await db.bdmonhoc.findAll({
+          where: { MaQuaTrinhHoc: qt.MaQuaTrinhHoc }
+        });
+
+        for (const bd of bdMonList) {
+          await calculateAndUpdateDiemTB(bd.MaBDMonHoc);
+        }
+
         const diemTBHK = await tinhDiemTBHocKy(qt.MaQuaTrinhHoc);
         if (diemTBHK !== null && diemTBHK !== undefined && diemTBHK >= diemDat) {
           soLuongDat++;
@@ -575,7 +587,7 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
         if (!qtHoc) continue;
 
         const diemTBMonHoc = await calculateAndUpdateDiemTB(qtHoc.MaQuaTrinhHoc);
-
+        console.log(diemTBMonHoc)
         const bdMon = await db.bdmonhoc.findOne({
           where: { MaQuaTrinhHoc: qtHoc.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc }
         });

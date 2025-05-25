@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import SubjectGradeTable from '../../components/Table/SubjectGradeTable';
 import reportService from '../../services/reportService';
 import '../../styles/Page/SubjectGradesPage.scss';
-
+import '../../styles/FilterGroup.scss';
 const SubjectGradesPage = () => {
     const [filters, setFilters] = useState({
         year: '',

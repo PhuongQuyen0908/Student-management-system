@@ -4,7 +4,7 @@ import ModalUpdateGrade from '../Modal/ModalUpdateGrade';
 import ModalAddGrade from '../Modal/ModalAddGrade';
 import TableHeaderAction from '../TableHeaderAction';
 import useSubjectGradeTable from '../../hooks/useSubjectGradeTable';
-import '../../styles/Table/SubjectGradeTable.scss';
+import '../../styles/Table/Table.scss';
 
 const SubjectGradeTable = ({ filters }) => {
   const {
