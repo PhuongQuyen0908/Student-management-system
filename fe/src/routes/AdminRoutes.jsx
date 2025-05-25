@@ -9,6 +9,7 @@ import SubjectReportPage from '../pages/Admin/SubjectReportPage';
 import SemesterReportPage from '../pages/Admin/SemesterReportPage';
 import RulesChangePage from '../pages/Admin/RulesChangePage';
 import HomePage from '../pages/Admin/HomePage';
+import InfoPage from '../pages/Admin/InfoPage';
 const AdminRoutes = {
     path: '/admin',
     element: <AdminPage />,
@@ -53,6 +54,10 @@ const AdminRoutes = {
         {
             path: 'ruleschange',
             element: <RulesChangePage />,
+        },
+        {
+            path: 'info',
+            element: <InfoPage />,
         },
     ],
 };

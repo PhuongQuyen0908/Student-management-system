@@ -147,9 +147,9 @@ const Taskbar = () => {
           className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
         >
           <FontAwesomeIcon icon={faCog} /> Cài đặt
-        </NavLink>
+        </NavLink >
         <NavLink
-          to="/admin/profile"
+          to="/admin/info"
           className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
         >
           <FontAwesomeIcon icon={faUser} /> Hồ sơ

@@ -9,6 +9,7 @@ import ModalDeleteStudent from "../Modal/ModalDeleteStudent";
 import ReactPaginate from 'react-paginate';
 import { useEffect } from 'react';
 import useStudentTable from '../../hooks/useStudentTable';
+import { FaSort } from 'react-icons/fa';
 
 const StudentTable = () => {
     // const addModal = useModal();
@@ -49,7 +50,12 @@ const StudentTable = () => {
                     <thead>
                         <tr>
                             <th>Mã học sinh</th>
-                            <th>Họ và tên</th>
+                            <th>
+                                Họ và tên
+                                <button className="sort-button" title="Sắp xếp">
+                                    <FaSort />
+                                </button>
+                            </th>
                             <th>Ngày sinh</th>
                             <th>Giới tính</th>
                             <th>Địa chỉ</th>
