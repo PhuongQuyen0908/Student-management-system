@@ -1,7 +1,14 @@
 import axios from "../setup/axios";
 
-const fetchStudentWithYear = (year , page ,limit) =>{
-  return axios.get(`/api/student/read?MaNamHoc=${year}&page=${page}&limit=${limit}`);
+const fetchStudentWithYear = (year , page ,limit , search ="") =>{
+  return axios.get('api/student/read', {
+    params: {
+      year,
+      search,
+      page,
+      limit,
+    },
+  });
 } 
 
 const featchAllYear = () => {

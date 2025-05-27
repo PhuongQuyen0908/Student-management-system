@@ -16,18 +16,20 @@ const StudentListTable = ({ selectedYear }) => {
         totalPages,
         fetchStudents,
         currentPage,
+        searchTerm, // nhập giá trị search
+        handleSearchChange // search
     } = useStudentListTable(selectedYear);
 
     useEffect(() => {
         fetchStudents();
-    }, [currentPage, selectedYear]);
+    }, [currentPage, selectedYear , searchTerm]);
 
     
 
     return (
         <div className="studentlist-table-wrapper">
             <TableHeaderAction
-                onSearchChange={(value) => console.log('Tìm kiếm:', value)}
+                onSearchChange={(e)=> handleSearchChange(e)}
                 placeholder="Tìm kiếm học sinh..."
                 hideAdd={true}
             />

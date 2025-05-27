@@ -12,10 +12,13 @@ const useStudentListTable = (selectedYear) => {
     const [currentLimit, setCurrentLimit] = useState(7);
     const [totalPages, setTotalPages] = useState(10);
 
+    //search
+    const [searchTerm, setSearchTerm] = useState("");
+
 
     const fetchStudents = async () => {
         try {
-            let response = await fetchStudentWithYear(selectedYear , currentPage, currentLimit);
+            let response = await fetchStudentWithYear(selectedYear , currentPage, currentLimit , searchTerm);
             console.log('check thử response data', response.data);
             if (response && response.data && response.data.EC === 0) {
                 setListStudents(response.data.DT.students);
@@ -29,12 +32,18 @@ const useStudentListTable = (selectedYear) => {
     }
 
 
-
     const handlePageClick = async (event) => {
         setCurrentPage(+event.selected + 1);
     };
 
-    return { listStudents, handlePageClick, totalPages , fetchStudents, currentPage };
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+        console.log("Search term:", value);
+  };
+
+
+    return { listStudents, handlePageClick, totalPages , fetchStudents, currentPage , searchTerm, handleSearchChange  };
 }
 
 export default useStudentListTable;
