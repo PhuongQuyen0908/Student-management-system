@@ -6,6 +6,7 @@ import ReactPaginate from 'react-paginate';
 const useStudentListTable = (selectedYear) => {
     const [listStudents, setListStudents] = useState([]);
 
+
     //pagination
     const [currentPage, setCurrentPage] = useState(1);
     const [currentLimit, setCurrentLimit] = useState(7);
@@ -26,6 +27,8 @@ const useStudentListTable = (selectedYear) => {
             console.error('Error fetching students:', error);
         }
     }
+
+
 
     const handlePageClick = async (event) => {
         setCurrentPage(+event.selected + 1);

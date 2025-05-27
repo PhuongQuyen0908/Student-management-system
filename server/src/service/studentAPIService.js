@@ -1,4 +1,5 @@
 import db from "../models/index";
+const { Op, fn, col, where } = require('sequelize');
 
 db.danhsachlop.hasMany(db.ct_dsl, { foreignKey: "MaDanhSachLop" });
 db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: "MaHocSinh" });
@@ -8,10 +9,64 @@ db.danhsachlop.belongsTo(db.lop, { foreignKey: "MaLop" });
 db.ct_dsl.belongsTo(db.danhsachlop, { foreignKey: "MaDanhSachLop" });
 db.lop.hasMany(db.danhsachlop, { foreignKey: "MaLop" });
 
+const getAllStudentWithSearch = async (search, page, limit) => {
+  const offset = (page - 1) * limit;
+  try {
+    // Nếu search không rỗng thì tạo điều kiện tìm kiếm
+    const whereClause = search
+      ? {
+          [Op.or]: [
+            { MaHocSinh: isNaN(Number(search)) ? -1 : Number(search) },
+            { HoTen: { [Op.like]: `%${search}%` } },
+            where(fn("DATE_FORMAT", col("NgaySinh"), "%Y-%m-%d"), { //chuyển đổi NgàySinh sang định dạng YYYY-MM-DD để so sánh
+              [Op.like]: `%${search}%`,
+            }),
+            { GioiTinh: { [Op.like]: `%${search}%` } },
+            { DiaChi: { [Op.like]: `%${search}%` } },
+            { Email: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
 
+    const { count, rows } = await db.hocsinh.findAndCountAll({
+      where: whereClause, // <-- Thêm dòng này để lọc theo search
+      offset: offset,
+      limit: limit,
+      attributes: [
+        "MaHocSinh",
+        "HoTen",
+        "Email",
+        "GioiTinh",
+        "DiaChi",
+        "NgaySinh",
+      ],
+      order: [["MaHocSinh", "DESC"]],
+    });
+
+    let totalPages = Math.ceil(count / limit); // tính tổng số trang
+    let data = {
+      totalRow: count,
+      totalPages: totalPages,
+      users: rows,
+    };
+
+    return {
+      EM: "fetch ok",
+      EC: 0,
+      DT: data,
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      EM: "Lỗi từ service",
+      EC: -1, // nên trả mã lỗi khác 0 để dễ biết có lỗi
+      DT: [],
+    };
+  }
+};
 
 //code chạy rồi không cần tối ưu lại
-const getAllStudentWithYear = async (yearId, page , limit) => {
+const getAllStudentWithYear = async (yearId, page, limit) => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
     const dslList = await db.danhsachlop.findAll({
@@ -38,7 +93,7 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
         },
         {
           model: db.lop,
-          attributes: ["MaLop" , "TenLop"],
+          attributes: ["MaLop", "TenLop"],
         },
       ],
     });
@@ -74,7 +129,7 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
       totalRow: students.length,
       totalPages: totalPages,
       students: students,
-    }
+    };
     return {
       EM: "Lấy dữ liệu thành công",
       EC: 0,
@@ -92,9 +147,16 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
 
 const getAllStudent = async () => {
   try {
-   let students = await db.hocsinh.findAll({
-      attributes: ["MaHocSinh", "HoTen", "Email", "GioiTinh", "DiaChi", "NgaySinh"]
-   });
+    let students = await db.hocsinh.findAll({
+      attributes: [
+        "MaHocSinh",
+        "HoTen",
+        "Email",
+        "GioiTinh",
+        "DiaChi",
+        "NgaySinh",
+      ],
+    });
     if (students) {
       return {
         EM: "Lấy dữ liệu thành công",
@@ -142,7 +204,6 @@ const getStudentWithPagination = async (page, limit) => {
       totalPages: totalPages,
       users: rows,
     };
-    console.log("check data ", data);
     return {
       EM: "fetch ok",
       EC: 0,
@@ -199,7 +260,7 @@ const updateStudent = async (data) => {
       return {
         EM: "Cập nhập học sinh thành công",
         EC: 0,
-        DT: '',
+        DT: "",
       };
     } else {
       return {
@@ -253,4 +314,5 @@ module.exports = {
   getAllStudent,
   getStudentWithPagination,
   getAllStudentWithYear,
+  getAllStudentWithSearch,
 };

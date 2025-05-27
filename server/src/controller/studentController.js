@@ -3,7 +3,7 @@
 
 const readFunc = async (req, res) => {
   try {
-    if(req.query.MaNamHoc && req.query.page && req.query.limit) {
+    if(req.query.MaNamHoc && req.query.page && req.query.limit) { // tìm theo năm học
       let page = req.query.page;
       let limit = req.query.limit;
       let data = await studentApiService.getAllStudentWithYear(req.query.MaNamHoc , +page , +limit ); // chuyển thành số để dùng sql
@@ -16,13 +16,21 @@ const readFunc = async (req, res) => {
     else if (req.query.page && req.query.limit) {
       let page = req.query.page;
       let limit = req.query.limit;
-
+      if (req.query.search) { //nếu có seach truyền vào
+        let search = req.query.search;
+        let data = await studentApiService.getAllStudentWithSearch(search, +page, +limit); // chuyển thành số để dùng sql
+        return res.status(200).json({
+          EM: data.EM,
+          EC: data.EC, //error code
+          DT: data.DT, //data
+        });
+      } else{
       let data = await studentApiService.getStudentWithPagination(+page, +limit); // chuyển thành số để dùng sql
       return res.status(200).json({
         EM: data.EM,
         EC: data.EC, //error code
         DT: data.DT, //data
-      });
+      })};
     } else {
       let data = await studentApiService.getAllStudent();
       return res.status(200).json({

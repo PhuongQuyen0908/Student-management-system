@@ -10,7 +10,8 @@ import ReactPaginate from 'react-paginate';
 import { useEffect } from 'react';
 import useStudentTable from '../../hooks/useStudentTable';
 import { FaSort } from 'react-icons/fa';
-
+//import mới 27/05/2025
+import { useState } from 'react';
 const StudentTable = () => {
     // const addModal = useModal();
     // const updateModal = useModal();
@@ -28,11 +29,14 @@ const StudentTable = () => {
         confirmDeleteStudent, //xác nhận xóa học sinh
         handleEditStudent,
         dataModal,
-        dataModalStudent } = useStudentTable();
+        dataModalStudent,
+        searchTerm,
+        handleSearchChange } = useStudentTable();
 
+   
     useEffect(() => {
         fetchStudents();
-    }, [currentPage]) // mỗi làn click 1 trang sẽ load lại database users
+    }, [currentPage, searchTerm]) // mỗi làn click 1 trang sẽ load lại database users
 
 
     return (
@@ -40,7 +44,7 @@ const StudentTable = () => {
         <div className="student-table-wrapper">
             <TableHeaderAction
                 onAddClick={addModal.open}
-                onSearchChange={(value) => console.log('Tìm kiếm:', value)}
+                onSearchChange={(e) => handleSearchChange(e)}
                 placeholder="Tìm kiếm học sinh..."
                 addLabel="Thêm học sinh"
             />
