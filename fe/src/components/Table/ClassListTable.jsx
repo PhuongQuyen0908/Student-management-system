@@ -2,7 +2,7 @@ import { FaEdit, FaTrash } from 'react-icons/fa';
 import useModal from '../../hooks/useModal';
 import TableHeaderAction from '../TableHeaderAction';
 import ModalStudentList from '../Modal/ModalStudentList';
-
+import '../../styles/Table.scss';
 const dummyStudentData = [
     {
         name: 'Nguyễn Văn A',
@@ -38,8 +38,8 @@ const ClassListTable = () => {
                 addLabel="Thêm học sinh"
             />
 
-            <div className="classlist-table-container">
-                <table className="student-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>STT</th>

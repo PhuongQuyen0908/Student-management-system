@@ -7,10 +7,18 @@ import SubjectGradesPage from '../pages/Admin/SubjectGradesPage';
 import StudentsListPage from '../pages/Admin/StudentsListPage';
 import SubjectReportPage from '../pages/Admin/SubjectReportPage';
 import SemesterReportPage from '../pages/Admin/SemesterReportPage';
+import RulesChangePage from '../pages/Admin/RulesChangePage';
+import HomePage from '../pages/Admin/HomePage';
+import InfoPage from '../pages/Admin/InfoPage';
 const AdminRoutes = {
     path: '/admin',
     element: <AdminPage />,
     children: [
+        {
+            path: 'home',
+            element: <HomePage />,
+        },
+
         {
             path: 'studentadmission',
             element: <StudentsPage />,
@@ -42,6 +50,14 @@ const AdminRoutes = {
         {
             path: 'semesterreport',
             element: <SemesterReportPage />,
+        },
+        {
+            path: 'ruleschange',
+            element: <RulesChangePage />,
+        },
+        {
+            path: 'info',
+            element: <InfoPage />,
         },
     ],
 };

@@ -2,23 +2,35 @@ import { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
-const ModalUpdateGrade = ({ show, handleClose }) => {
-    const [studentName, setStudentName] = useState('');
-    const [grade15min, setGrade15min] = useState('');
-    const [grade1period, setGrade1period] = useState('');
-    const [gradeFinal, setGradeFinal] = useState('');
+const ModalUpdateGrade = ({ show, handleClose, grade, onSave, testTypes }) => {
+    const [grades, setGrades] = useState({});
 
     useEffect(() => {
-        if (show) {
-            setStudentName('Nguyễn Văn A');
-            setGrade15min('8');
-            setGrade1period('7');
-            setGradeFinal('9');
+        if (show && grade) {
+            const initial = {};
+            testTypes.forEach(type => {
+                initial[type.TenLoaiKiemTra] =
+                    grade.diemTP?.find(d => d.LoaiKiemTra === type.TenLoaiKiemTra)?.Diem ?? '';
+            });
+            setGrades(initial);
         }
-    }, [show]);
+    }, [show, grade, testTypes]);
+
+    const handleChange = (type, value) => {
+        setGrades(prev => ({ ...prev, [type]: value }));
+    };
 
     const handleSave = () => {
-        // Gửi dữ liệu tại đây
+        const filledScores = testTypes
+            .filter(type => grades[type.TenLoaiKiemTra] !== "" && grades[type.TenLoaiKiemTra] !== null && grades[type.TenLoaiKiemTra] !== undefined)
+            .map(type => ({
+                LoaiKiemTra: type.TenLoaiKiemTra,
+                Diemmoi: grades[type.TenLoaiKiemTra]
+            }));
+        onSave({
+            HoTen: grade.name,
+            DiemTP: filledScores
+        });
         handleClose();
     };
 
@@ -33,37 +45,21 @@ const ModalUpdateGrade = ({ show, handleClose }) => {
                     <input
                         type="text"
                         className="form-control"
-                        value={studentName}
+                        value={grade?.name || ''}
                         disabled
                     />
                 </div>
-                <div className="mb-3">
-                    <label className="form-label">Điểm 15 phút</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        value={grade15min}
-                        onChange={(e) => setGrade15min(e.target.value)}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Điểm 1 tiết</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        value={grade1period}
-                        onChange={(e) => setGrade1period(e.target.value)}
-                    />
-                </div>
-                <div className="mb-3">
-                    <label className="form-label">Điểm học kỳ</label>
-                    <input
-                        type="number"
-                        className="form-control"
-                        value={gradeFinal}
-                        onChange={(e) => setGradeFinal(e.target.value)}
-                    />
-                </div>
+                {testTypes.map(type => (
+                    <div className="mb-3" key={type.MaLoaiKiemTra}>
+                        <label className="form-label">{type.TenLoaiKiemTra}</label>
+                        <input
+                            type="number"
+                            className="form-control"
+                            value={grades[type.TenLoaiKiemTra] || ""}
+                            onChange={e => handleChange(type.TenLoaiKiemTra, e.target.value)}
+                        />
+                    </div>
+                ))}
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>

@@ -1,4 +1,4 @@
-import '../../styles/Table/StudentTable.scss';
+import '../../styles/Table.scss';
 import TableHeaderAction from '../TableHeaderAction';
 import ModalAddStudent from '../Modal/ModalAddStudent';
 import { FaEdit, FaLock } from 'react-icons/fa';
@@ -9,6 +9,7 @@ import ModalDeleteStudent from "../Modal/ModalDeleteStudent";
 import ReactPaginate from 'react-paginate';
 import { useEffect } from 'react';
 import useStudentTable from '../../hooks/useStudentTable';
+import { FaSort } from 'react-icons/fa';
 
 const StudentTable = () => {
     // const addModal = useModal();
@@ -44,12 +45,17 @@ const StudentTable = () => {
                 addLabel="Thêm học sinh"
             />
 
-            <div className="student-table-container">
-                <table className="student-table">
+            <div className="table-container">
+                <table className="table">
                     <thead>
                         <tr>
                             <th>Mã học sinh</th>
-                            <th>Họ và tên</th>
+                            <th>
+                                Họ và tên
+                                <button className="sort-button" title="Sắp xếp">
+                                    <FaSort />
+                                </button>
+                            </th>
                             <th>Ngày sinh</th>
                             <th>Giới tính</th>
                             <th>Địa chỉ</th>
