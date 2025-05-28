@@ -1,5 +1,5 @@
 import db from "../models/index";
-const { Op, fn, col, where } = require('sequelize');
+const { Op, fn, col, where } = require("sequelize");
 
 db.danhsachlop.hasMany(db.ct_dsl, { foreignKey: "MaDanhSachLop" });
 db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: "MaHocSinh" });
@@ -18,7 +18,8 @@ const getAllStudentWithSearch = async (search, page, limit) => {
           [Op.or]: [
             { MaHocSinh: isNaN(Number(search)) ? -1 : Number(search) },
             { HoTen: { [Op.like]: `%${search}%` } },
-            where(fn("DATE_FORMAT", col("NgaySinh"), "%Y-%m-%d"), { //chuyển đổi NgàySinh sang định dạng YYYY-MM-DD để so sánh
+            where(fn("DATE_FORMAT", col("NgaySinh"), "%Y-%m-%d"), {
+              //chuyển đổi NgàySinh sang định dạng YYYY-MM-DD để so sánh
               [Op.like]: `%${search}%`,
             }),
             { GioiTinh: { [Op.like]: `%${search}%` } },
@@ -43,7 +44,6 @@ const getAllStudentWithSearch = async (search, page, limit) => {
       order: [["MaHocSinh", "DESC"]],
     });
 
-    
     let totalPages = Math.ceil(count / limit); // tính tổng số trang
     let data = {
       totalRow: count,
@@ -67,7 +67,7 @@ const getAllStudentWithSearch = async (search, page, limit) => {
 };
 
 //code chạy rồi không cần tối ưu lại
-const getAllStudentWithYear = async (yearId, page, limit , search ="") => {
+const getAllStudentWithYear = async (yearId, page, limit, search = "") => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
     const dslList = await db.danhsachlop.findAll({
@@ -123,16 +123,33 @@ const getAllStudentWithYear = async (yearId, page, limit , search ="") => {
       });
     });
 
-    // Thêm chức năng tìm kiếm ở đây
+    // // Thêm chức năng tìm kiếm ở đây
+    //hàm tìm kiếm không phân biệt chữ hoa thường và dấu
+    const removeAccents = (str) => {
+      return str
+        .normalize("NFD") // Tách chữ và dấu
+        .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+        .toLowerCase(); // Viết thường
+    };
+    //nếu có từ để search
     if (search && search.trim() !== "") {
-      const searchLower = search.toLowerCase();
-      students = students.filter((s) =>
-        s.TenLop?.toLowerCase().includes(searchLower) ||
-        s.HoTen?.toLowerCase().includes(searchLower) ||
-        s.MaHocSinh?.toString().includes(searchLower) ||
-        s.DiemTB_HK1?.toString().includes(searchLower) ||
-        s.DiemTB_HK2?.toString().includes(searchLower)
-      );
+      const searchNormalized = removeAccents(search);
+
+      students = students.filter((s) => {
+        const hoTen = removeAccents(s.HoTen || "");
+        const tenLop = removeAccents(s.TenLop || "");
+        const maHocSinh = removeAccents(s.MaHocSinh?.toString() || "");
+        const diemHK1 = removeAccents(s.DiemTB_HK1?.toString() || "");
+        const diemHK2 = removeAccents(s.DiemTB_HK2?.toString() || "");
+
+        return (
+          hoTen.includes(searchNormalized) ||
+          tenLop.includes(searchNormalized) ||
+          maHocSinh.includes(searchNormalized) ||
+          diemHK1.includes(searchNormalized) ||
+          diemHK2.includes(searchNormalized)
+        );
+      });
     }
 
     let totalPages = Math.ceil(students.length / limit); // tính tổng số trang

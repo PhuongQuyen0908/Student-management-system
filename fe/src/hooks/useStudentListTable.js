@@ -42,8 +42,9 @@ const useStudentListTable = (selectedYear) => {
         console.log("Search term:", value);
   };
 
+  
 
-    return { listStudents, handlePageClick, totalPages , fetchStudents, currentPage , searchTerm, handleSearchChange  };
+    return { listStudents, handlePageClick, totalPages , fetchStudents, currentPage , searchTerm, handleSearchChange };
 }
 
 export default useStudentListTable;
