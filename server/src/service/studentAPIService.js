@@ -1,4 +1,5 @@
 import db from "../models/index";
+const { Op, fn, col, where } = require("sequelize");
 
 db.danhsachlop.hasMany(db.ct_dsl, { foreignKey: "MaDanhSachLop" });
 db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: "MaHocSinh" });
@@ -8,10 +9,65 @@ db.danhsachlop.belongsTo(db.lop, { foreignKey: "MaLop" });
 db.ct_dsl.belongsTo(db.danhsachlop, { foreignKey: "MaDanhSachLop" });
 db.lop.hasMany(db.danhsachlop, { foreignKey: "MaLop" });
 
+const getAllStudentWithSearch = async (search, page, limit) => {
+  const offset = (page - 1) * limit;
+  try {
+    // Nếu search không rỗng thì tạo điều kiện tìm kiếm
+    const whereClause = search
+      ? {
+          [Op.or]: [
+            { MaHocSinh: isNaN(Number(search)) ? -1 : Number(search) },
+            { HoTen: { [Op.like]: `%${search}%` } },
+            where(fn("DATE_FORMAT", col("NgaySinh"), "%Y-%m-%d"), {
+              //chuyển đổi NgàySinh sang định dạng YYYY-MM-DD để so sánh
+              [Op.like]: `%${search}%`,
+            }),
+            { GioiTinh: { [Op.like]: `%${search}%` } },
+            { DiaChi: { [Op.like]: `%${search}%` } },
+            { Email: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
 
+    const { count, rows } = await db.hocsinh.findAndCountAll({
+      where: whereClause, // <-- Thêm dòng này để lọc theo search
+      offset: offset,
+      limit: limit,
+      attributes: [
+        "MaHocSinh",
+        "HoTen",
+        "Email",
+        "GioiTinh",
+        "DiaChi",
+        "NgaySinh",
+      ],
+      order: [["MaHocSinh", "DESC"]],
+    });
+
+    let totalPages = Math.ceil(count / limit); // tính tổng số trang
+    let data = {
+      totalRow: count,
+      totalPages: totalPages,
+      users: rows,
+    };
+
+    return {
+      EM: "fetch ok",
+      EC: 0,
+      DT: data,
+    };
+  } catch (e) {
+    console.log(e);
+    return {
+      EM: "Lỗi từ service",
+      EC: -1, // nên trả mã lỗi khác 0 để dễ biết có lỗi
+      DT: [],
+    };
+  }
+};
 
 //code chạy rồi không cần tối ưu lại
-const getAllStudentWithYear = async (yearId, page , limit) => {
+const getAllStudentWithYear = async (yearId, page, limit, search = "") => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
     const dslList = await db.danhsachlop.findAll({
@@ -38,7 +94,7 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
         },
         {
           model: db.lop,
-          attributes: ["MaLop" , "TenLop"],
+          attributes: ["MaLop", "TenLop"],
         },
       ],
     });
@@ -67,6 +123,35 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
       });
     });
 
+    // // Thêm chức năng tìm kiếm ở đây
+    //hàm tìm kiếm không phân biệt chữ hoa thường và dấu
+    const removeAccents = (str) => {
+      return str
+        .normalize("NFD") // Tách chữ và dấu
+        .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+        .toLowerCase(); // Viết thường
+    };
+    //nếu có từ để search
+    if (search && search.trim() !== "") {
+      const searchNormalized = removeAccents(search);
+
+      students = students.filter((s) => {
+        const hoTen = removeAccents(s.HoTen || "");
+        const tenLop = removeAccents(s.TenLop || "");
+        const maHocSinh = removeAccents(s.MaHocSinh?.toString() || "");
+        const diemHK1 = removeAccents(s.DiemTB_HK1?.toString() || "");
+        const diemHK2 = removeAccents(s.DiemTB_HK2?.toString() || "");
+
+        return (
+          hoTen.includes(searchNormalized) ||
+          tenLop.includes(searchNormalized) ||
+          maHocSinh.includes(searchNormalized) ||
+          diemHK1.includes(searchNormalized) ||
+          diemHK2.includes(searchNormalized)
+        );
+      });
+    }
+
     let totalPages = Math.ceil(students.length / limit); // tính tổng số trang
     students = students.slice(offset, offset + limit); // phân trang dữ liệu
 
@@ -74,7 +159,7 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
       totalRow: students.length,
       totalPages: totalPages,
       students: students,
-    }
+    };
     return {
       EM: "Lấy dữ liệu thành công",
       EC: 0,
@@ -92,9 +177,16 @@ const getAllStudentWithYear = async (yearId, page , limit) => {
 
 const getAllStudent = async () => {
   try {
-   let students = await db.hocsinh.findAll({
-      attributes: ["MaHocSinh", "HoTen", "Email", "GioiTinh", "DiaChi", "NgaySinh"]
-   });
+    let students = await db.hocsinh.findAll({
+      attributes: [
+        "MaHocSinh",
+        "HoTen",
+        "Email",
+        "GioiTinh",
+        "DiaChi",
+        "NgaySinh",
+      ],
+    });
     if (students) {
       return {
         EM: "Lấy dữ liệu thành công",
@@ -142,7 +234,6 @@ const getStudentWithPagination = async (page, limit) => {
       totalPages: totalPages,
       users: rows,
     };
-    console.log("check data ", data);
     return {
       EM: "fetch ok",
       EC: 0,
@@ -199,7 +290,7 @@ const updateStudent = async (data) => {
       return {
         EM: "Cập nhập học sinh thành công",
         EC: 0,
-        DT: '',
+        DT: "",
       };
     } else {
       return {
@@ -253,4 +344,5 @@ module.exports = {
   getAllStudent,
   getStudentWithPagination,
   getAllStudentWithYear,
+  getAllStudentWithSearch,
 };
