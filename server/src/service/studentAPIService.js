@@ -43,6 +43,7 @@ const getAllStudentWithSearch = async (search, page, limit) => {
       order: [["MaHocSinh", "DESC"]],
     });
 
+    
     let totalPages = Math.ceil(count / limit); // tính tổng số trang
     let data = {
       totalRow: count,
@@ -66,7 +67,7 @@ const getAllStudentWithSearch = async (search, page, limit) => {
 };
 
 //code chạy rồi không cần tối ưu lại
-const getAllStudentWithYear = async (yearId, page, limit) => {
+const getAllStudentWithYear = async (yearId, page, limit , search ="") => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
     const dslList = await db.danhsachlop.findAll({
@@ -121,6 +122,18 @@ const getAllStudentWithYear = async (yearId, page, limit) => {
         });
       });
     });
+
+    // Thêm chức năng tìm kiếm ở đây
+    if (search && search.trim() !== "") {
+      const searchLower = search.toLowerCase();
+      students = students.filter((s) =>
+        s.TenLop?.toLowerCase().includes(searchLower) ||
+        s.HoTen?.toLowerCase().includes(searchLower) ||
+        s.MaHocSinh?.toString().includes(searchLower) ||
+        s.DiemTB_HK1?.toString().includes(searchLower) ||
+        s.DiemTB_HK2?.toString().includes(searchLower)
+      );
+    }
 
     let totalPages = Math.ceil(students.length / limit); // tính tổng số trang
     students = students.slice(offset, offset + limit); // phân trang dữ liệu

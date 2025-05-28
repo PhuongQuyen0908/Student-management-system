@@ -3,7 +3,7 @@ import axios from "../setup/axios";
 const fetchStudentWithYear = (year , page ,limit , search ="") =>{
   return axios.get('api/student/read', {
     params: {
-      year,
+      MaNamHoc:year,
       search,
       page,
       limit,

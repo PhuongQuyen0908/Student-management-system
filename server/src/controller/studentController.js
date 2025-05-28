@@ -7,10 +7,12 @@ const readFunc = async (req, res) => {
       // tìm theo năm học
       let page = req.query.page;
       let limit = req.query.limit;
+      let search = req.query.search ? req.query.search : ""; //nếu có seach truyền vào
       let data = await studentApiService.getAllStudentWithYear(
         req.query.MaNamHoc,
         +page,
-        +limit
+        +limit,
+        search
       ); // chuyển thành số để dùng sql
       return res.status(200).json({
         EM: data.EM,
