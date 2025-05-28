@@ -24,6 +24,7 @@
     "react-paginate": "^8.1.0",
     "react-router-dom": "^7.4.1",
     "react-toastify": "^11.0.5",
+    "recharts": "^2.15.3",
     "sass": "1.48.0"
   },
   "devDependencies": {
