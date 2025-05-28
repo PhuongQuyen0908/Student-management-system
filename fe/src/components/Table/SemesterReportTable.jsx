@@ -1,5 +1,5 @@
 // src/components/Table/SemesterReportTable.jsx
-import React, { useState } from 'react';
+import React from 'react';
 import TableHeaderAction from '../TableHeaderAction';
 import '../../styles/Table/SemesterReportTable.scss';
 import {
@@ -9,20 +9,25 @@ import {
 
 const COLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff7f50', '#a569bd', '#5dade2', '#f1948a', '#45b39d'];
 
-const SemesterReportTable = ({ data, meta, onSort, sortConfig }) => {
-
+const SemesterReportTable = ({ data, meta, onSort, sortConfig, onSearchChange }) => {
   const renderSortableHeader = (label, key) => (
-    <th onClick={() => onSort(key)} style={{ cursor: 'pointer' }}>
+    <th onClick={() => onSort && onSort(key)} style={{ cursor: 'pointer' }}>
       {label}{' '}
-      {sortConfig?.sortBy === key &&
-        (sortConfig.order === 'asc' ? '▲' : '▼')}
+      {sortConfig?.sortBy === key && (sortConfig.order === 'asc' ? '▲' : '▼')}
     </th>
   );
-  const [searchTerm, setSearchTerm] = useState('');
 
-  const filteredData = data.filter((row) =>
-    row.lop.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const totalPassed = data.reduce((acc, curr) => acc + curr.soLuongDat, 0);
+
+  const percentPassedByClass = data.map(item => ({
+    lop: item.lop,
+    tiLe: item.siSo ? Number(((item.soLuongDat / item.siSo) * 100).toFixed(2)) : 0
+  }));
+
+  const percentOfPassedTotal = data.map(item => ({
+    lop: item.lop,
+    tiLe: totalPassed ? Number(((item.soLuongDat / totalPassed) * 100).toFixed(2)) : 0
+  }));
 
   return (
     <div className="semesterreport-table-wrapper">
@@ -31,8 +36,8 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig }) => {
       </h3>
 
       <TableHeaderAction
-        onSearchChange={setSearchTerm}
-        placeholder="Tìm kiếm lớp..."
+        onSearchChange={(value) => onSearchChange(value.toString())}
+        placeholder="Tìm kiếm lớp, sĩ số, số lượng đạt, tỷ lệ đạt..."
         hideAdd={true}
       />
 
@@ -48,8 +53,8 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig }) => {
             </tr>
           </thead>
           <tbody>
-            {filteredData.length > 0 ? (
-              filteredData.map((report, index) => (
+            {data.length > 0 ? (
+              data.map((report, index) => (
                 <tr key={index}>
                   <td>{report.stt || index + 1}</td>
                   <td>{report.lop}</td>
@@ -66,7 +71,7 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig }) => {
           </tbody>
         </table>
       </div>
-    {/* Biểu đồ cột */}
+
       <div className="semesterreport-chart-container">
         <h4>Biểu đồ cột: Số lượng đạt theo lớp</h4>
         <ResponsiveContainer width="100%" height={300}>
@@ -81,23 +86,26 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig }) => {
         </ResponsiveContainer>
       </div>
 
-      {/* Biểu đồ tròn */}
       <div className="semesterreport-piechart-container">
-        <h4>Biểu đồ tròn: Tỉ lệ số lượng đạt giữa các lớp</h4>
+        <h4>Biểu đồ tròn: Tỉ lệ đạt trên sĩ số theo lớp (%)</h4>
         <ResponsiveContainer width="100%" height={350}>
           <PieChart>
-            <Pie
-              data={data}
-              dataKey="soLuongDat"
-              nameKey="lop"
-              cx="50%"
-              cy="50%"
-              outerRadius={120}
-              fill="#82ca9d"
-              label
-            >
-              {data.map((entry, index) => (
+            <Pie data={percentPassedByClass} dataKey="tiLe" nameKey="lop" cx="50%" cy="50%" outerRadius={120} label>
+              {percentPassedByClass.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+              ))}
+            </Pie>
+            <Tooltip />
+            <Legend />
+          </PieChart>
+        </ResponsiveContainer>
+
+        <h4>Biểu đồ tròn: Tỉ lệ số lượng đạt so với tổng đạt (%)</h4>
+        <ResponsiveContainer width="100%" height={350}>
+          <PieChart>
+            <Pie data={percentOfPassedTotal} dataKey="tiLe" nameKey="lop" cx="50%" cy="50%" outerRadius={120} label>
+              {percentOfPassedTotal.map((entry, index) => (
+                <Cell key={`cell-total-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
             <Tooltip />
