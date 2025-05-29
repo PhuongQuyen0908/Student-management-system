@@ -1,7 +1,7 @@
 // src/components/Table/SemesterReportTable.jsx
 import React from 'react';
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SemesterReportTable.scss';
+//import '../../styles/Table/SemesterReportTable.scss';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell

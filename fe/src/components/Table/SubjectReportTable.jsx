@@ -1,5 +1,5 @@
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SubjectReportTable.scss';
+import '../../styles/Table.scss';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell

@@ -1,12 +1,14 @@
 import axios from "../setup/axios";
 
-const fetchStudentWithYear = (year , page ,limit , search ="") =>{
+const fetchStudentWithYear = (year , page ,limit , search ="",sortField,sortOrder) =>{
   return axios.get('api/student/read', {
     params: {
       MaNamHoc:year,
       search,
       page,
       limit,
+      sortField,
+      sortOrder,
     },
   });
 } 
@@ -27,12 +29,14 @@ const createStudent = (data) => {
 // };
 
 //sửa lại đoạn fetchAllStudent để có thể search 
-const fetchAllStudent = (page, limit, search = "") => {
+const fetchAllStudent = (page, limit, search = "" ,sortField, sortOrder ) => {
   return axios.get('api/student/read', {
     params: {
       search,
       page,
       limit,
+      sortField,
+      sortOrder,
     },
   });
 };
