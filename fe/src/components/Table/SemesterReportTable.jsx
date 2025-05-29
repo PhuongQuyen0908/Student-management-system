@@ -36,7 +36,7 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig, onSearchChange })
       </h3>
 
       <TableHeaderAction
-        onSearchChange={(value) => onSearchChange(value.toString())}
+        onSearchChange={(e) => onSearchChange(e.target.value)}
         placeholder="Tìm kiếm lớp, sĩ số, số lượng đạt, tỷ lệ đạt..."
         hideAdd={true}
       />

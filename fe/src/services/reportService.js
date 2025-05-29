@@ -23,8 +23,8 @@ const reportService = {
     axios.post('/api/report/edit-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
 
   // 6. Tính báo cáo tổng kết học kỳ (BM5.2)
-  getSemesterReport: ({ tenHocKy, tenNamHoc }) =>
-    axios.post('/api/report/semester-report', { tenHocKy, tenNamHoc }),
+  getSemesterReport: ({ tenHocKy, tenNamHoc, searchTerm}) =>
+    axios.post('/api/report/semester-report', { tenHocKy, tenNamHoc, searchTerm, }),
 
   // 7. Tính báo cáo tổng kết môn học (BM5.1)
   getSubjectReport: ({ tenMonHoc, tenHocKy, tenNamHoc }) =>
