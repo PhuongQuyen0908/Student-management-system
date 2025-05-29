@@ -1,7 +1,6 @@
-// src/components/Table/SemesterReportTable.jsx
 import React from 'react';
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SemesterReportTable.scss';
+import '../../styles/Table.scss';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell
@@ -41,8 +40,8 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig, onSearchChange })
         hideAdd={true}
       />
 
-      <div className="semesterreport-table-container">
-        <table className="semesterreport-table">
+      <div className="table-container">
+        <table className="table">
           <thead>
             <tr>
               <th>STT</th>
