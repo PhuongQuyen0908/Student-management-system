@@ -3,6 +3,7 @@ var _bctk_hocky = require("./bctk_hocky");
 var _bctk_monhoc = require("./bctk_monhoc");
 var _bdchitietmonhoc = require("./bdchitietmonhoc");
 var _bdmonhoc = require("./bdmonhoc");
+var _chucnang = require("./chucnang");
 var _ct_dsl = require("./ct_dsl");
 var _ctbctk_mon = require("./ctbctk_mon");
 var _danhsachlop = require("./danhsachlop");
@@ -13,6 +14,9 @@ var _loaikiemtra = require("./loaikiemtra");
 var _lop = require("./lop");
 var _monhoc = require("./monhoc");
 var _namhoc = require("./namhoc");
+var _nguoidung = require("./nguoidung");
+var _nhomnguoidung = require("./nhomnguoidung");
+var _phanquyen = require("./phanquyen");
 var _quatrinhhoc = require("./quatrinhhoc");
 var _thamso = require("./thamso");
 
@@ -21,6 +25,7 @@ function initModels(sequelize) {
   var bctk_monhoc = _bctk_monhoc(sequelize, DataTypes);
   var bdchitietmonhoc = _bdchitietmonhoc(sequelize, DataTypes);
   var bdmonhoc = _bdmonhoc(sequelize, DataTypes);
+  var chucnang = _chucnang(sequelize, DataTypes);
   var ct_dsl = _ct_dsl(sequelize, DataTypes);
   var ctbctk_mon = _ctbctk_mon(sequelize, DataTypes);
   var danhsachlop = _danhsachlop(sequelize, DataTypes);
@@ -31,6 +36,9 @@ function initModels(sequelize) {
   var lop = _lop(sequelize, DataTypes);
   var monhoc = _monhoc(sequelize, DataTypes);
   var namhoc = _namhoc(sequelize, DataTypes);
+  var nguoidung = _nguoidung(sequelize, DataTypes);
+  var nhomnguoidung = _nhomnguoidung(sequelize, DataTypes);
+  var phanquyen = _phanquyen(sequelize, DataTypes);
   var quatrinhhoc = _quatrinhhoc(sequelize, DataTypes);
   var thamso = _thamso(sequelize, DataTypes);
 
@@ -74,6 +82,7 @@ function initModels(sequelize) {
     bctk_monhoc,
     bdchitietmonhoc,
     bdmonhoc,
+    chucnang,
     ct_dsl,
     ctbctk_mon,
     danhsachlop,
@@ -84,6 +93,9 @@ function initModels(sequelize) {
     lop,
     monhoc,
     namhoc,
+    nguoidung,
+    nhomnguoidung,
+    phanquyen,
     quatrinhhoc,
     thamso,
   };

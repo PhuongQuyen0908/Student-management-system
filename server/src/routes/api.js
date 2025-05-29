@@ -13,6 +13,11 @@ import yearController from "../controller/yearController";
 import getGradesController from '../controller/getGradesController.js';
 import reportController from '../controller/reportController.js';
 
+//mới
+import userController from "../controller/userController.js";
+import {checkUserJWT , checkUserPermission} from '../middleware/JWTAction.js'
+
+
 const router = express.Router();
 
 /**
@@ -23,8 +28,14 @@ const router = express.Router();
 const initApiRoutes = (app) => {
   //rest api CRUD
   //GET -- read , POST -- create , PUT - update , Delete - Delete
+
+  //middleware
+  router.all('*' , checkUserJWT,checkUserPermission)
+
+  //phân quyền
   router.get("/test-api", apiController.testApi);
-  // router.post("/login", apiController.handleLogin);
+  router.post("/login", apiController.handleLogin); // login user
+  router.get("/account", userController.getUserAccount); // get user account
 
   //CRUD student
   router.get("/student/read", studentController.readFunc);

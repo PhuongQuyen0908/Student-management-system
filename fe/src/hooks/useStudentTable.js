@@ -30,7 +30,6 @@ const fetchStudents = async () => {
     setTotalPages(response.data.DT.totalPages);
     setListStudents(response.data.DT.users); //set danh sách học sinh
   }
-  console.log("check response", response.data);
 };
 
 const handlePageClick = async (event) => {

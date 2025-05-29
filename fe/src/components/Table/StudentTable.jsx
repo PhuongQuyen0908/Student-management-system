@@ -14,7 +14,7 @@ const StudentTable = () => {
     // const addModal = useModal();
     // const updateModal = useModal();
     // const deleteModal = useModal();
-    const { 
+    const {
         addModal,
         updateModal,
         deleteModal,
@@ -27,13 +27,19 @@ const StudentTable = () => {
         confirmDeleteStudent, //xác nhận xóa học sinh
         handleEditStudent,
         dataModal,
-        dataModalStudent} = useStudentTable();
+        dataModalStudent } = useStudentTable();
+
+
+    useEffect(() => {
+        fetchStudents();
+    }, []) 
+
 
     useEffect(() => {
         fetchStudents();
     }, [currentPage]) // mỗi làn click 1 trang sẽ load lại database users
 
-    
+
     return (
 
         <div className="student-table-wrapper">
@@ -71,10 +77,10 @@ const StudentTable = () => {
                                             <td>{student.Email}</td>
                                             <td>
                                                 <div className="action-buttons">
-                                                    <button className="icon-button edit" onClick={()=>handleEditStudent(student)} title="Chỉnh sửa">
+                                                    <button className="icon-button edit" onClick={() => handleEditStudent(student)} title="Chỉnh sửa">
                                                         <FaEdit />
                                                     </button>
-                                                    <button className="icon-button lock" onClick={()=>handleDeleteStudent(student)} title="Khóa">
+                                                    <button className="icon-button lock" onClick={() => handleDeleteStudent(student)} title="Khóa">
                                                         <FaLock />
                                                     </button>
                                                 </div>

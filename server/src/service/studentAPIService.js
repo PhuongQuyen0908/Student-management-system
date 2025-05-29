@@ -1,9 +1,51 @@
+import { where } from "sequelize";
 import db from "../models/index";
+const { Op } = require("sequelize"); // Nhớ import Op
+
+const getAgeLimit = async () => {
+  try {
+    let age = await db.thamso.findAll({
+      where: {
+        TenThamSo: {
+          [Op.or]: ["TuoiHocSinhToiDa", "TuoiHocSinhToiThieu"],
+        },
+      },
+      attributes: ["TenThamSo", "GiaTri"],
+    });
+    if (age && age.length > 0) {
+      return {
+        EM: "Lấy dữ liệu thành công",
+        EC: 0,
+        DT: age,
+      };
+    } else {
+      return {
+        EM: "Lấy dữ liệu thất bại",
+        EC: -1,
+        DT: [],
+      };
+    }
+  } catch (e) {
+    console.log(e);
+    return {
+      EM: "Lỗi từ service",
+      EC: -1,
+      DT: [],
+    };
+  }
+};
 
 const getAllStudent = async () => {
   try {
     let students = await db.hocsinh.findAll({
-      attributes: ["MaHocSinh", "HoTen", "Email", "GioiTinh", "DiaChi", "NgaySinh"]
+      attributes: [
+        "MaHocSinh",
+        "HoTen",
+        "Email",
+        "GioiTinh",
+        "DiaChi",
+        "NgaySinh",
+      ],
     });
     if (students) {
       return {
@@ -35,7 +77,14 @@ const getStudentWithPagination = async (page, limit) => {
     const { count, rows } = await db.hocsinh.findAndCountAll({
       offset: offset,
       limit: limit,
-      attributes: ["MaHocSinh", "HoTen", "Email", "GioiTinh", "DiaChi", "NgaySinh"],
+      attributes: [
+        "MaHocSinh",
+        "HoTen",
+        "Email",
+        "GioiTinh",
+        "DiaChi",
+        "NgaySinh",
+      ],
       order: [["MaHocSinh", "DESC"]],
     });
 
@@ -60,7 +109,6 @@ const getStudentWithPagination = async (page, limit) => {
     };
   }
 };
-
 
 const createNewStudent = async (rawStudentData) => {
   try {
@@ -99,11 +147,11 @@ const updateStudent = async (data) => {
         Email: data.studentEmail,
         NgaySinh: data.studentBirth,
         GioiTinh: data.studentGender,
-      })
+      });
       return {
         EM: "Cập nhập học sinh thành công",
         EC: 0,
-        DT: '',
+        DT: "",
       };
     } else {
       return {
@@ -156,4 +204,5 @@ module.exports = {
   deleteStudent,
   getAllStudent,
   getStudentWithPagination,
+  getAgeLimit,
 };

@@ -4,9 +4,14 @@ import StudentsPage from '../pages/Admin/StudentsPage'
 import SubjectsPage from '../pages/Admin/SubjectsPage'
 import ClassesListPage from '../pages/Admin/ClassesListPage';
 import SubjectGradesPage from '../pages/Admin/SubjectGradesPage';
+//import mới
+import PrivateRoutes from './PrivateRoutes';
+
 const AdminRoutes = {
     path: '/admin',
-    element: <AdminPage />,
+    element: (
+    <PrivateRoutes element={<AdminPage />} />
+    ),
     children: [
         {
             path: 'students',
