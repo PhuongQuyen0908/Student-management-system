@@ -646,6 +646,22 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
   }
 };
 
+const filterBySearchTerm = async (ketQua, searchTerm) => {
+  if (!searchTerm) return ketQua;
+
+  const lowerTerm = searchTerm.toLowerCase();
+
+  return ketQua.filter(row => {
+    return (
+      row.lop?.toLowerCase().includes(lowerTerm) ||
+      row.siSo?.toString().includes(lowerTerm) ||
+      row.soLuongDat?.toString().includes(lowerTerm) ||
+      row.tiLe?.toString().includes(lowerTerm)
+    );
+  });
+};
+
+
 module.exports = { 
   getOptions,
   getSubjectSummary,
@@ -654,4 +670,5 @@ module.exports = {
   editScore,
   tinhBaoCaoTongKetHocKy,
   tinhBaoCaoTongKetMon,
+  filterBySearchTerm,
 };

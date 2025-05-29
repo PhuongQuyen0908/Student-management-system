@@ -9,22 +9,33 @@ const SemesterReportFilter = ({ onSubmit }) => {
   const [selectedSemester, setSelectedSemester] = useState('');
 
   useEffect(() => {
-    reportService.getOptions()
-      .then((res) => {
-        const { namHoc, hocKy } = res.data.DT;
+  reportService.getOptions()
+    .then((res) => {
+      const { namHoc, hocKy } = res.data.DT;
 
-        setYearOptions(namHoc);
-        setSemesterOptions(hocKy);
+      setYearOptions(namHoc);
+      setSemesterOptions(hocKy);
 
-        setSelectedYear(namHoc[0]?.value || '');
-        setSelectedSemester(hocKy[0]?.value || '');
-      })
-      .catch((err) => {
-        console.error(err);
-        setYearOptions([]);
-        setSemesterOptions([]);
-      });
-  }, []);
+      const defaultYear = namHoc[0]?.value || '';
+      const defaultSemester = hocKy[0]?.value || '';
+
+      setSelectedYear(defaultYear);
+      setSelectedSemester(defaultSemester);
+
+      // 👇 Gọi báo cáo ban đầu luôn
+      if (defaultYear && defaultSemester) {
+        onSubmit({
+          tenHocKy: defaultSemester,
+          tenNamHoc: defaultYear,
+        });
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      setYearOptions([]);
+      setSemesterOptions([]);
+    });
+}, []);
 
   const handleClick = () => {
     onSubmit({
