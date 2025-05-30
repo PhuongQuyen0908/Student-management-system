@@ -9,7 +9,13 @@ db.danhsachlop.belongsTo(db.lop, { foreignKey: "MaLop" });
 db.ct_dsl.belongsTo(db.danhsachlop, { foreignKey: "MaDanhSachLop" });
 db.lop.hasMany(db.danhsachlop, { foreignKey: "MaLop" });
 
-const getAllStudentWithSearch = async (search, page, limit) => {
+const getAllStudentWithSearch = async (
+  search,
+  page,
+  limit,
+  sortField,
+  sortOrder
+) => {
   const offset = (page - 1) * limit;
   try {
     // Nếu search không rỗng thì tạo điều kiện tìm kiếm
@@ -41,7 +47,7 @@ const getAllStudentWithSearch = async (search, page, limit) => {
         "DiaChi",
         "NgaySinh",
       ],
-      order: [["MaHocSinh", "DESC"]],
+      order: [[sortField, sortOrder.toUpperCase()]],
     });
 
     let totalPages = Math.ceil(count / limit); // tính tổng số trang
@@ -67,7 +73,14 @@ const getAllStudentWithSearch = async (search, page, limit) => {
 };
 
 //code chạy rồi không cần tối ưu lại
-const getAllStudentWithYear = async (yearId, page, limit, search = "") => {
+const getAllStudentWithYear = async (
+  yearId,
+  page,
+  limit,
+  search = "",
+  sortField,
+  sortOrder
+) => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
     const dslList = await db.danhsachlop.findAll({
@@ -122,6 +135,25 @@ const getAllStudentWithYear = async (yearId, page, limit, search = "") => {
         });
       });
     });
+
+    // // Thêm chức năng sort
+    if (sortField && sortOrder) {
+      students.sort((a, b) => {
+        const aField = a[sortField];
+        const bField = b[sortField];
+
+        if (aField === null || aField === undefined) return 1;
+        if (bField === null || bField === undefined) return -1;
+
+        if (typeof aField === "string" && typeof bField === "string") {
+          return sortOrder === "asc"
+            ? aField.localeCompare(bField)
+            : bField.localeCompare(aField);
+        }
+
+        return sortOrder === "asc" ? aField - bField : bField - aField;
+      });
+    }
 
     // // Thêm chức năng tìm kiếm ở đây
     //hàm tìm kiếm không phân biệt chữ hoa thường và dấu
@@ -210,7 +242,7 @@ const getAllStudent = async () => {
   }
 };
 
-const getStudentWithPagination = async (page, limit) => {
+const getStudentWithPagination = async (page, limit, sortField, sortOrder) => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
 
@@ -225,7 +257,7 @@ const getStudentWithPagination = async (page, limit) => {
         "DiaChi",
         "NgaySinh",
       ],
-      order: [["MaHocSinh", "DESC"]],
+      order: [[sortField, sortOrder.toUpperCase()]],
     });
 
     let totalPages = Math.ceil(count / limit); // tính tổng số trang

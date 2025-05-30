@@ -3,16 +3,21 @@ import studentApiService from "../service/studentAPIService";
 
 const readFunc = async (req, res) => {
   try {
-    if (req.query.MaNamHoc && req.query.page && req.query.limit) {
+    if (req.query.MaNamHoc && req.query.page && req.query.limit) { // nếu có năm học và phân trang
       // tìm theo năm học
       let page = req.query.page;
       let limit = req.query.limit;
       let search = req.query.search ? req.query.search : ""; //nếu có seach truyền vào
+      //sort 
+      let sortField = req.query.sortField;
+      let sortOrder = req.query.sortOrder 
       let data = await studentApiService.getAllStudentWithYear(
         req.query.MaNamHoc,
         +page,
         +limit,
-        search
+        search,
+        sortField,
+        sortOrder
       ); // chuyển thành số để dùng sql
       return res.status(200).json({
         EM: data.EM,
@@ -22,13 +27,17 @@ const readFunc = async (req, res) => {
     } else if (req.query.page && req.query.limit) {
       let page = req.query.page;
       let limit = req.query.limit;
+      let sortField = req.query.sortField;
+      let sortOrder = req.query.sortOrder;
       if (req.query.search) {
         //nếu có seach truyền vào
         let search = req.query.search;
         let data = await studentApiService.getAllStudentWithSearch(
           search,
           +page,
-          +limit
+          +limit,
+          sortField,
+          sortOrder
         ); // chuyển thành số để dùng sql
         return res.status(200).json({
           EM: data.EM,
@@ -38,7 +47,9 @@ const readFunc = async (req, res) => {
       } else {
         let data = await studentApiService.getStudentWithPagination(
           +page,
-          +limit
+          +limit,
+          sortField,
+          sortOrder
         ); // chuyển thành số để dùng sql
         return res.status(200).json({
           EM: data.EM,

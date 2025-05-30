@@ -3,6 +3,7 @@ import ReactPaginate from "react-paginate";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import useModal from "./useModal";
+import { set } from "lodash";
 
 const useStudentTable = () => {
   const addModal = useModal();
@@ -25,13 +26,18 @@ const useStudentTable = () => {
   //search
   const [searchTerm, setSearchTerm] = useState("");
 
+  //sort
+  const [sortField, setSortField] = useState("MaHocSinh");
+  const [sortOrder, setSortOrder] = useState("asc");
+
+  
+
   const fetchStudents = async () => {
-    let response = await fetchAllStudent(currentPage, currentLimit,searchTerm);
+    let response = await fetchAllStudent(currentPage, currentLimit,searchTerm , sortField, sortOrder);
     if (response && response.data && response.data.EC === 0) {
       setTotalPages(response.data.DT.totalPages);
       setListStudents(response.data.DT.users); //set danh sách học sinh
     }
-    console.log("check response", response.data);
   };
 
   const handlePageClick = async (event) => {
@@ -67,6 +73,17 @@ const useStudentTable = () => {
     console.log("Search term:", value);
   };
 
+
+  const handleSort = (field) => {
+  if (field === sortField) {
+    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+  } else {
+    setSortField(field);
+    setSortOrder("asc");
+  }
+  setCurrentPage(1); // Reset to first page on sort change
+};
+
   return {
     addModal,
     updateModal,
@@ -82,7 +99,10 @@ const useStudentTable = () => {
     dataModalStudent,
     dataModal,
     searchTerm,
-    handleSearchChange 
+    handleSearchChange ,
+    handleSort,
+    sortField,
+    sortOrder,
   };
 };
 export default useStudentTable;

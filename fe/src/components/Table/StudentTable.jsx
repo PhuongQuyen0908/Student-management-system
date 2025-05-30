@@ -12,6 +12,7 @@ import useStudentTable from '../../hooks/useStudentTable';
 import { FaSort } from 'react-icons/fa';
 //import mới 27/05/2025
 import { useState } from 'react';
+import { use } from 'react';
 const StudentTable = () => {
     // const addModal = useModal();
     // const updateModal = useModal();
@@ -31,12 +32,17 @@ const StudentTable = () => {
         dataModal,
         dataModalStudent,
         searchTerm,
-        handleSearchChange } = useStudentTable();
+        handleSearchChange,
+        handleSort, // hàm để xử lý sự kiện sắp xếp
+        sortField, // trường đang sắp xếp
+        sortOrder, // thứ tự sắp xếp
+    } = useStudentTable();
 
 
     useEffect(() => {
         fetchStudents();
-    }, [currentPage, searchTerm]) // mỗi làn click 1 trang sẽ load lại database users
+    }, [currentPage, searchTerm, sortField, sortOrder]) // mỗi làn click 1 trang sẽ load lại database users
+                                                        // mỗi lần click nút sort  sẽ load lại database users    
 
     // highlightText function để làm nổi bật từ khóa tìm kiếm trong bảng
     // Hàm remove dấu tiếng Việt
@@ -101,17 +107,45 @@ const StudentTable = () => {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>Mã học sinh</th>
-                            <th>
-                                Họ và tên
-                                <button className="sort-button" title="Sắp xếp">
+                            <th>Mã học sinh
+                                <button className="sort-button" title="Sắp xếp" value="MaHocSinh" //nút sort
+                                    onClick={() => handleSort('MaHocSinh')}
+                                >
                                     <FaSort />
                                 </button>
                             </th>
-                            <th>Ngày sinh</th>
-                            <th>Giới tính</th>
-                            <th>Địa chỉ</th>
-                            <th>Email</th>
+                            <th>
+                                Họ và tên
+                                <button className="sort-button" title="Sắp xếp" value="HoTen" //nút sort
+                                    onClick={() => handleSort('HoTen')}
+                                >
+                                    <FaSort />
+                                </button>
+                            </th>
+                            <th>Ngày sinh
+                                <button className="sort-button" title="Sắp xếp" value="NgaySinh"
+                                    onClick={() => handleSort('NgaySinh')}
+                                >
+                                    <FaSort />
+                                </button>
+                            </th>
+                            <th>Giới tính
+                                <button className="sort-button" title="Sắp xếp" value="GioiTinh"
+                                    onClick={() => handleSort('GioiTinh')}
+                                >
+                                    <FaSort />
+                                </button>
+                            </th>
+                            <th>
+                                Địa chỉ
+                            </th>
+                            <th>Email
+                                <button className="sort-button" title="Sắp xếp" value="Email"
+                                    onClick={() => handleSort('Email')}
+                                >
+                                    <FaSort />
+                                </button>
+                            </th>
                             <th></th>
                         </tr>
                     </thead>
@@ -169,6 +203,7 @@ const StudentTable = () => {
                         containerClassName="pagination"
                         activeClassName="active"
                         renderOnZeroPageCount={null}
+                        forcePage={currentPage - 1} // reset trang hiện tại khi sort 
                     />
                 </div>
             }
