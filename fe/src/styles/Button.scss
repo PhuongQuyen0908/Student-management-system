@@ -1,0 +1,26 @@
+.report-button {
+  background-color: #e0e0e0; 
+  color: #1f2937; 
+  padding: 0.5rem 1.25rem;
+  border: none;
+  border-radius: 1rem; 
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 2px 2px 0 #6b7280;
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background-color: #d1d5db; 
+    box-shadow: 2px 2px 0 #4b5563; 
+  }
+
+  &:active {
+    box-shadow: inset 2px 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); 
+  }
+}

@@ -120,13 +120,13 @@ const Taskbar = () => {
               to="/admin/subjectreport"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
-              Lập báo cáo tổng kết môn
+              Báo cáo tổng kết môn
             </NavLink>
             <NavLink
               to="/admin/semesterreport"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
-              Lập báo cáo tổng kết học kỳ
+              Báo cáo tổng kết học kỳ
             </NavLink>
           </div>
         )}

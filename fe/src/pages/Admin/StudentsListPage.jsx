@@ -32,7 +32,7 @@ const StudentsListPage = () => {
                     </select>
                 </div>
             </div>
-            <StudentListTable selectedYear ={selectedYear}/> 
+            <StudentListTable selectedYear={selectedYear} />
             {/* truyền id năm học vào đây */}
         </div>
     );

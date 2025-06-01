@@ -30,9 +30,9 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig, onSearchChange })
 
   return (
     <div className="semesterreport-table-wrapper">
-      <h3 className="semesterreport-title">
+      <h2 className="semesterreport-title">
         Báo cáo học kỳ: {meta.hocKy} - Năm học: {meta.namHoc} (Điểm đạt: {meta.diemDat})
-      </h3>
+      </h2>
 
       <TableHeaderAction
         onSearchChange={(e) => onSearchChange(e.target.value)}
