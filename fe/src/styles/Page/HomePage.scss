@@ -1,8 +1,11 @@
 .home-page-container {
-  margin-left: 280px;
-  padding: 0; 
-  background-color: white;
-  height: calc(100vh - 60px); 
+    margin-left: 235px; 
+    margin-top: 36px; 
+    margin-right: -22px;
+    margin-bottom: -22px;
+    padding: 20px;
+    background-color: #f1f5f9;
+    min-height: calc(100vh - 60px); 
   display: flex;
   justify-content: center;
   align-items: center;

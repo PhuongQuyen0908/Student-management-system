@@ -67,22 +67,23 @@ const SubjectReportPage = () => {
 
   return (
     <div className="subjectreport-page-container">
-      <div className="subjectreport-table-wrapper">
+      <div className='subjectreport-header'>
+        <h2 className="studentslist-title">Báo cáo tổng kết môn</h2>
         <SubjectReportFilters onSubmit={handleFilterSubmit} />
-
-        <TableHeaderAction
-          onSearchChange={(value) => console.log('Tìm kiếm:', value)}
-          placeholder="Tìm kiếm lớp..."
-          hideAdd={true}
-        />
-
-        <SubjectReportTable
-          data={reportData}
-          meta={reportMeta}
-          onSort={handleSort}
-          sortConfig={sortConfig}
-        />
       </div>
+
+      <TableHeaderAction
+        onSearchChange={(value) => console.log('Tìm kiếm:', value)}
+        placeholder="Tìm kiếm lớp..."
+        hideAdd={true}
+      />
+
+      <SubjectReportTable
+        data={reportData}
+        meta={reportMeta}
+        onSort={handleSort}
+        sortConfig={sortConfig}
+      />
     </div>
   );
 };
