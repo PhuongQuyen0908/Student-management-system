@@ -1,9 +1,8 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import '../../styles/Page/SemesterReportPage.scss';
 import SemesterReportTable from '../../components/Table/SemesterReportTable';
 import SemesterReportFilter from '../../components/Modal/SemesterReportFilter';
 import reportService from '../../services/reportService';
-import { useEffect } from 'react';
 
 const SemesterReportPage = () => {
   const [reportData, setReportData] = useState([]);
@@ -16,34 +15,24 @@ const SemesterReportPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleFilterSubmit = async (filters) => {
-  try {
-    const res = await reportService.getSemesterReport({
-      ...filters,
-      searchTerm: searchTerm.trim(),  // ✅ Gửi kèm searchTerm
-    });
+    try {
+      const res = await reportService.getSemesterReport({
+        ...filters,
+        searchTerm: searchTerm.trim(),
+      });
 
-    if (res.status === 200 && res.data.EC === 0 && res.data.DT.EC === 0) {
-      const { ketQua, hocKy, namHoc, diemDat } = res.data.DT.DT;
-      setReportMeta({ hocKy, namHoc, diemDat });
-      setReportData(ketQua || []);
-    } else {
-      alert('Không thể lấy báo cáo học kỳ.');
+      if (res.status === 200 && res.data.EC === 0 && res.data.DT.EC === 0) {
+        const { ketQua, hocKy, namHoc, diemDat } = res.data.DT.DT;
+        setReportMeta({ hocKy, namHoc, diemDat });
+        setReportData(ketQua || []);
+      } else {
+        alert('Không thể lấy báo cáo học kỳ.');
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Lỗi kết nối đến server.');
     }
-  } catch (error) {
-    console.error(error);
-    alert('Lỗi kết nối đến server.');
-  }
-};
-
-useEffect(() => {
-  if (reportMeta.hocKy && reportMeta.namHoc) {
-    handleFilterSubmit({
-      tenHocKy: reportMeta.hocKy,
-      tenNamHoc: reportMeta.namHoc,
-    });
-  }
-}, [searchTerm]);
-
+  };
 
   const handleSort = (key) => {
     const order =
@@ -64,9 +53,6 @@ useEffect(() => {
       })
     );
   };
-
-  console.log('Search:', searchTerm);
-  console.log('Data:', reportData);
 
   return (
     <div className="semesterreport-page-container">

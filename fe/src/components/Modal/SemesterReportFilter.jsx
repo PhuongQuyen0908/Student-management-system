@@ -22,13 +22,6 @@ const SemesterReportFilter = ({ onSubmit }) => {
       setSelectedYear(defaultYear);
       setSelectedSemester(defaultSemester);
 
-      // 👇 Gọi báo cáo ban đầu luôn
-      if (defaultYear && defaultSemester) {
-        onSubmit({
-          tenHocKy: defaultSemester,
-          tenNamHoc: defaultYear,
-        });
-      }
     })
     .catch((err) => {
       console.error(err);
