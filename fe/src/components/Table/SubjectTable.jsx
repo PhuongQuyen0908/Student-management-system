@@ -1,113 +1,232 @@
-import '../../styles/Table.scss';
-import { FaEdit, FaTrash } from 'react-icons/fa';
-import useModal from '../../hooks/useModal';
-import ModalAddSubject from '../Modal/ModalAddSubject';
-import ModalUpdateSubject from '../Modal/ModalUpdateSubject';
-import ModalDeleteSubject from '../Modal/ModalDeleteSubject';
-import TableHeaderAction from '../TableHeaderAction';
-import ReactPaginate from 'react-paginate';
-import { useEffect } from 'react';
-import useSubjectTable from '../../hooks/useSubjectTable';
+/* eslint-disable no-unused-vars */
+import "../../styles/Table.scss";
+import { FaEdit, FaTrash } from "react-icons/fa";
+import ModalAddSubject from "../Modal/ModalAddSubject";
+import ModalUpdateSubject from "../Modal/ModalUpdateSubject";
+import ModalDeleteSubject from "../Modal/ModalDeleteSubject";
+import TableHeaderAction from "../TableHeaderAction";
+import ReactPaginate from "react-paginate";
+import useSubjectTable from "../../hooks/useSubjectTable";
+import { useEffect } from "react";
+import "../../styles/Table.scss";
+
+//ngày 2/06/2025
+import { FaSort } from "react-icons/fa";
 
 const SubjectTable = () => {
-    const {
-        addModal,
-        updateModal,
-        deleteModal,
-        listSubjects,
-        fetchSubjects,
-        handleDeleteSubject,
-        confirmDeleteSubject,
-        handleEditSubject,
-        dataModalSubject,
-        dataModal,
-    } = useSubjectTable();
+  const {
+    addModal,
+    updateModal,
+    deleteModal,
+    listSubjects, // Danh sách môn học
+    fetchSubjects, // Hàm lấy danh sách môn học
+    handleDeleteSubject,
+    confirmDeleteSubject,
+    handleEditSubject,
+    dataModalSubject,
+    handleSortChange, // Hàm xử lý sự kiện sắp xếp
+    dataModal,
+    totalPages,
+    currentPage,
+    handlePageClick, // Hàm xử lý sự kiện phân trang
+    searchTerm, // Từ khóa tìm kiếm
+    handleSearchChange, // Hàm xử lý sự kiện tìm kiếm
+    confirmAddSubject, // Hàm xác nhận thêm môn học
+    confirmUpdateSubject, // Hàm xác nhận cập nhật môn học
+  } = useSubjectTable();
+  useEffect(() => {
+    fetchSubjects();
+  }, [fetchSubjects]);
 
-    return (
-        <div className="subject-table-wrapper">
-            <TableHeaderAction
-                onAddClick={addModal.open}
-                onSearchChange={(value) => console.log('Tìm kiếm:', value)}
-                placeholder="Tìm kiếm môn học..."
-                addLabel="Thêm môn học"
-            />
+  const removeAccents = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+  // Hàm highlightText để làm nổi bật từ khóa tìm kiếm trong bảng
+  const highlightText = (text, keyword) => {
+    if (!keyword || !text) return text;
+    if (typeof text !== "string") text = String(text);
 
-            <div className="table-container">
-                <table className="table">
-                    <thead>
-                        <tr>
-                            <th>Mã môn học</th>
-                            <th>Tên môn học</th>
-                            {/* <th>Số điểm đạt</th> */}
-                            <th>Hệ số</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {listSubjects && listSubjects.length > 0 ? (
-                            listSubjects.map((subject, index) => (
-                                <tr key={`subject-${index}`}>
-                                    <td>{subject.MaMonHoc}</td>
-                                    <td>{subject.TenMonHoc}</td>
-                                    {/* <td>{subject.DiemDat}</td> */}
-                                    <td>{subject.HeSo}</td>
-                                    <td>
-                                        <div className="action-buttons">
-                                            <button
-                                                className="icon-button edit"
-                                                onClick={() => handleEditSubject(subject)}
-                                                title="Chỉnh sửa"
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                            <button
-                                                className="icon-button delete"
-                                                onClick={() => handleDeleteSubject(subject)}
-                                                title="Xoá"
-                                            >
-                                                <FaTrash />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="5">Không tìm thấy môn học nào</td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+    const normalizedText = removeAccents(text).toLowerCase();
+    const normalizedKeyword = removeAccents(keyword).toLowerCase();
 
-            {/* Modals */}
-            {addModal.isOpen && (
-                <ModalAddSubject
-                    show={addModal.isOpen}
-                    handleClose={addModal.close}
-                    fetchSubjects={fetchSubjects}
-                />
-            )}
+    let result = [];
+    let lastIndex = 0;
 
-            {updateModal.isOpen && (
-                <ModalUpdateSubject
-                    show={updateModal.isOpen}
-                    handleClose={updateModal.close}
-                    fetchSubjects={fetchSubjects}
-                    dataModalSubject={dataModalSubject}
-                />
-            )}
-
-            {deleteModal.isOpen && (
-                <ModalDeleteSubject
-                    show={deleteModal.isOpen}
-                    handleClose={deleteModal.close}
-                    confirmDeleteSubject={confirmDeleteSubject}
-                    dataModal={dataModal}
-                />
-            )}
-        </div>
+    // Tìm vị trí match trong normalizedText
+    const regex = new RegExp(
+      normalizedKeyword.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"),
+      "gi"
     );
+    let match;
+
+    while ((match = regex.exec(normalizedText)) !== null) {
+      const start = match.index;
+      const end = start + match[0].length;
+
+      // Phần trước match (chuỗi gốc)
+      if (lastIndex < start) {
+        result.push(text.slice(lastIndex, start));
+      }
+      // Phần match (chuỗi cần làm nổi bật)
+      result.push(
+        <span className="highlight" key={start}>
+          {text.slice(start, end)}
+        </span>
+      );
+      lastIndex = end;
+    }
+
+    // Phần sau match
+    if (lastIndex < text.length) {
+      result.push(text.slice(lastIndex));
+    }
+
+    return result;
+  };
+
+  return (
+    <div className="subject-table-wrapper">
+      <TableHeaderAction
+        onAddClick={addModal.open}
+        onSearchChange={handleSearchChange}
+        searchTerm={searchTerm}
+        placeholder="Tìm kiếm môn học..."
+        addLabel="Thêm môn học"
+      />
+
+      <div className="table-container">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>
+                Mã môn học
+                <button
+                  className="sort-button"
+                  title="Sắp xếp"
+                  value="MaMonHoc"
+                  onClick={() => handleSortChange("MaMonHoc")}
+                >
+                  <FaSort />
+                </button>
+              </th>
+              <th>
+                Tên môn học
+                <button
+                  className="sort-button"
+                  title="Sắp xếp"
+                  value="TenMonHoc"
+                  onClick={() => handleSortChange("TenMonHoc")}
+                >
+                  <FaSort />
+                </button>
+              </th>
+              {/* <th>Số điểm đạt</th> */}
+              <th>
+                Hệ số
+                <button
+                  className="sort-button"
+                  title="Sắp xếp"
+                  value="HeSo"
+                  onClick={() => handleSortChange("HeSo")}
+                >
+                  <FaSort />
+                </button>
+              </th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {listSubjects && listSubjects.length > 0 ? (
+              listSubjects.map((subject, index) => (
+                <tr key={`subject-${index}`}>
+                  <td>{highlightText(subject.MaMonHoc, searchTerm)}</td>
+                  <td>{highlightText(subject.TenMonHoc, searchTerm)}</td>
+                  <td>{highlightText(subject.HeSo, searchTerm)}</td>
+                  <td>
+                    <div className="action-buttons">
+                      <button
+                        className="icon-button edit"
+                        onClick={() => handleEditSubject(subject)}
+                        title="Chỉnh sửa"
+                      >
+                        <FaEdit />
+                      </button>
+                      <button
+                        className="icon-button delete"
+                        onClick={() => handleDeleteSubject(subject)}
+                        title="Xoá"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5">Không tìm thấy môn học nào</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      {totalPages > 0 && (
+        <div className="student-footer">
+          <ReactPaginate
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={3}
+            marginPagesDisplayed={2}
+            pageCount={totalPages}
+            previousLabel="Previous"
+            pageClassName="page-item"
+            pageLinkClassName="number page-link"
+            previousClassName="page-item"
+            previousLinkClassName="prev page-link"
+            nextClassName="page-item"
+            nextLinkClassName="next page-link"
+            nextLabel="Next"
+            breakLabel="..."
+            breakClassName="page-item"
+            breakLinkClassName="break page-link"
+            containerClassName="pagination"
+            activeClassName="active"
+            renderOnZeroPageCount={null}
+            forcePage={currentPage - 1} // vì currentPage bắt đầu từ 1, trong khi ReactPaginate bắt đầu từ 0
+          />
+        </div>
+      )}
+      {/* Modals */}
+      {addModal.isOpen && (
+        <ModalAddSubject
+          show={addModal.isOpen}
+          handleClose={addModal.close}
+          fetchSubjects={fetchSubjects}
+          onSubmit={confirmAddSubject}
+        />
+      )}
+
+      {updateModal.isOpen && (
+        <ModalUpdateSubject
+          show={updateModal.isOpen}
+          handleClose={updateModal.close}
+          fetchSubjects={fetchSubjects}
+          dataModalSubject={dataModalSubject}
+          onSubmit={confirmUpdateSubject}
+        />
+      )}
+
+      {deleteModal.isOpen && (
+        <ModalDeleteSubject
+          show={deleteModal.isOpen}
+          handleClose={deleteModal.close}
+          dataModal={dataModal}
+          onSubmit={confirmDeleteSubject}
+        />
+      )}
+    </div>
+  );
 };
 
 export default SubjectTable;

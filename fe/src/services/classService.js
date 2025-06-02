@@ -1,13 +1,26 @@
 import axios from "../setup/axios";
 
-const fetchAllClasses = (page, limit) => {
-  if(Number.isInteger(page) && Number.isInteger(limit)){
-    return axios.get(`/api/class/read?page=${page}&limit=${limit}`);
-  }
-  else{
-    return axios.get(`/api/class/read`);
-  }
-};
+// const fetchAllClasses = (page, limit) => {
+//   if(Number.isInteger(page) && Number.isInteger(limit)){
+//     return axios.get(`/api/class/read?page=${page}&limit=${limit}`);
+//   }
+//   else{
+//     return axios.get(`/api/class/read`);
+//   }
+// };
+
+const fetchAllClasses = ({ search = "", page = 1, limit = 10, sortField = "MaLop", sortOrder = "asc" }) => {
+  const query = new URLSearchParams({
+    search,
+    page,
+    limit,
+    sortField,
+    sortOrder,
+  }).toString();
+
+  return axios.get(`/api/class/read?${query}`);
+}
+
 const createClass = (data) => {
   return axios.post("/api/class/create",data);
 }
