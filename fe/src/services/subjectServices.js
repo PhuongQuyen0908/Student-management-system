@@ -4,10 +4,16 @@ const createSubject = (data) => {
     return axios.post("/api/subject/create", data);
 }
 
-const fetchAllSubject = () => {
-    return axios.get(
-        '/api/subject/read'
-    );
+const fetchAllSubject = ({ search = "", page = 1, limit = 10, sortField = "MaMonHoc", sortOrder = "asc" }) => {
+  const query = new URLSearchParams({
+    search,
+    page,
+    limit,
+    sortField,
+    sortOrder,
+  }).toString();
+
+  return axios.get(`/api/subject/read?${query}`);
 };
 
 const deleteSubject = (subject) => {
@@ -18,7 +24,7 @@ const deleteSubject = (subject) => {
 
 
 const updateCurrentSubject = (subjectData) => {
-    return axios.put(`/api/subject/yearupdate/${subjectData.MaMonHoc}`, { ...subjectData });
+    return axios.put(`/api/subject/update/${subjectData.MaMonHoc}`, { ...subjectData });
 }
 
 export { createSubject, deleteSubject, fetchAllSubject, updateCurrentSubject };

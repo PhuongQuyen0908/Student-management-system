@@ -21,6 +21,7 @@ const ModalAddClass = ({
   onSubmit,
   fetchClass,
   gradesList,
+  fetchGrades,
 }) => {
   // const [className, setClassName] = useState("");
   // const [classGrade, setClassGrade] = useState("");
@@ -34,8 +35,12 @@ const ModalAddClass = ({
     if (show) {
       setClassData(defaultClassData);
       setObjValidInput(defaultValidInput);
+      //Fetch danh sách khối lớp nếu chưa có
+      if (gradesList.length === 0) {
+        fetchGrades();
+      }
     }
-  }, [show]);
+  }, [show, fetchGrades, gradesList.length]);
 
   //Xử lý khi người dùng thay đổi các giá trị trong form
   //Value: giá trị, field: trường thay đổi
@@ -67,20 +72,16 @@ const ModalAddClass = ({
     if (!isValid) return;
     try {
       let response = await onSubmit?.(classData);
-      if (response?.EC === 0) {
-        toast.success("Thêm lớp học thành công"); //Xuất thông báo
+      if (response?.data?.EC === 0) {
         await fetchClass(); //Load lại danh sách học sinh
         handleClose(); //Đóng modal
         setObjValidInput(defaultValidInput);
         setClassData(defaultClassData);
-      } else if (response?.EC === 1 && response?.EM === "Lớp học đã tồn tại") {
-        toast.error("Lớp học đã tồn tại");
+      } else if (response?.data?.EC === 1) {
         setObjValidInput({ ...defaultValidInput, isValidClassName: false });
-      } else {
-        toast.error("Thêm lớp học thất bại");
       }
-    } catch {
-      toast.error("Có lỗi xảy ra trong quá trình thêm lớp học");
+    } catch (error) {
+      console.log(error);
     }
   };
 

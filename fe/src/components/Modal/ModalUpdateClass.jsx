@@ -9,7 +9,6 @@ const ModalUpdateClass = ({
   handleClose,
   classData,
   onSubmit,
-  fetchClasses,
   gradesList,
 }) => {
   const defaultDataForm = {
@@ -69,17 +68,10 @@ const ModalUpdateClass = ({
         MaKhoi: formData.classGrade,
         MaLop: classData.MaLop,
       });
-      if (response?.EC === 0) {
-        toast.success("Cập nhật lớp học thành công");
-        await fetchClasses?.();
+      if (response?.data?.EC === 0) {
         handleClose();
         setFormData(defaultDataForm);
         setObjValidInput(defaultValidInput);
-      } else if (response?.EC === 1 && response?.EM === "Lớp học đã tồn tại") {
-        toast.error("Tên lớp đã tồn tại!");
-        setObjValidInput((prev) => ({ ...prev, isValidClassName: false }));
-      } else {
-        toast.error(response?.EM || "Cập nhật lớp học thất bại");
       }
     } catch {
       toast.error("Không thể kết nối đến máy chủ");

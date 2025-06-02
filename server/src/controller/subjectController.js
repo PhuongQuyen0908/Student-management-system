@@ -3,24 +3,53 @@ import subjectAPIService from "../service/subjectAPIService";
 // Hàm xử lý lấy tất cả môn học
 const readSubject = async (req, res) => {
   try {
-    const subjects = await subjectAPIService.getAllSubjects(); 
-    if (subjects.length === 0) {
-      return res.status(404).json({ message: 'Không có môn học nào trong cơ sở dữ liệu' });
+    let page = req.query.page ? parseInt(req.query.page) : 1; // Lấy số trang từ query, mặc định là 1
+    let limit = req.query.limit ? parseInt(req.query.limit) : 7; // Lấy giới hạn số lượng môn học trên mỗi trang, mặc định là 7
+    let sortField = req.query.sortField || 'MaMonHoc'; // Trường sắp xếp, mặc định là MaMonHoc
+    let sortOrder = req.query.sortOrder || 'asc'; // Thứ tự sắp xếp, mặc định là 'asc'
+    let search = req.query.search || ''; // Lấy từ khóa tìm kiếm từ query, mặc định là rỗng
+    let data;
+    if(search) {
+      // Nếu có từ khóa tìm kiếm, gọi service để tìm kiếm theo từ khóa
+      data = await subjectAPIService.getAllSubjectWithSearch(search, page, limit, sortField, sortOrder);
+    }else if(req.query.page && req.query.limit) {
+      // Không có search nhưng có phân trang, gọi service để lấy danh sách môn học với phân trang
+      data = await subjectAPIService.getAllSubjectsWithPagination(page, limit, sortField, sortOrder);
+    }else{
+      // Không có search và không có phân trang, gọi service để lấy tất cả môn học
+      data = await subjectAPIService.getAllSubjects();
     }
-    res.json({ message: 'Danh sách môn ', data: subjects });
+    return res.status(200).json({
+      EM: data.EM,
+      EC: data.EC,
+      DT: data.DT
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    console.error(error);
+    return res.status(500).json({
+      EM: 'Lỗi phía server',
+      EC: 1, // Mã lỗi
+      DT: [] // Dữ liệu trả về
+    });
+}};
 
 // Hàm xử lý lấy môn học theo ID
 const getSubjectById = async (req, res) => {
   try {
     const id = req.params.id;
     const subject = await subjectAPIService.getSubjectById(id); 
-    res.json({ message: 'Môn học tìm thấy', data: subject });
+    return res.status(200).json({
+      EM: subject.EM,
+      EC: subject.EC,
+      DT: subject.DT
+    });
   } catch (error) {
-    res.status(404).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({
+      EM: 'Lỗi phía server',
+      EC: 1, // Mã lỗi
+      DT: [] // Dữ liệu trả về
+    });
   }
 };
 
@@ -29,15 +58,28 @@ const createSubject = async (req, res) => {
   try {
     // Kiểm tra xem môn  đã tồn tại chưa
     const existingSubject = await subjectAPIService.checkSubjectExists(req.body.TenMonHoc);
-    if (existingSubject) {
-      return res.status(400).json({ message: 'Môn học đã tồn tại, không thể tạo lại.' });
+    if (existingSubject.EC === 0) {
+      // HTTP 409 Conflict: Môn học đã tồn tại
+      return res.status(409).json({
+        EM: 'Môn học đã tồn tại',
+        EC: 1,
+        DT: existingSubject.DT
+      })
     }
-
     // Nếu môn học chưa tồn tại, tiến hành tạo môn mới
     const newSubject = await subjectAPIService.createSubject(req.body);
-    res.status(201).json({ message: 'Tạo môn thành công', data: newSubject });
+    return res.status(201).json({
+      EM: newSubject.EM,
+      EC: newSubject.EC,
+      DT: newSubject.DT
+    });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({
+      EM: 'Lỗi phía server',
+      EC: -1,
+      DT: [] 
+    });
   }
 };
 
@@ -45,14 +87,42 @@ const createSubject = async (req, res) => {
 // Hàm xử lý cập nhật môn học theo ID
 const updateSubject = async (req, res) => {
   try {
+    //Kiểm tra ID môn học có tồn tại không
     const id = req.params.id;
-    const updatedSubject = await subjectAPIService.updateSubject(id, req.body);
-    if (!updatedSubject) {
-      return res.status(404).json({ message: 'Môn  không tồn tại' });
+    const existingSubject = await subjectAPIService.getSubjectById(id);
+    if (!existingSubject || existingSubject.EC !== 0) {
+      // HTTP 404 Not Found: Môn học không tồn tại
+      return res.status(404).json({
+        EM: 'Môn học không tồn tại',
+        EC: 1,
+        DT: {}
+      });
     }
-    res.json({ message: 'Cập nhật môn  thành công', data: updatedSubject });
+    // Nếu môn học tồn tại, tiến hành cập nhật
+    // Chỉ cho phép cập nhật nếu tên không trùng với môn học khác
+    const checkSubject = await subjectAPIService.checkSubjectExists(req.body.TenMonHoc);
+    if (checkSubject.EC === 0 && checkSubject.DT.MaMonHoc !== id) {
+      // HTTP 409 Conflict: Môn học đã tồn tại
+      return res.status(409).json({
+        EM: 'Môn học đã tồn tại',
+        EC: 1,
+        DT: checkSubject.DT
+      });
+    }
+    // Nếu môn học chưa tồn tại hoặc là chính môn học đang cập nhật, tiến hành cập nhật
+    const updatedSubject = await subjectAPIService.updateSubject(id, req.body);
+    return res.status(200).json({
+      EM: updatedSubject.EM,
+      EC: updatedSubject.EC,
+      DT: updatedSubject.DT
+    }); 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({
+      EM: 'Lỗi phía server',
+      EC: -1,
+      DT: [] 
+    });
   }
 };
 
@@ -60,13 +130,32 @@ const updateSubject = async (req, res) => {
 const deleteSubject = async (req, res) => {
   try {
     const id = req.params.id;
-    const deleted = await subjectAPIService.deleteSubject(id); // Sử dụng đúng service
-    if (!deleted) {
-      return res.status(404).json({ message: 'Môn  không tồn tại để xóa' });
+    // Kiểm tra xem môn học có tồn tại không
+    const existingSubject = await subjectAPIService.getSubjectById(id);
+    if (!existingSubject || existingSubject.EC !== 0) {
+      // HTTP 404 Not Found: Môn học không tồn tại
+      return res.status(404).json({
+        EM: 'Môn học không tồn tại',
+        EC: 1,
+        DT: {}
+      });
     }
-    res.json({ message: 'Xóa môn  thành công' });
+    // Nếu môn học tồn tại, tiến hành xóa
+    const deleted = await subjectAPIService.deleteSubject(id); // Sử dụng đúng service
+    if (deleted) {
+      return res.status(200).json({
+        EM: 'Xóa môn học thành công',
+        EC: 0,
+        DT: {}
+      });
+    } 
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error(error);
+    return res.status(500).json({
+      EM: 'Lỗi phía server',
+      EC: -1,
+      DT: [] 
+    });
   }
 };
 

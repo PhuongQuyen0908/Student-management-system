@@ -1,34 +1,132 @@
-// Helper để tạo response thống nhất
-
 import db from '../models/index.js';
-
+import { Op } from 'sequelize';
 const buildResponse = (EM, EC, DT) => ({ EM, EC, DT });
+
+const buildSearchClause = (search) => {
+  if (!search) return {};
+  const terms = search.trim().split(/\s+/); 
+  const orConditions = [];
+
+  for (const term of terms) {
+    const isNumber = !isNaN(Number(term));
+    if (isNumber && term.trim() !== '') {
+      orConditions.push(
+        { MaLop: Number(term) },
+        { MaKhoi: Number(term) }
+      );
+    }
+    orConditions.push(
+      { TenLop: { [Op.like]: `%${term}%` } },
+      { '$khoi.TenKhoi$': { [Op.like]: `%${term}%` } } // Thêm dòng này để tìm trên tên khối
+    );
+  }
+  return orConditions.length > 0 ? { [Op.or]: orConditions } : {};
+};
+
+const getAllClassesWithSearch = async (search, page, limit, sortField, sortOrder) => {
+  try {
+    const validFields = ['MaLop', 'TenLop', 'MaKhoi']; // Các trường hợp hợp lệ để sắp xếp
+    // Kiểm tra xem sortField có hợp lệ không 
+    if (!validFields.includes(sortField)) {
+      console.warn(`Trường sắp xếp không hợp lệ: ${sortField}`);
+      sortField = 'MaLop'; // Default sort field
+    }
+    sortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'; // Chỉ cho phép ASC hoặc DESC
+
+    const offset = (page - 1) * limit;
+    const searchClause = buildSearchClause(search);
+    const { count, rows } = await db.lop.findAndCountAll({
+      where: searchClause,
+      limit,
+      offset,
+      order: [[sortField, sortOrder]],
+      attributes: ['MaLop', 'TenLop', 'MaKhoi'],
+      include: [
+        {
+          model: db.khoi,
+          as: 'khoi',
+          attributes: ['MaKhoi', 'TenKhoi'], // Chỉ lấy các trường cần thiết từ bảng khoi
+        },
+      ],
+    });
+    const totalPages = Math.ceil(count / limit); // Tính tổng số trang
+    const data = {
+      totalItems: count,
+      totalPages: totalPages,
+      currentPage: page,
+      classes: rows,
+      sortField: sortField,
+      sortOrder: sortOrder,
+    };
+    if( rows.length === 0) {
+      return buildResponse("Không tìm thấy lớp học nào", 1, data);
+    }else{
+      return buildResponse("Lấy danh sách lớp học thành công", 0, data);
+    }
+  } catch (error) {
+    console.error("Lỗi khi tìm kiếm và phân trang:", error);
+    return buildResponse("Lỗi phía server. Lấy dữ liệu thất bại", -1, []);
+  }
+};
 
 const getAllClasses = async () => {
   try {
     const classes = await db.lop.findAll();
-    console.log("Check debug", classes)
-    return buildResponse("Lấy dữ liệu thành công", 0, classes);
+    if (classes.length === 0) {
+      return buildResponse("Không tìm thấy lớp học nào", 1, []);
+    }
+    else {
+      return buildResponse("Lấy danh sách lớp học thành công", 0, classes);
+    }
   } catch (error) {
-    console.error(error);
+    console.log("Lỗi khi lấy danh sách lớp học:", error);
     return buildResponse("Lỗi phía server. Lấy dữ liệu thất bại", -1, []);
   }
 };
 
-const getClassWithPagination = async (page, limit) => {
+const getClassWithPagination = async (page, limit, sortField,sortOrder) => {
   try {
-    const offset = (page - 1) * limit;
-    const { count, rows } = await db.lop.findAndCountAll({ limit, offset });
-    return buildResponse("Lấy dữ liệu thành công", 0, {
-      totalPages: Math.ceil(count / limit),
-      totalRows: count,
-      classes: rows,
+    const validFields = ['MaLop', 'TenLop', 'MaKhoi']; // Các trường hợp hợp lệ để sắp xếp
+    // Kiểm tra xem sortField có hợp lệ không
+    if (!validFields.includes(sortField)) {
+      console.warn(`Trường sắp xếp không hợp lệ: ${sortField}`);
+      sortField = 'MaLop'; // Mặc định sắp xếp theo MaLop nếu trường không hợp lệ
+    }
+    sortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'; // Chỉ cho phép ASC hoặc DESC
+    const offset = (page - 1) * limit; // Tính toán offset cho phân trang
+    const { count, rows } = await db.lop.findAndCountAll({
+      offset: offset,
+      limit: limit,
+      order: [[sortField, sortOrder]], // Sắp xếp theo trường và thứ tự
+      attributes: ['MaLop', 'TenLop', 'MaKhoi'],
+      include: [
+        {
+          model: db.khoi,
+          as: 'khoi',
+          attributes: ['MaKhoi', 'TenKhoi'], // Chỉ lấy các trường cần thiết từ bảng khoi
+        },
+      ],
     });
+    const totalPages = Math.ceil(count / limit); // Tính tổng số trang
+    const data = {
+      totalItems: count,
+      totalPages: totalPages,
+      currentPage: page,
+      classes: rows,
+      sortField: sortField,
+      sortOrder: sortOrder,
+    };
+    if (rows.length === 0) {
+      return buildResponse("Không tìm thấy lớp học nào", 1, data);
+    } else {
+      return buildResponse("Lấy danh sách lớp học thành công", 0, data);
+    }
   } catch (error) {
     console.error("Lỗi khi phân trang:", error);
     return buildResponse("Lỗi phía server. Lấy dữ liệu thất bại", -1, []);
   }
-};
+}
+
 
 const createClass = async (data) => {
   try {
@@ -38,7 +136,7 @@ const createClass = async (data) => {
     });
     return buildResponse("Tạo lớp mới thành công", 0, newClass);
   } catch (error) {
-    console.error("Tạo lớp thất bại:", error);
+    console.error("Lỗi khi tạo lớp mới:", error);
     return buildResponse("Lỗi phía server", -1, []);
   }
 };
@@ -91,7 +189,7 @@ const getClassById = async (id) => {
 const checkClassExists = async (className) => {
   try {
     const existed = await db.lop.findOne({ where: { TenLop: className } });
-    return existed !== null;
+    return !!existed; // Trả về true nếu lớp tồn tại, false nếu không
   } catch (error) {
     console.error(error);
     return false;
@@ -101,6 +199,7 @@ const checkClassExists = async (className) => {
 const findClassByName = async (className) => {
   try {
     return await db.lop.findOne({ where: { TenLop: className } });
+    
   } catch (error) {
     console.error(error);
     return null;
@@ -108,6 +207,7 @@ const findClassByName = async (className) => {
 };
 
 export default {
+  getAllClassesWithSearch,
   getAllClasses,
   buildResponse,
   getClassWithPagination,

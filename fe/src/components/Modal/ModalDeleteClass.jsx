@@ -4,24 +4,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { toast } from "react-toastify";
 import _ from "lodash";
 
-const ModalDeleteClass = ({
-  show,
-  handleClose,
-  classData,
-  onSubmit,
-  fetchClasses,
-}) => {
+const ModalDeleteClass = ({ show, handleClose, classData, onSubmit }) => {
   const confirmDeleteClass = async () => {
     try {
       const id = classData.MaLop;
-      const res = await onSubmit(id);
-      if (res?.data?.EC === 0) {
-        toast.success(res.data.EM || "Xóa lớp học thành công");
-        fetchClasses();
-        handleClose();
-      } else {
-        toast.error(res?.data?.EM || "Lỗi khi xóa lớp học");
-      }
+      await onSubmit(id);
+      handleClose();
     } catch (error) {
       toast.error("Không thể kết nối đến máy chủ", error);
     }

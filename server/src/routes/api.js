@@ -83,7 +83,7 @@ const initApiRoutes = (app) => {
   router.get("/subject/read", subjectController.readSubject);
   router.get("/subject/getByID/:id", subjectController.getSubjectById);
   router.post("/subject/create", subjectController.createSubject);
-  router.put("/subject/yearupdate/:id", subjectController.updateSubject);
+  router.put("/subject/update/:id", subjectController.updateSubject);
   router.delete("/subject/delete/:id", subjectController.deleteSubject);
 
   //năm học

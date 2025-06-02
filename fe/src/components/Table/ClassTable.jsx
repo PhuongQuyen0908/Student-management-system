@@ -1,14 +1,13 @@
+/* eslint-disable no-unused-vars */
 import "../../styles/Table.scss";
-import { FaEdit, FaTrash } from "react-icons/fa";
-import useModal from "../../hooks/useModal";
+import { FaEdit, FaSort, FaTrash } from "react-icons/fa";
 import ModalAddClass from "../Modal/ModalAddClass";
 import ModalUpdateClass from "../Modal/ModalUpdateClass";
 import ModalDeleteClass from "../Modal/ModalDeleteClass";
 import TableHeaderAction from "../TableHeaderAction";
-import { use, useEffect, useState } from "react";
-import { fetchAllClasses, fetchAllGrades } from "../../services/classService";
 import useClassTable from "../../hooks/useClassTable";
 import ReactPaginate from "react-paginate";
+import "../../styles/Table.scss";
 
 const ClassTable = () => {
   const {
@@ -23,46 +22,115 @@ const ClassTable = () => {
     handleOpenDeleteModal,
     handleUpdateClass,
     handleDeleteClass,
-    currentPage,
+    handleSortChange,
+    handleSearchChange,
+    handlePageClick,
+    searchTerm,
     totalPages,
-    setCurrentPage,
+    currentPage,
+    fetchClasses,
+    fetchGrades,
   } = useClassTable();
 
-  const handlePageClick = (event) => {
-    const selectedPage = event.selected + 1;
-    setCurrentPage(selectedPage);
+  const removeAccents = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
+  // Hàm highlightText để làm nổi bật từ khóa tìm kiếm trong bảng
+  const highlightText = (text, keyword) => {
+    if (!keyword || !text) return text;
+    if (typeof text !== "string") text = String(text);
 
+    const normalizedText = removeAccents(text).toLowerCase();
+    const normalizedKeyword = removeAccents(keyword).toLowerCase();
+
+    let result = [];
+    let lastIndex = 0;
+
+    // Tìm vị trí match trong normalizedText
+    const regex = new RegExp(
+      normalizedKeyword.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&"),
+      "gi"
+    );
+    let match;
+
+    while ((match = regex.exec(normalizedText)) !== null) {
+      const start = match.index;
+      if (start > lastIndex) {
+        result.push(text.substring(lastIndex, start));
+      }
+      result.push(
+        <span className="highlight" key={start}>
+          {text.substring(start, regex.lastIndex)}
+        </span>
+      );
+      lastIndex = regex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      result.push(text.substring(lastIndex));
+    }
+
+    return result;
+  };
 
   return (
     <div className="class-table-wrapper">
       <TableHeaderAction
         onAddClick={addModal.open}
-        onSearchChange={(value) => console.log("Tìm kiếm:", value)}
+        onSearchChange={handleSearchChange}
+        searchTerm={searchTerm}
         placeholder="Tìm kiếm lớp học..."
         addLabel="Thêm lớp học"
       />
-
 
       <div className="table-container">
         <table className="table">
           <thead>
             <tr>
-              <th>STT</th>
-              <th>Tên lớp học</th>
-              <th>Khối lớp</th>
+              <th>
+                STT
+                <button
+                  className="sort-button"
+                  value={"MaLop"}
+                  onClick={() => handleSortChange("MaLop")}
+                  title="Sắp xếp"
+                >
+                  <FaSort />
+                </button>
+              </th>
+              <th>
+                Tên lớp học
+                <button
+                  className="sort-button"
+                  value={"TenLop"}
+                  onClick={() => handleSortChange("TenLop")}
+                  title="Sắp xếp"
+                >
+                  <FaSort />
+                </button>
+              </th>
+              <th>
+                Khối lớp
+                <button
+                  className="sort-button"
+                  value={"MaKhoi"}
+                  onClick={() => handleSortChange("MaKhoi")}
+                  title="Sắp xếp"
+                >
+                  <FaSort />
+                </button>
+              </th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {classList.length > 0 ? (
-              classList.map((classItem, index) => (
-                <tr key={classItem.classId || classItem.id || index}>
-                  <td>{(currentPage - 1) * 7 + index + 1}</td>
-                  <td>{classItem.className || classItem.TenLop}</td>
+              classList.map((classItem) => (
+                <tr key={classItem.MaLop}>
+                  <td>{highlightText(classItem.MaLop, searchTerm)}</td>
+                  <td>{highlightText(classItem.TenLop, searchTerm)}</td>
                   <td>
-                    {gradesList.find((g) => g.MaKhoi === classItem.MaKhoi)
-                      ?.TenKhoi || ""}
+                    {highlightText(classItem.khoi?.TenKhoi || "", searchTerm)}
                   </td>
                   <td>
                     <div className="action-buttons">
@@ -76,7 +144,7 @@ const ClassTable = () => {
                       <button
                         className="icon-button delete"
                         onClick={() => handleOpenDeleteModal(classItem)}
-                        title="Xoá"
+                        title="Xóa"
                       >
                         <FaTrash />
                       </button>
@@ -124,8 +192,9 @@ const ClassTable = () => {
           show={addModal.isOpen}
           handleClose={addModal.close}
           onSubmit={handleAddClass}
-          fetchClass={fetchAllClasses}
+          fetchClass={fetchClasses}
           gradesList={gradesList}
+          fetchGrades={fetchGrades}
         />
       )}
       {updateModal.isOpen && (
@@ -134,7 +203,7 @@ const ClassTable = () => {
           handleClose={updateModal.close}
           classData={selectedClass}
           onSubmit={handleUpdateClass}
-          fetchClasses={fetchAllClasses}
+          fetchClass={fetchClasses}
           gradesList={gradesList}
         />
       )}
@@ -145,7 +214,7 @@ const ClassTable = () => {
           handleClose={deleteModal.close}
           classData={selectedClass}
           onSubmit={handleDeleteClass}
-          fetchClasses={fetchAllClasses}
+          fetchClass={fetchClasses}
         />
       )}
     </div>
