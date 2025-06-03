@@ -142,12 +142,29 @@ const Taskbar = () => {
       <div className="taskbar-section">
         <p className="section-title">KHÁC</p>
 
-        <NavLink
-          to="/admin/settings"
-          className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
-        >
+        <NavLink className="taskbar-item" onClick={() => toggleMenu('settingManagement')}>
           <FontAwesomeIcon icon={faCog} /> Cài đặt
-        </NavLink >
+          <FontAwesomeIcon
+            icon={expandedMenus.settingManagement ? faChevronDown : faChevronRight}
+            className="menu-arrow"
+          />
+        </NavLink>
+        {expandedMenus.settingManagement && (
+          <div className="submenu">
+            <NavLink
+              to="/admin/accountmanagement"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Quản lý tài khoản
+            </NavLink>
+            <NavLink
+              to="/admin/dencentralization"
+              className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+            >
+              Phân quyền
+            </NavLink>
+          </div>
+        )}
         <NavLink
           to="/admin/info"
           className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
