@@ -11,6 +11,7 @@ import RulesChangePage from '../pages/Admin/RulesChangePage';
 import HomePage from '../pages/Admin/HomePage';
 import InfoPage from '../pages/Admin/InfoPage';
 import AccountsPage from '../pages/Admin/AccountsPage';
+import DecentralizationPage from '../pages/Admin/DecentralizationPage';
 const AdminRoutes = {
     path: '/admin',
     element: <AdminPage />,
@@ -63,6 +64,11 @@ const AdminRoutes = {
         {
             path: 'accountmanagement',
             element: <AccountsPage />,
+        },
+
+        {
+            path: 'decentralization',
+            element: <DecentralizationPage />,
         },
     ],
 };

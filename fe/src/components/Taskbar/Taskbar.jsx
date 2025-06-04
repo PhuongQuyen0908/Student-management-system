@@ -158,10 +158,10 @@ const Taskbar = () => {
               Quản lý tài khoản
             </NavLink>
             <NavLink
-              to="/admin/dencentralization"
+              to="/admin/decentralization"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
-              Phân quyền
+              Quản lý phân quyền
             </NavLink>
           </div>
         )}
