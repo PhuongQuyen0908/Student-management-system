@@ -12,9 +12,13 @@ import HomePage from '../pages/Admin/HomePage';
 import InfoPage from '../pages/Admin/InfoPage';
 import AccountsPage from '../pages/Admin/AccountsPage';
 import DecentralizationPage from '../pages/Admin/DecentralizationPage';
+//import 04/06/2025
+import PrivateRoutes from './PrivateRoutes';
 const AdminRoutes = {
     path: '/admin',
-    element: <AdminPage />,
+    element: (
+        <PrivateRoutes element={<AdminPage />} />
+    ),
     children: [
         {
             path: 'home',

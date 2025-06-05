@@ -17,8 +17,20 @@ import AdminRoutes from "./routes/AdminRoutes.jsx";
 import LoginPage from "./pages/Login/LoginPage.jsx";
 import StudentsPage from "./pages/Admin/StudentsPage.jsx";
 import { Toast } from "bootstrap";
+
+//mới
+import { UserContext } from './context/UserContext';
+import { useContext } from 'react';
+
 function App() {
+  const { user } = useContext(UserContext);
   return (
+    <>
+    {user && user.isLoading == true ? 
+    <div>
+      <h1>Loading...</h1>
+    </div>
+    :
     // <Router>
     //   <div className="app-container">
     //     {/* App Route */}
@@ -27,12 +39,14 @@ function App() {
     //     <ModalUpdateStudent />
     //     <AppRoutes />
     //   </div>
-    //
+    //   
     // </Router>
-    <>
-      <ToastContainer />
-      <AppRoutes></AppRoutes>
-    </>
+    <div>
+    <ToastContainer />  
+    <AppRoutes></AppRoutes>
+    </div>
+    }
+   </>
   );
 }
 

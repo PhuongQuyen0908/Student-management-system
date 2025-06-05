@@ -19,6 +19,13 @@ import semesterReportController from '../controller/semesterReportController.js'
 import sortSubjectController from '../controller/sortSubjectController';
 import subjectreportController from '../controller/subjectreportController.js';
 import paramenterController from "../controller/paramenterController.js"
+
+// 3/6/2025
+import groupController from "../controller/groupController.js";
+import roleController from "../controller/roleController.js";
+import userController from "../controller/userController.js";
+import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction.js";
+
 const router = express.Router();
 
 /**
@@ -30,7 +37,27 @@ const initApiRoutes = (app) => {
   //rest api CRUD
   //GET -- read , POST -- create , PUT - update , Delete - Delete
   router.get("/test-api", apiController.testApi);
-  // router.post("/login", apiController.handleLogin);
+   //middleware
+  router.all('*' , checkUserJWT,checkUserPermission)
+
+  //phân quyền
+  router.get("/test-api", apiController.testApi);
+  router.post("/login", apiController.handleLogin); // login user
+  router.post("/logout", apiController.handleLogout); // logout user
+  router.get("/account", userController.getUserAccount); // get user account
+
+  //Create group and assign role to group
+  router.post("/group/create", groupController.createFunc);
+  router.get("/group/read", groupController.readFunc);
+  router.get("/role/by-group/:groupId", roleController.getRoleBygroup); // lấy các quyền của 1 nhóm
+  router.post("/role/assign", roleController.assignRoleToGroup); // gán quyền cho nhóm người dùng
+
+
+  //CRUD user
+  router.get("/user/read", userController.readFunc);
+  router.post("/user/create", userController.createFunc);
+  router.put("/user/update", userController.updateFunc);
+  router.delete("/user/delete", userController.deleteFunc);
 
   //CRUD student
   router.get("/student/read", studentController.readFunc);
