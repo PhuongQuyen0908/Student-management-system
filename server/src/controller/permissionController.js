@@ -1,9 +1,9 @@
-import roleApiService from "../service/roleApiService";
+import permissionApiService from "../service/permissionApiService";
 
-const getRoleBygroup = async (req,res) =>{
+const getPermissionBygroup = async (req,res) =>{
   try {
     let MaNhom = req.params.groupId; // lấy MaNhom từ params
-    let data = await roleApiService.getRoleByGroup(MaNhom);
+    let data = await permissionApiService.getPermissionByGroup(MaNhom);
     return res.status(200).json({
       EM: data.EM,
       EC: data.EC, //error code
@@ -19,9 +19,9 @@ const getRoleBygroup = async (req,res) =>{
   }
 }
 
-const assignRoleToGroup = async(req,res)=>{
+const assignPermissionToGroup = async(req,res)=>{
   try {
-    let data = await roleApiService.assignRoleToGroup(req.body); // sau này sửa thành req.body.data
+    let data = await permissionApiService.assignPermissionToGroup(req.body); // sau này sửa thành req.body.data
     //data có MaNhom và DanhSachQuyen
     return res.status(200).json({
       EM: data.EM,
@@ -39,6 +39,6 @@ const assignRoleToGroup = async(req,res)=>{
 }
 
 module.exports = {
-    getRoleBygroup,
-    assignRoleToGroup
+    getPermissionBygroup,
+    assignPermissionToGroup
 };

@@ -49,7 +49,7 @@ const ModalAssignFunction = ({ show, handleClose, group }) => {
     if (!group) return null;
 
     return (
-        <Modal show={show} onHide={handleClose} centered size="lg">
+        <Modal show={show} onHide={handleClose} centered size="xl">
             <Modal.Header closeButton>
                 <Modal.Title>
                     Gán chức năng cho nhóm: <strong>{group.TenNhomQuyen}</strong>

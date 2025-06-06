@@ -1,6 +1,6 @@
 import db from "../models/index.js";
 
-const getRoleByGroup = async (MaNhom) => {
+const getPermissionByGroup = async (MaNhom) => {
   try {
     if (!MaNhom) {
       return {
@@ -9,7 +9,7 @@ const getRoleByGroup = async (MaNhom) => {
         DT: [],
       };
     }
-    let roles = await db.nhomnguoidung.findOne({
+    let permissions = await db.nhomnguoidung.findOne({
       where: { MaNhom: MaNhom },
       attributes: ["MaNhom", "TenNhom"],
       include: {
@@ -26,7 +26,7 @@ const getRoleByGroup = async (MaNhom) => {
     return {
       EM: `Lấy danh sách quyền của nhóm thành công`,
       EC: 0,
-      DT: roles,
+      DT: permissions,
     };
   } catch (error) {
     console.log(error);
@@ -38,11 +38,11 @@ const getRoleByGroup = async (MaNhom) => {
   }
 };
 
-const assignRoleToGroup = async (data) => {
+const assignPermissionToGroup = async (data) => {
   // gán quyền cho nhóm người dùng
   try {
-    //data = groupId:4 , groupRoles:[{},{}]  , groupRoles
-    //data truyền lên gồm 2 phần là groupId và groupRoles => cần data.groupRoles
+    //data = groupId:4 , groupPermissions:[{},{}]  , groupPermissions
+    //data truyền lên gồm 2 phần là groupId và groupPermissions => cần data.groupPermissions
 
     // tiếng việt : data = MaNhom:4 , DanhSachQuyen:[{},{}]
     //DanhSachQuyen có dạng [{MaNhom:4, MaChucNang:1}, {MaNhom:4, MaChucNang:2}]
@@ -76,6 +76,6 @@ const assignRoleToGroup = async (data) => {
   }
 };
 module.exports = {
-  getRoleByGroup,
-  assignRoleToGroup,
+  getPermissionByGroup,
+  assignPermissionToGroup,
 };
