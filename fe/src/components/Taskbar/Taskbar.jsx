@@ -19,7 +19,7 @@ import useTaskbar from '../../hooks/useTaskbar';
 import logo from '../../assets/School-logo.png';
 
 const Taskbar = () => {
-  const { expandedMenus, toggleMenu } = useTaskbar();
+  const { expandedMenus, toggleMenu, handleLogout } = useTaskbar();
 
   return (
     <nav className="taskbar-container">
@@ -171,9 +171,9 @@ const Taskbar = () => {
         >
           <FontAwesomeIcon icon={faUser} /> Hồ sơ
         </NavLink>
-        <NavLink to="/logout" className="taskbar-item">
+        <div className="taskbar-item" onClick={handleLogout}>
           <FontAwesomeIcon icon={faSignOutAlt} /> Đăng xuất
-        </NavLink>
+        </div>
       </div>
     </nav>
   );

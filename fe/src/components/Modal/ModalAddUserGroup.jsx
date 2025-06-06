@@ -2,16 +2,17 @@ import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { useState } from "react";
 import { toast } from "react-toastify";
-
-const ModalAddUserGroup = ({ show, handleClose }) => {
+//import mới 
+import { createGroup } from "../../services/roleServices";
+const ModalAddUserGroup = ({ show, handleClose , fetchGroups}) => {
     const defaultGroupData = {
-        name: "",
-        description: "",
+        TenNhom: "",
+        MoTa: "",
     };
 
     const defaultValidInputs = {
-        name: true,
-        description: true,
+        TenNhom: true,
+        MoTa: true,
     };
 
     const [groupData, setGroupData] = useState(defaultGroupData);
@@ -28,15 +29,15 @@ const ModalAddUserGroup = ({ show, handleClose }) => {
         let isValid = true;
         setValidInputs(defaultValidInputs);
 
-        if (!groupData.name.trim()) {
+        if (!groupData.TenNhom.trim()) {
             toast.error("Tên nhóm không được để trống");
-            setValidInputs((prev) => ({ ...prev, name: false }));
+            setValidInputs((prev) => ({ ...prev, TenNhom: false }));
             isValid = false;
         }
 
-        if (!groupData.description.trim()) {
+        if (!groupData.MoTa.trim()) {
             toast.error("Mô tả nhóm không được để trống");
-            setValidInputs((prev) => ({ ...prev, description: false }));
+            setValidInputs((prev) => ({ ...prev, MoTa: false }));
             isValid = false;
         }
 
@@ -46,12 +47,16 @@ const ModalAddUserGroup = ({ show, handleClose }) => {
     const confirmAddGroup = async () => {
         const valid = isValidInputs();
         if (valid) {
-            console.log("Tạo nhóm người dùng thành công với dữ liệu:", groupData);
-            toast.success("Tạo nhóm người dùng thành công!");
-
-            setGroupData(defaultGroupData);
-            setValidInputs(defaultValidInputs);
-            handleClose();
+            const response = await createGroup(groupData);
+            if (response && +response.data.EC === 0) {
+                toast.success(response.data.EM);
+                await fetchGroups(); // Gọi hàm để cập nhật danh sách nhóm
+                setGroupData(defaultGroupData);
+                setValidInputs(defaultValidInputs);
+                handleClose();
+            } else {
+                toast.error(response.data.EM);
+            }
         }
     };
 
@@ -66,20 +71,20 @@ const ModalAddUserGroup = ({ show, handleClose }) => {
                     <input
                         type="text"
                         className={
-                            validInputs.name ? "form-control" : "form-control is-invalid"
+                            validInputs.TenNhom ? "form-control" : "form-control is-invalid"
                         }
-                        value={groupData.name}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "name")}
+                        value={groupData.TenNhom}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "TenNhom")}
                     />
                 </div>
                 <div className="mb-3">
                     <label className="form-label">Mô tả</label>
                     <textarea
                         className={
-                            validInputs.description ? "form-control" : "form-control is-invalid"
+                            validInputs.MoTa ? "form-control" : "form-control is-invalid"
                         }
-                        value={groupData.description}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "description")}
+                        value={groupData.MoTa}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "MoTa")}
                     />
                 </div>
             </Modal.Body>

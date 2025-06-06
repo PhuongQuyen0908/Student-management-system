@@ -26,11 +26,21 @@ const checkPhoneExist = async (userPhone) => {
 };
 
 
+const CheckPhoneUpdate = async (userPhone, TenDangNhap) => {
+  let user = await db.nguoidung.findOne({
+    where: { SoDienThoai: userPhone, TenDangNhap: { [db.Sequelize.Op.ne]: TenDangNhap } },
+  });
+  if (user) {
+    return true; // Số điện thoại đã được sử dụng bởi người dùng khác
+  }
+  return false; // Số điện thoại không bị trùng
+};
+
 
 const getAllUser = async () => {
   try {
     let users = await db.nguoidung.findAll({
-      attributes: [ "TenDangNhap", "SoDienThoai" , "Hoten"],
+      attributes: [ "TenDangNhap", "SoDienThoai" , "HoTen"],
       include: { model: db.nhomnguoidung, attributes: ["TenNhom"] },
     });
     if (users) {
@@ -63,7 +73,7 @@ const getUserWithPagination = async (page, limit) => {
     const { count, rows } = await db.nguoidung.findAndCountAll({
       offset: offset,
       limit: limit,
-      attributes: [ "TenDangNhap", "SoDienThoai" , "Hoten"],
+      attributes: [ "TenDangNhap", "SoDienThoai" , "HoTen"],
       include: { model: db.nhomnguoidung, attributes: ["MaNhom" , "TenNhom"] },
       order: [["MaNhom", "DESC"]],
     });
@@ -118,7 +128,6 @@ const createNewUser = async (data) => {
       };
     }
 
- 
     await db.nguoidung.create( data );
     return {
       EM: "create ok",
@@ -139,9 +148,9 @@ const updateUser = async (data) => {
         DT: "group",
       };
     }
-    const isPhoneExist = await checkPhoneExist(data.SoDienThoai);
+    const isPhoneExist = await CheckPhoneUpdate(data.SoDienThoai , data.TenDangNhap);
     if (isPhoneExist) {
-      return {
+      return {  
         EM: "Số điện thoại đã được sử dụng",
         EC: 1,
         DT: '',

@@ -9,28 +9,28 @@ const allPermissions = [
     "/user/update",
     "/user/delete",
     "/group/read",
-    "/role/create",
-    "/role/read",
-    "/role/update",
-    "/role/delete",
-    "/role/by-group",
-    "/role/assign-to-group",
+    "/group/create",
+    "/group/read",
+    "/group/update",
+    "/group/delete",
+    "/group/by-group",
+    "/group/assign-to-group",
 ];
 
-const ModalAssignFunction = ({ show, handleClose, role }) => {
+const ModalAssignFunction = ({ show, handleClose, group }) => {
     const [selectedPermissions, setSelectedPermissions] = useState([]);
 
     useEffect(() => {
-        if (role) {
+        if (group) {
             // giả lập dữ liệu quyền đã được gán
             setSelectedPermissions([
                 "/user/read",
                 "/user/update",
                 "/group/read",
-                "/role/read",
+                "/group/read",
             ]);
         }
-    }, [role]);
+    }, [group]);
 
     const handleTogglePermission = (permission) => {
         setSelectedPermissions((prev) =>
@@ -41,25 +41,25 @@ const ModalAssignFunction = ({ show, handleClose, role }) => {
     };
 
     const handleSave = () => {
-        console.log(`Gán quyền cho nhóm "${role?.TenNhomQuyen}":`, selectedPermissions);
+        console.log(`Gán quyền cho nhóm "${group?.TenNhomQuyen}":`, selectedPermissions);
         toast.success("Đã lưu quyền chức năng!");
         handleClose();
     };
 
-    if (!role) return null;
+    if (!group) return null;
 
     return (
         <Modal show={show} onHide={handleClose} centered size="lg">
             <Modal.Header closeButton>
                 <Modal.Title>
-                    Gán chức năng cho nhóm: <strong>{role.TenNhomQuyen}</strong>
+                    Gán chức năng cho nhóm: <strong>{group.TenNhomQuyen}</strong>
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <h5>Assign Roles:</h5>
                 <div className="d-flex flex-column gap-2 ps-2">
-                    {allPermissions.map((permission) => (
-                        <label key={permission} className="form-check">
+                    {allPermissions.map((permission , index) => (
+                        <label key={`permission-${index}`} className="form-check">
                             <input
                                 type="checkbox"
                                 className="form-check-input"

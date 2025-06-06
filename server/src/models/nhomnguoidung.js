@@ -41,8 +41,13 @@ module.exports = function(sequelize, DataTypes) {
     TenNhom: {
       type: DataTypes.STRING(50),
       allowNull: false
+    },
+    MoTa: {
+      type: DataTypes.STRING(50),
+      allowNull: false
     }
-  }, {
+  },
+   {
     sequelize,
     tableName: 'nhomnguoidung',
     timestamps: false,

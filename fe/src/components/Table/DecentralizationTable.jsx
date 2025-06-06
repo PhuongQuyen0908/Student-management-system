@@ -4,10 +4,14 @@ import { FaPuzzlePiece, FaSort } from 'react-icons/fa';
 import ModalAssignFunction from '../Modal/ModalAssignFunction';
 import ModalAddUserGroup from '../Modal/ModalAddUserGroup';
 import useModal from '../../hooks/useModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+//import mới 06/06/2025
+import ReactPaginate from 'react-paginate';
+import { fetchGroup , createGroup} from '../../services/roleServices'; // fetchGroup này dành cho admin
 
 const DecentralizationTable = () => {
-    const [listRoles, setListRoles] = useState([
+    const [userGroup, setUserGroup] = useState([
         { id: 1, TenNhomQuyen: 'Admin' },
         { id: 2, TenNhomQuyen: 'Giáo viên' },
         { id: 3, TenNhomQuyen: 'Học sinh' },
@@ -16,15 +20,26 @@ const DecentralizationTable = () => {
     const addRoleModal = useModal();
     const assignModal = useModal();
 
-    const [selectedRole, setSelectedRole] = useState(null);
+    const [selectedGroup, setSelectedGroup] = useState(null);
 
-    const handleAssignPermission = (role) => {
-        setSelectedRole(role);
+    const fetchGroups = async () =>{
+        let response = await fetchGroup();
+        if (response && response.data && response.data.EC === 0) {
+            setUserGroup(response.data.DT);
+        }
+    }
+
+    useEffect(() => {
+        fetchGroups();
+    }, []);
+
+    const handleAssignPermission = (group) => {
+        setSelectedGroup(group);
         assignModal.open();
     };
 
     const handleAddRole = (newRole) => {
-        setListRoles((prev) => [...prev, { id: Date.now(), TenNhomQuyen: newRole }]);
+        setUserGroup((prev) => [...prev, { id: Date.now(), TenNhomQuyen: newRole }]);
         addRoleModal.close();
     };
 
@@ -52,20 +67,24 @@ const DecentralizationTable = () => {
                                     <FaSort />
                                 </button>
                             </th>
-                            <th></th>
+                            <th>
+                                Mô tả
+                            </th>
+                            <th>Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {listRoles.length > 0 ? (
-                            listRoles.map((role, index) => (
-                                <tr key={`role-${role.id}`}>
-                                    <td>{index + 1}</td>
-                                    <td>{role.TenNhomQuyen}</td>
+                        {userGroup.length > 0 ? (
+                            userGroup.map((group, index) => (
+                                <tr key={`group-${index}`}>
+                                    <td>{group.MaNhom}</td>
+                                    <td>{group.TenNhom}</td>
+                                    <td>{group.MoTa ? group.MoTa : "Chưa có mô tả "}</td>
                                     <td>
                                         <div className="action-buttons">
                                             <button
                                                 className="icon-button assign"
-                                                onClick={() => handleAssignPermission(role)}
+                                                onClick={() => handleAssignPermission(group.MaNhom)}
                                                 title="Gán chức năng"
                                             >
                                                 <FaPuzzlePiece />
@@ -83,19 +102,22 @@ const DecentralizationTable = () => {
                 </table>
             </div>
 
+          
+
             {addRoleModal.isOpen && (
                 <ModalAddUserGroup
                     show={addRoleModal.isOpen}
                     handleClose={addRoleModal.close}
                     onAddRole={handleAddRole}
+                    fetchGroups = {fetchGroups}
                 />
             )}
 
-            {assignModal.isOpen && selectedRole && (
+            {assignModal.isOpen && selectedGroup && (
                 <ModalAssignFunction
                     show={assignModal.isOpen}
                     handleClose={assignModal.close}
-                    role={selectedRole}
+                    group={selectedGroup}
                 />
             )}
         </div>

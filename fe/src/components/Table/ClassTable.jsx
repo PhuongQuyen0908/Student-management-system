@@ -8,6 +8,7 @@ import TableHeaderAction from "../TableHeaderAction";
 import useClassTable from "../../hooks/useClassTable";
 import ReactPaginate from "react-paginate";
 import "../../styles/Table.scss";
+import { useEffect } from "react";
 
 const ClassTable = () => {
   const {
@@ -72,6 +73,11 @@ const ClassTable = () => {
 
     return result;
   };
+
+  useEffect(() => {
+    fetchGrades();
+  },[])
+
 
   return (
     <div className="class-table-wrapper">
@@ -187,6 +193,7 @@ const ClassTable = () => {
         </div>
       )}
 
+   
       {addModal.isOpen && (
         <ModalAddClass
           show={addModal.isOpen}

@@ -38,6 +38,7 @@ const useClassTable = () => {
     setLoadingGrades(true);
     try {
       const res = await fetchAllGrades();
+      
       if (res?.data?.EC === 0) {
         setGradesList(res.data.DT || []);
       } else {

@@ -49,6 +49,7 @@ instance.interceptors.response.use(
 
       // bad request
       case 400: {
+        toast.error(error && error.response.data?.EM || "Bad Request");
         return Promise.reject(error);
       }
 

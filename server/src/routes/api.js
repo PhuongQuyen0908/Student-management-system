@@ -51,6 +51,7 @@ const initApiRoutes = (app) => {
   router.get("/group/read", groupController.readFunc);
   router.get("/role/by-group/:groupId", roleController.getRoleBygroup); // lấy các quyền của 1 nhóm
   router.post("/role/assign", roleController.assignRoleToGroup); // gán quyền cho nhóm người dùng
+  router.get("/group/read-for-admin", groupController.getGroupsForAdmin); // lấy danh sách nhóm cho admin
 
 
   //CRUD user

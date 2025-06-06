@@ -41,9 +41,12 @@ const useLogin = () => {
       };
       localStorage.setItem("jwt", token);
       loginContext(data); //login context 
-
-      //Navigate("/admin"); // fix sau
-      window.location.href = "/admin";
+      
+       
+      // Navigate("/admin/home"); // fix sau
+      toast.success("Đăng nhập thành công");
+       window.location.href = "/admin/home";
+    
     }
     if (response && response.data && +response.EC !== 0) {
       //error

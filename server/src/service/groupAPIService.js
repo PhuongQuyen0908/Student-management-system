@@ -52,7 +52,26 @@ const GetAllGroups = async () => {
 }
 
 
+const GetGroupsForAdmin = async () => {
+    try {
+        const groups = await db.nhomnguoidung.findAll();
+        return {
+            EM: "Lấy danh sách nhóm thành công",
+            EC: 0,
+            DT: groups
+        }
+    } catch (error) {
+        console.error("Lỗi khi lấy danh sách nhóm:", error);
+        return {
+            EM: "Lỗi từ service",
+            EC: -1,
+            DT: []
+        }
+    }
+}
+
 module.exports = {
     CreateGroup,
-    GetAllGroups
+    GetAllGroups,
+    GetGroupsForAdmin
 };

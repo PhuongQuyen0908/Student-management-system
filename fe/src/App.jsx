@@ -29,6 +29,7 @@ function App() {
     {user && user.isLoading == true ? 
     <div>
       <h1>Loading...</h1>
+       <ToastContainer />  
     </div>
     :
     // <Router>
