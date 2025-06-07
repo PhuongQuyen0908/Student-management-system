@@ -1,5 +1,25 @@
 import db from "../models/index.js";
 
+const getAllPermissions = async () => {
+  try {
+    let permissions = await db.chucnang.findAll({
+      attributes: ["MaChucNang", "TenChucNang", "TenManHinhDuocLoad" , "NhomChucNang"],
+    });
+    return {
+      EM: `Lấy danh sách quyền thành công`,
+      EC: 0,
+      DT: permissions,
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "error from service",
+      EC: 1,
+      DT: [],
+    };
+  }
+}
+
 const getPermissionByGroup = async (MaNhom) => {
   try {
     if (!MaNhom) {
@@ -57,6 +77,13 @@ const assignPermissionToGroup = async (data) => {
   ]
 }
     */
+   if(data.MaNhom === 1){
+      return {
+        EM: `Không thể thay đổi quyền của tài khoản quản trị hệ thống`,
+        EC: -1,
+        DT: [],
+      };
+    }
     await db.phanquyen.destroy({
       where: { MaNhom: +data.MaNhom },
     });
@@ -78,4 +105,5 @@ const assignPermissionToGroup = async (data) => {
 module.exports = {
   getPermissionByGroup,
   assignPermissionToGroup,
+  getAllPermissions
 };

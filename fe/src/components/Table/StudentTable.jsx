@@ -7,16 +7,20 @@ import ModalUpdateStudent from '../Modal/ModalUpdateStudent';
 //Các import mới
 import ModalDeleteStudent from "../Modal/ModalDeleteStudent";
 import ReactPaginate from 'react-paginate';
-import { useEffect } from 'react';
+import { useEffect ,useContext } from 'react';
 import useStudentTable from '../../hooks/useStudentTable';
 import { FaSort } from 'react-icons/fa';
 //import mới 27/05/2025
 import { useState } from 'react';
 import { use } from 'react';
+//import mới 06/06/2025
+import { UserContext } from '../../context/UserContext'; 
+//07/06/2025
 const StudentTable = () => {
-    // const addModal = useModal();
-    // const updateModal = useModal();
-    // const deleteModal = useModal();
+    const {user} = useContext(UserContext);
+    const userPermissions = user.account.groupWithPermissions.chucnangs
+    console.log("User permissions in StudentTable:", userPermissions);
+    
     const {
         addModal,
         updateModal,
@@ -97,10 +101,12 @@ const StudentTable = () => {
 
         <div className="student-table-wrapper">
             <TableHeaderAction
-                onAddClick={addModal.open}
+                onAddClick=  {addModal.open}
                 onSearchChange={(e) => handleSearchChange(e)}
                 placeholder="Tìm kiếm học sinh..."
-                addLabel="Thêm học sinh"
+                addLabel =  "Thêm học sinh" 
+                //ẩn nút nếu k có quyền
+                hideAdd = {!(userPermissions.TenManHinhDuocLoad === "/student/create" || userPermissions.TenManHinhDuocLoad === "/student/update")}
             />
 
             <div className="table-container">
@@ -150,7 +156,7 @@ const StudentTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {
+                        {   userPermissions.TenManHinhDuocLoad ="/student/read" &&
                             listStudents && listStudents.length > 0 ?
                                 <>
                                     {listStudents.map((student, index) => (
@@ -162,13 +168,18 @@ const StudentTable = () => {
                                             <td>{highlightText(student.DiaChi, searchTerm)}</td>
                                             <td>{highlightText(student.Email, searchTerm)}</td>
                                             <td>
+                                                
                                                 <div className="action-buttons">
+                                                    {userPermissions.TenManHinhDuocLoad=== "/student/update" &&
                                                     <button className="icon-button edit" onClick={() => handleEditStudent(student)} title="Chỉnh sửa">
                                                         <FaEdit />
                                                     </button>
+                                                    }
+                                                    {userPermissions.TenManHinhDuocLoad === "/student/delete" &&
                                                     <button className="icon-button lock" onClick={() => handleDeleteStudent(student)} title="Khóa">
                                                         <FaLock />
                                                     </button>
+                                                    }
                                                 </div>
                                             </td>
                                         </tr>
@@ -176,7 +187,7 @@ const StudentTable = () => {
                                 </>
                                 :
                                 <>
-                                    <tr><td>Not found users</td></tr>
+                                    <tr><td>Bạn không có quyền xem danh sách</td></tr>
                                 </>}
                     </tbody>
                 </table>

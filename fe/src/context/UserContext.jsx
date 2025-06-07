@@ -26,13 +26,13 @@ const UserProvider = ({ children }) => {
   const fetchUser = async () => {
     let response = await getUserAccount();
     if (response.data && +response.data.EC === 0) {
-      let groupWithRoles = response.data.DT.groupWithRoles;
+      let groupWithPermissions = response.data.DT.groupWithPermissions;
        let username = response.data.DT.username;
       let token = response.data.DT.access_token;
       let data = {
         isAuthenticated:true,
         token: token, 
-       account: { groupWithRoles, username },
+       account: { groupWithPermissions, username },
       }
       setUser(data)
     }else{

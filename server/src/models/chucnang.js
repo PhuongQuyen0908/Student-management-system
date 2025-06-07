@@ -47,6 +47,10 @@ module.exports = function(sequelize, DataTypes) {
     TenManHinhDuocLoad: {
       type: DataTypes.STRING(50),
       allowNull: false
+    },
+    NhomChucNang: {
+      type: DataTypes.STRING(50),
+      allowNull: false
     }
   }, {
     sequelize,

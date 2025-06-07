@@ -11,10 +11,7 @@ import ReactPaginate from 'react-paginate';
 import { fetchGroup , createGroup} from '../../services/roleServices'; // fetchGroup này dành cho admin
 
 const DecentralizationTable = () => {
-    const [userGroup, setUserGroup] = useState([
-        { id: 1, TenNhomQuyen: 'Admin' },
-        { id: 2, TenNhomQuyen: 'Giáo viên' },
-        { id: 3, TenNhomQuyen: 'Học sinh' },
+    const [userGroup, setUserGroup] = useState([{}
     ]);
 
     const addRoleModal = useModal();
@@ -117,7 +114,8 @@ const DecentralizationTable = () => {
                 <ModalAssignFunction
                     show={assignModal.isOpen}
                     handleClose={assignModal.close}
-                    group={selectedGroup}
+                    MaNhom={selectedGroup}
+                    TenNhom = {userGroup.find(group => group.MaNhom === selectedGroup)?.TenNhom || ''}
                 />
             )}
         </div>

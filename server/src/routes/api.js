@@ -50,6 +50,7 @@ const initApiRoutes = (app) => {
   router.post("/group/create", groupController.createFunc);
   router.get("/group/read", groupController.readFunc);
   router.get("/permission/by-group/:groupId", permissionController.getPermissionBygroup); // lấy các quyền của 1 nhóm
+  router.get("/permission/read", permissionController.getAllPermissions); // lấy tất cả quyền
   router.post("/permission/assign", permissionController.assignPermissionToGroup); // gán quyền cho nhóm người dùng
   router.get("/group/read-for-admin", groupController.getGroupsForAdmin); // lấy danh sách nhóm cho admin
 

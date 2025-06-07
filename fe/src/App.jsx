@@ -24,6 +24,7 @@ import { useContext } from 'react';
 
 function App() {
   const { user } = useContext(UserContext);
+  console.log("User context in App:", user);
   return (
     <>
     {user && user.isLoading == true ? 

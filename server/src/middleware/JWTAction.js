@@ -67,10 +67,11 @@ const checkUserJWT = (req, res, next) => {
 const checkUserPermission = (req, res, next) => {
   
   if (nonSecurePaths.includes(req.path) || req.path === "/account" || req.path ==="/year/read" 
-  || req.path ==="/test/read" || req.path ==="/report/options" || req.path === "/classGrade/read" || req.path ==="/group/read" )
+  || req.path ==="/test/read" || req.path ==="/report/options" || req.path === "/classGrade/read" 
+  || req.path ==="/group/read"  || req.path.startsWith("/permission/by-group/") ||req.path ==="/permission/assign" )
     return next();
   if (req.user) {
-    let roles = req.user.groupWithRoles.chucnangs;
+    let roles = req.user.groupWithPermissions.chucnangs;
     console.log("check roles", roles);
     let currentUrl = req.path;
     if (!roles && roles.length === 0) {

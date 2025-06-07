@@ -90,7 +90,7 @@ const getUserAccount = async (req, res) =>{
     EC: "0", //error code
     DT: {
       access_token:req.token,
-      groupWithRoles:req.user.groupWithRoles,
+      groupWithPermissions:req.user.groupWithPermissions,
       username:req.user.username    
     }
   }); 

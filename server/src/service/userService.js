@@ -130,7 +130,7 @@ const createNewUser = async (data) => {
 
     await db.nguoidung.create( data );
     return {
-      EM: "create ok",
+      EM: "Tạo người dùng thành công",
       EC: 0,
       DT: data,
     };

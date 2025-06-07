@@ -31,13 +31,13 @@ const useLogin = () => {
     let response = await loginUser(valueLogin, password);
     if (response.data && +response.data.EC === 0) {
       //sucess
-      let groupWithRoles = response.data.DT.groupWithRoles;
+      let groupWithPermissions = response.data.DT.groupWithPermissions;
       let username = response.data.DT.username;
       let token = response.data.DT.access_token;
       let data = {
         isAuthenticated: true,
         token: token,
-        account: { groupWithRoles, username },
+        account: { groupWithPermissions, username },
       };
       localStorage.setItem("jwt", token);
       loginContext(data); //login context 

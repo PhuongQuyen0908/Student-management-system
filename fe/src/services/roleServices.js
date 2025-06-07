@@ -8,5 +8,15 @@ const createGroup = (groupData) => {
     return axios.post("/api/group/create", groupData);
 }
 
+const fetchAllPermissions = () => {
+    return axios.get('api/permission/read');
+}
 
-export {fetchGroup, createGroup};
+const fetchAllPermissionsByGroup = (groupId) => {
+    return axios.get(`api/permission/by-group/${groupId}`);
+}
+
+const assignGroupPermissions = (data) => {
+    return axios.post(`/api/permission/assign`,{data:data});
+}
+export {fetchGroup, createGroup , fetchAllPermissions , fetchAllPermissionsByGroup,assignGroupPermissions};
