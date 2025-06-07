@@ -7,6 +7,11 @@ import { UserContext } from '../context/UserContext';
 import { toast } from 'react-toastify';
 
 const useTaskbar = () => {
+
+//   //ẩn hiện ui ( chưa xong )
+   const {isAvailable} = useContext(UserContext);
+   
+
   const [expandedMenus, setExpandedMenus] = useState({
     classManagement: false,
     subjectManagement: false,
@@ -38,7 +43,8 @@ const useTaskbar = () => {
   return {
     expandedMenus,
     toggleMenu,
-    handleLogout
+    handleLogout,
+    isAvailable
   };
 };
 

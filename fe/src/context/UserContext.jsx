@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, use } from 'react'
 import { getUserAccount } from '../services/userServices'
+import { set } from 'lodash';
 
 const UserContext = React.createContext();
 
@@ -52,11 +53,47 @@ const UserProvider = ({ children }) => {
     useEffect(() => {
     fetchUser();
   }, [])
- 
+
+  //ẩn hiển UI khi không có quyền truy cập vào các chức năng
+    const [userPermissions ,setUserPermissions] =useState([])//= user.account.groupWithPermissions.chucnangs.map(permission => permission.TenManHinhDuocLoad);
+    const  [isAvailable ,setIsAvailable] = useState({});
+    const loadPage = {
+    DanhSachHocSinh: ['/student/read'],
+    TiepNhanHocSinh: ['/student/create', '/student/read' ],
+    DanhSachMonHoc: ['/subject/read', '/subject/create', '/subject/update', '/subject/delete'],
+    BangDiemMonHoc: ['/report/subject-summary' ,'/report/add-score' , '/report/edit-score', '/report/delete-score'],
+    DanhSachLopHoc: ['/class/read', '/class/create', '/class/update', '/class/delete'],
+    BaoCaoMonHoc: ['report/subject-report'],
+    BaoCaoHocKy: ['/report/semester-report'],
+    ThayDoiQuyDinh: ['/paramenter/read', '/paramenter/update'],
+    QuanLyTaiKhoan: ['/user/read', '/user/create', '/user/update', '/user/delete'],
+    QuanLyPhanQuyen: ['/group/read-for-admin' , '/group/create', 'permission/read','permission/assign'],
+
+}
+    
+  useEffect(() => {
+    if (user.account && user.account.groupWithPermissions) {
+    setUserPermissions(user.account.groupWithPermissions.chucnangs.map(permission => permission.TenManHinhDuocLoad));
+    }}, [user]);
+
+  useEffect(() => {
+    setIsAvailable  ( { // kiểm tra quyền của user để ẩn khỏi taskbar
+    DanhSachHocSinh: userPermissions.some(permission => loadPage.DanhSachHocSinh.includes(permission)),
+    TiepNhanHocSinh: userPermissions.some(permission => loadPage.TiepNhanHocSinh.includes(permission)),
+    DanhSachMonHoc: userPermissions.some(permission => loadPage.DanhSachMonHoc.includes(permission)),
+    BangDiemMonHoc: userPermissions.some(permission => loadPage.BangDiemMonHoc.includes(permission)),
+    QuanLyLopHoc: userPermissions.some(permission => loadPage.DanhSachLopHoc.includes(permission)),
+    BaoCaoMonHoc: userPermissions.some(permission => loadPage.BaoCaoMonHoc.includes(permission)),
+    BaoCaoHocKy: userPermissions.some(permission => loadPage.BaoCaoHocKy.includes(permission)),
+    ThayDoiQuyDinh: userPermissions.some(permission => loadPage.ThayDoiQuyDinh.includes(permission)),
+    QuanLyTaiKhoan: userPermissions.some(permission => loadPage.QuanLyTaiKhoan.includes(permission)),
+    QuanLyPhanQuyen: userPermissions.some(permission => loadPage.QuanLyPhanQuyen.includes(permission)),
+  })}, [userPermissions]);
+
 
 
   return (
-    <UserContext.Provider value={{ user, loginContext, logoutContext }}>
+    <UserContext.Provider value={{ user, loginContext, logoutContext ,isAvailable}}>
       {children}
     </UserContext.Provider>
   );

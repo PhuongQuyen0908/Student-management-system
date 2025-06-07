@@ -17,9 +17,9 @@ import { use } from 'react';
 import { UserContext } from '../../context/UserContext'; 
 //07/06/2025
 const StudentTable = () => {
+    //ẩn hiện các nút nếu k có quyền
     const {user} = useContext(UserContext);
     const userPermissions = user.account.groupWithPermissions.chucnangs
-    console.log("User permissions in StudentTable:", userPermissions);
     
     const {
         addModal,
@@ -106,7 +106,7 @@ const StudentTable = () => {
                 placeholder="Tìm kiếm học sinh..."
                 addLabel =  "Thêm học sinh" 
                 //ẩn nút nếu k có quyền
-                hideAdd = {!(userPermissions.TenManHinhDuocLoad === "/student/create" || userPermissions.TenManHinhDuocLoad === "/student/update")}
+                hideAdd = {(userPermissions.TenManHinhDuocLoad === "/student/create")}
             />
 
             <div className="table-container">
