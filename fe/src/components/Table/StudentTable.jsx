@@ -156,7 +156,7 @@ const StudentTable = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {   userPermissions.TenManHinhDuocLoad ="/student/read" &&
+                        {  userPermissions.some(p => p.TenManHinhDuocLoad === "/student/read")  &&
                             listStudents && listStudents.length > 0 ?
                                 <>
                                     {listStudents.map((student, index) => (
@@ -170,12 +170,12 @@ const StudentTable = () => {
                                             <td>
                                                 
                                                 <div className="action-buttons">
-                                                    {userPermissions.TenManHinhDuocLoad=== "/student/update" &&
+                                                    {userPermissions.some(p => p.TenManHinhDuocLoad === "/student/update")  &&
                                                     <button className="icon-button edit" onClick={() => handleEditStudent(student)} title="Chỉnh sửa">
                                                         <FaEdit />
                                                     </button>
                                                     }
-                                                    {userPermissions.TenManHinhDuocLoad === "/student/delete" &&
+                                                    {userPermissions.some(p => p.TenManHinhDuocLoad === "/student/delete") &&
                                                     <button className="icon-button lock" onClick={() => handleDeleteStudent(student)} title="Khóa">
                                                         <FaLock />
                                                     </button>
