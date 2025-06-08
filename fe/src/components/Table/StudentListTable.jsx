@@ -5,10 +5,13 @@ import '../../styles/Table.scss';
 import { useState, useEffect } from "react";
 import ReactPaginate from 'react-paginate';
 import useStudentListTable from '../../hooks/useStudentListTable';
+import { fetchStudentWithYear } from "../../services/studentServices";
+
 
 //import 29/05/2025
 import { FaSort } from 'react-icons/fa';
-
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const StudentListTable = ({ selectedYear }) => {
 
@@ -28,7 +31,7 @@ const StudentListTable = ({ selectedYear }) => {
 
     useEffect(() => {
         fetchStudents();
-    }, [currentPage, selectedYear, searchTerm , sortField, sortOrder]);
+    }, [currentPage, selectedYear, searchTerm, sortField, sortOrder]);
 
     // highlightText function để làm nổi bật từ khóa tìm kiếm trong bảng
     // Hàm remove dấu tiếng Việt
@@ -77,6 +80,46 @@ const StudentListTable = ({ selectedYear }) => {
 
         return result.length > 0 ? result : text;
     };
+    const exportToExcel = async () => {
+        try {
+            const response = await fetchStudentWithYear(
+                selectedYear,
+                1,
+                10000,
+                searchTerm,
+                sortField,
+                sortOrder
+            );
+
+            if (response && response.data && response.data.EC === 0) {
+                const allStudents = response.data.DT.students;
+
+                const data = allStudents.map(student => ({
+                    'Mã học sinh': student.MaHocSinh,
+                    'Họ và tên': student.HoTen,
+                    'Lớp': student.TenLop,
+                    'Điểm TB học kỳ I': student.DiemTB_HK1,
+                    'Điểm TB học kỳ II': student.DiemTB_HK2
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách học sinh');
+
+                const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const file = new Blob([excelBuffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+
+                saveAs(file, `DanhSachHocSinh_${selectedYear}.xlsx`);
+            } else {
+                toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
+            }
+        } catch (error) {
+            console.error("Error exporting students to Excel:", error);
+            toast.error("Lỗi khi xuất file Excel");
+        }
+    };
 
 
     return (
@@ -85,6 +128,7 @@ const StudentListTable = ({ selectedYear }) => {
                 onSearchChange={(e) => handleSearchChange(e)}
                 placeholder="Tìm kiếm học sinh..."
                 hideAdd={true}
+                onExportClick={exportToExcel}
             />
             <div className="table-container">
                 <table className="table">

@@ -15,7 +15,7 @@ const StudentsListPage = () => {
     return (
         <div className="studentslist-page-container">
             <div className="studentslist-header">
-                <h2 className="studentslist-title">Danh sách lớp</h2>
+                <h2 className="studentslist-title">Danh sách học sinh</h2>
                 <div className="filter-group ">
                     <select
                         className="form-select"
