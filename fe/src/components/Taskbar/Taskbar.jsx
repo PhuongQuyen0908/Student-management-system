@@ -18,8 +18,15 @@ import {
 import useTaskbar from '../../hooks/useTaskbar';
 import logo from '../../assets/School-logo.png';
 
+
+
+
 const Taskbar = () => {
-  const { expandedMenus, toggleMenu } = useTaskbar();
+  //vẫn thiếu phần ẩn hiện về lớp fix sau 07/06/2025
+
+  const { expandedMenus, toggleMenu, handleLogout ,isAvailable  } = useTaskbar();
+  //isAvailable là object chứa quyết định xem có hiện trang đó hay không
+  //isAvailable = { DanhSachHocSinh: true,...} là hiện trang Danh sách học sinh
 
   return (
     <nav className="taskbar-container">
@@ -44,18 +51,24 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.studentManagement && (
           <div className="submenu">
+            {isAvailable.DanhSachHocSinh &&  //ẩn nếu k có quyền vào
             <NavLink
               to="/admin/students"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Danh sách học sinh
             </NavLink>
+            }
+
+            {isAvailable.TiepNhanHocSinh &&  //ẩn nếu k có quyền vào}
             <NavLink
               to="/admin/studentadmission"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Tiếp nhận học sinh
             </NavLink>
+          }
+
           </div>
         )}
 
@@ -68,18 +81,22 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.subjectManagement && (
           <div className="submenu">
+            {isAvailable.DanhSachMonHoc &&  //ẩn nếu k có quyền vào
             <NavLink
               to="/admin/subjects"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Danh sách môn học
             </NavLink>
+            }
+            {isAvailable.BangDiemMonHoc &&  //ẩn nếu k có quyền vào
             <NavLink
               to="/admin/subjectgrades"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Bảng điểm môn học
             </NavLink>
+            } 
           </div>
         )}
 
@@ -92,12 +109,15 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.classManagement && (
           <div className="submenu">
+            {isAvailable.QuanLyLopHoc &&  //ẩn nếu k có quyền vào}
             <NavLink
               to="/admin/classmanagement"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Quản lý lớp học
             </NavLink>
+            }
+            {/*thiếu phần này */}
             <NavLink
               to="/admin/classlist"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
@@ -106,7 +126,6 @@ const Taskbar = () => {
             </NavLink>
           </div>
         )}
-
         <NavLink className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>
           <FontAwesomeIcon icon={faChartBar} /> Báo cáo
           <FontAwesomeIcon
@@ -116,27 +135,34 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.reportManagement && (
           <div className="submenu">
+            {isAvailable.BaoCaoMonHoc &&  
             <NavLink
               to="/admin/subjectreport"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Báo cáo tổng kết môn
             </NavLink>
+            }
+
+            { isAvailable.BaoCaoHocKy &&
             <NavLink
               to="/admin/semesterreport"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Báo cáo tổng kết học kỳ
             </NavLink>
+            }
           </div>
         )}
 
+        {isAvailable.ThayDoiQuyDinh &&  //ẩn nếu k có quyền vào
         <NavLink
           to="/admin/ruleschange"
           className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
         >
           <FontAwesomeIcon icon={faClipboardList} /> Thay đổi quy định
         </NavLink>
+        }
       </div>
 
       <div className="taskbar-section">
@@ -151,18 +177,23 @@ const Taskbar = () => {
         </NavLink>
         {expandedMenus.settingManagement && (
           <div className="submenu">
+            {isAvailable.QuanLyTaiKhoan &&  //ẩn nếu k có quyền vào
             <NavLink
               to="/admin/accountmanagement"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Quản lý tài khoản
             </NavLink>
+            }
+
+            {isAvailable.QuanLyPhanQuyen &&  //ẩn nếu k có quyền vào}
             <NavLink
               to="/admin/decentralization"
               className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
             >
               Quản lý phân quyền
             </NavLink>
+            }
           </div>
         )}
         <NavLink
@@ -171,9 +202,9 @@ const Taskbar = () => {
         >
           <FontAwesomeIcon icon={faUser} /> Hồ sơ
         </NavLink>
-        <NavLink to="/logout" className="taskbar-item">
+        <div className="taskbar-item" onClick={handleLogout}>
           <FontAwesomeIcon icon={faSignOutAlt} /> Đăng xuất
-        </NavLink>
+        </div>
       </div>
     </nav>
   );

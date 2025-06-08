@@ -2,10 +2,10 @@ import db from "../models/index.js";
 const { Op } = db.Sequelize;
 const { hocsinh, ct_dsl, bdchitietmonhoc, loaikiemtra, danhsachlop, lop, bdmonhoc, monhoc } = db;
 
-ct_dsl.belongsTo(hocsinh, { foreignKey: 'MaHocSinh' });
-bdchitietmonhoc.belongsTo(loaikiemtra, { foreignKey: 'MaLoaiKiemTra' });
-danhsachlop.belongsTo(lop, { foreignKey: 'MaLop' });
-bdmonhoc.belongsTo(monhoc, { foreignKey: 'MaMonHoc' });
+db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: 'MaHocSinh' });
+db.bdchitietmonhoc.belongsTo(db.loaikiemtra, { foreignKey: 'MaLoaiKiemTra' });
+db.danhsachlop.belongsTo(db.lop, { foreignKey: 'MaLop' });
+db.bdmonhoc.belongsTo(db.monhoc, { foreignKey: 'MaMonHoc' });
 
 async function getThamSo(tenThamSo) {
   const param = await db.thamso.findOne({ where: { TenThamSo: tenThamSo } });
@@ -49,10 +49,10 @@ const getOptions = async () => {
 };
 
 const calculateAndUpdateDiemTB = async (MaBDMonHoc) => {
-  const bdChiTietList = await bdchitietmonhoc.findAll({
+  const bdChiTietList = await db.bdchitietmonhoc.findAll({
     where: { MaBDMonHoc },
     include: [{
-      model: loaikiemtra,
+      model: db.loaikiemtra,
       attributes: ['HeSo'],
     }]
   });

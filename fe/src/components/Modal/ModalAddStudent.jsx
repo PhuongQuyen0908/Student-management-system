@@ -76,8 +76,9 @@ const ModalAddStudent = ({ show, handleClose, fetchStudents }) => {
         await fetchStudents(); // load lại page
         handleClose(); // đóng modal
         setValidInputs(defaultValidInputs); // reset lại validInputs
-        setStudentData(defaultStudentData); // reset lại studentData
-      } else {
+        setStudentData(defaultStudentData); // reset lại studentData        
+      }
+      else {
         toast.error(serverData.EM); // thông báo lỗi từ server
         // nếu không thành công thì set lại validInputs để hiển thị lỗi ( có thể email trùng , ... )
         let _validInputs = _.cloneDeep(defaultValidInputs);

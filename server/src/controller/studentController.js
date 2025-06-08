@@ -78,6 +78,31 @@ const readFunc = async (req, res) => {
 const createFunc = async (req, res) => {
   try {
     let data = req.body;
+    let age = await studentApiService.getAgeLimit();
+    console.log("check data", data);
+    const tuoiToiThieu = parseInt(
+      age.DT.find(item => item.TenThamSo === "TuoiToiThieu")?.GiaTri
+    ) || null; // lấy tuổi tối thiểu
+    
+    const tuoiToiDa = parseInt(
+      age.DT.find(item => item.TenThamSo === "TuoiToiDa")?.GiaTri
+    ) || null; // lấy tuổi tối đa
+
+    if (data.studentBirth) {
+      const currentDate = new Date();
+      const birthDate = new Date(data.studentBirth);
+      const ageInMilliseconds = currentDate - birthDate;
+      const ageInYears = Math.floor(ageInMilliseconds / (1000 * 60 * 60 * 24 * 365.25));
+
+      if (ageInYears < tuoiToiThieu || ageInYears > tuoiToiDa) {
+        return res.status(400).json({
+          EM: `Tuổi học sinh không hợp lệ! Tuổi tối thiểu là ${tuoiToiThieu} và tối đa là ${tuoiToiDa}`,
+          EC: -1,
+          DT: "",
+        });
+      }
+    }
+
     let dataUser = await studentApiService.createNewStudent(data);
     return res.status(200).json({
       EM: dataUser.EM,

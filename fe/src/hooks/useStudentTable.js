@@ -53,7 +53,6 @@ const useStudentTable = () => {
     let response = await deleteStudent(dataModal);
     if (response && +response.data.EC === 0) {
       toast.success(response.data.EM);
-      console.log("xóa thành công");
       await fetchStudents();
       deleteModal.close();
     } else {
@@ -64,7 +63,6 @@ const useStudentTable = () => {
   const handleEditStudent = (student) => {
     updateModal.open(); // mở modal
     setDataModalStudent(student); // truyền dữ liệu vào modal
-    console.log("check data student", student);
   };
 
   const handleSearchChange = (event) => {

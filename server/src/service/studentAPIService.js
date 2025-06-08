@@ -369,6 +369,39 @@ const deleteStudent = async (MaHocSinh) => {
   }
 };
 
+const getAgeLimit = async () => {
+  try {
+    let age = await db.thamso.findAll({
+      where: {
+        TenThamSo: {
+          [Op.or]: ["TuoiToiDa", "TuoiToiThieu"],
+        },
+      },
+      attributes: ["TenThamSo", "GiaTri"],
+    });
+    if (age && age.length > 0) {
+      return {
+        EM: "Lấy dữ liệu thành công",
+        EC: 0,
+        DT: age,
+      };
+    } else {
+      return {
+        EM: "Lấy dữ liệu thất bại",
+        EC: -1,
+        DT: [],
+      };
+    }
+  } catch (e) {
+    console.log(e);
+    return {
+      EM: "Lỗi từ service",
+      EC: -1,
+      DT: [],
+    };
+  }
+};
+
 module.exports = {
   createNewStudent,
   updateStudent,
@@ -377,4 +410,5 @@ module.exports = {
   getStudentWithPagination,
   getAllStudentWithYear,
   getAllStudentWithSearch,
+  getAgeLimit
 };

@@ -1,28 +1,32 @@
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import _ from "lodash";
 
-const ModalAddAccount = ({ show, handleClose }) => {
+//import 06/06/2025
+import { fetchGroup ,createUser} from "../../services/userServices";
+
+const ModalAddAccount = ({ show, handleClose , fetchAccounts}) => {
     const defaultAccountData = {
-        username: "",
-        phone: "",
-        fullName: "",
-        password: "",
-        group: "",
+        TenDangNhap: "",
+        SoDienThoai: "",
+        HoTen: "",
+        MatKhau: "",
+        MaNhom: "",
     };
 
     const defaultValidInputs = {
-        username: true,
-        phone: true,
-        fullName: true,
-        password: true,
-        group: true,
+        TenDangNhap: true,
+        SoDienThoai: true,
+        HoTen: true,
+        MatKhau: true,
+        MaNhom: true,
     };
 
     const [accountData, setAccountData] = useState(defaultAccountData);
     const [validInputs, setValidInputs] = useState(defaultValidInputs);
+    const [userGroups, setUserGroups] = useState([]);
 
     const handleOnChangeInput = (value, name) => {
         let _accountData = _.cloneDeep(accountData);
@@ -36,40 +40,71 @@ const ModalAddAccount = ({ show, handleClose }) => {
         const rePhone = /^\d{10,11}$/;
         let isValid = true;
 
-        if (!accountData.username || !reEmail.test(accountData.username)) {
+        if (!reEmail.test(accountData.TenDangNhap)) {
             toast.error("Tên đăng nhập phải là email hợp lệ");
-            setValidInputs((prev) => ({ ...prev, username: false }));
+            setValidInputs((prev) => ({ ...prev, TenDangNhap: false }));
             isValid = false;
-        } else if (!accountData.phone || !rePhone.test(accountData.phone)) {
+        } else if (!accountData.SoDienThoai || !rePhone.test(accountData.SoDienThoai)) {
             toast.error("Số điện thoại không hợp lệ (10-11 chữ số)");
-            setValidInputs((prev) => ({ ...prev, phone: false }));
+            setValidInputs((prev) => ({ ...prev, SoDienThoai: false }));
             isValid = false;
-        } else if (!accountData.fullName) {
+        } else if (!accountData.HoTen) {
             toast.error("Họ tên là bắt buộc");
-            setValidInputs((prev) => ({ ...prev, fullName: false }));
+            setValidInputs((prev) => ({ ...prev, HoTen: false }));
             isValid = false;
-        } else if (!accountData.password || accountData.password.length < 6) {
+        } else if (!accountData.MatKhau || accountData.MatKhau.length < 6) {
             toast.error("Mật khẩu phải từ 6 ký tự trở lên");
-            setValidInputs((prev) => ({ ...prev, password: false }));
+            setValidInputs((prev) => ({ ...prev, MatKhau: false }));
             isValid = false;
-        } else if (!accountData.group) {
+        } else if (!accountData.MaNhom) {
             toast.error("Phải chọn nhóm người dùng");
-            setValidInputs((prev) => ({ ...prev, group: false }));
+            setValidInputs((prev) => ({ ...prev, MaNhom: false }));
             isValid = false;
         }
 
         return isValid;
     };
 
+    const fetchGroups = async () => {
+        try {
+            const response = await fetchGroup();
+            if (response && response.data.EC === 0) {
+                console.log("Danh sách nhóm người dùng:", response.data.DT);
+                setUserGroups(response.data.DT);
+                if(response.data.DT && response.data.DT.length > 0) {
+                    setAccountData((prev) => ({
+                        ...prev,
+                        MaNhom: response.data.DT[0].MaNhom, // Chọn nhóm đầu tiên làm mặc định
+                    }));
+                }
+            } else {
+                toast.error(response.EM || "Lỗi khi lấy danh sách nhóm người dùng");
+            }
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách nhóm người dùng:", error);
+            toast.error("Lỗi kết nối đến máy chủ");
+        }
+    };
+
+    useEffect(() => {
+        fetchGroups();
+    }, []);
+
     const confirmAddAccount = async () => {
         const isValid = isValidInputs();
         if (isValid) {
-            console.log("Tạo account thành công với dữ liệu:", accountData);
-            toast.success("Tạo tài khoản thành công!");
+            const response = await createUser(accountData);
+            if (response && response.data && +response.data.EC === 0) {
+                await fetchAccounts();
+                toast.success(response.data.EM);
+                setAccountData(defaultAccountData);
+                setValidInputs(defaultValidInputs);
+                handleClose();
+            }
+            else{
+                toast.error(response.data.EM || "Lỗi khi thêm tài khoản");
 
-            setAccountData(defaultAccountData);
-            setValidInputs(defaultValidInputs);
-            handleClose();
+            }
         }
     };
 
@@ -84,10 +119,10 @@ const ModalAddAccount = ({ show, handleClose }) => {
                     <input
                         type="email"
                         className={
-                            validInputs.username ? "form-control" : "form-control is-invalid"
+                            validInputs.TenDangNhap ? "form-control" : "form-control is-invalid"
                         }
-                        value={accountData.username}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "username")}
+                        value={accountData.TenDangNhap}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "TenDangNhap")}
                     />
                 </div>
 
@@ -96,10 +131,10 @@ const ModalAddAccount = ({ show, handleClose }) => {
                     <input
                         type="text"
                         className={
-                            validInputs.phone ? "form-control" : "form-control is-invalid"
+                            validInputs.SoDienThoai ? "form-control" : "form-control is-invalid"
                         }
-                        value={accountData.phone}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "phone")}
+                        value={accountData.SoDienThoai}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "SoDienThoai")}
                     />
                 </div>
 
@@ -108,22 +143,22 @@ const ModalAddAccount = ({ show, handleClose }) => {
                     <input
                         type="text"
                         className={
-                            validInputs.fullName ? "form-control" : "form-control is-invalid"
+                            validInputs.HoTen ? "form-control" : "form-control is-invalid"
                         }
-                        value={accountData.fullName}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "fullName")}
+                        value={accountData.HoTen}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "HoTen")}
                     />
                 </div>
 
                 <div className="mb-3">
                     <label className="form-label">Mật khẩu</label>
                     <input
-                        type="password"
+                        type="MatKhau"
                         className={
-                            validInputs.password ? "form-control" : "form-control is-invalid"
+                            validInputs.MatKhau ? "form-control" : "form-control is-invalid"
                         }
-                        value={accountData.password}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "password")}
+                        value={accountData.MatKhau}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "MatKhau")}
                     />
                 </div>
 
@@ -131,15 +166,20 @@ const ModalAddAccount = ({ show, handleClose }) => {
                     <label className="form-label">Nhóm người dùng</label>
                     <select
                         className={
-                            validInputs.group ? "form-select" : "form-select is-invalid"
+                            validInputs.MaNhom ? "form-select" : "form-select is-invalid"
                         }
-                        value={accountData.group}
-                        onChange={(e) => handleOnChangeInput(e.target.value, "group")}
+                        value={accountData.MaNhom}
+                        onChange={(e) => handleOnChangeInput(e.target.value, "MaNhom")}
                     >
-                        <option value="">-- Chọn nhóm --</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Teacher">Giáo viên</option>
-                        <option value="Student">Học sinh</option>
+                       { userGroups && userGroups.length > 0 ? (
+                            userGroups.map((group) => (
+                                <option key={`group-${group.MaNhom}`} value={group.MaNhom}>
+                                    {group.TenNhom}
+                                </option>
+                            ))
+                        ) : (
+                            <option value="">Không có nhóm người dùng</option>
+                        )}
                     </select>
                 </div>
             </Modal.Body>

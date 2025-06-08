@@ -5,32 +5,35 @@ import ModalAddAccount from '../Modal/ModalAddAccount';
 import ModalUpdateAccount from '../Modal/ModalUpdateAccount';
 import ModalDeleteAccount from '../Modal/ModalDeleteAccount';
 import useModal from '../../hooks/useModal';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+//import mới 06/06/2025
+import ReactPaginate from 'react-paginate';
+import { fetchAllUsers , deleteUser } from '../../services/userServices';
+import { toast } from 'react-toastify';
 
 const AccountTable = () => {
-    const [listAccounts] = useState([
-        {
-            id: 1,
-            HoTen: 'Nguyễn Văn A',
-            TenDangNhap: 'nguyenvana',
-            SoDienThoai: '0912345678',
-            NhomNguoiDung: 'Admin',
-        },
-        {
-            id: 2,
-            HoTen: 'Trần Thị B',
-            TenDangNhap: 'tranthib',
-            SoDienThoai: '0987654321',
-            NhomNguoiDung: 'Giáo viên',
-        },
-        {
-            id: 3,
-            HoTen: 'Lê Văn C',
-            TenDangNhap: 'levanc',
-            SoDienThoai: '0901122334',
-            NhomNguoiDung: 'Học sinh',
-        },
-    ]);
+    const [listAccounts , setListAccounts] = useState([]);
+
+    //pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const [currentLimit, setCurrentLimit] = useState(7);
+    const [totalPages, setTotalPages] = useState(10);
+
+    const fetchAccounts = async () => {
+        let response = await fetchAllUsers(currentPage, currentLimit);
+        if (response && response.data && response.data.EC === 0) {
+            setTotalPages(response.data.DT.totalPages);
+            setListAccounts(response.data.DT.users); // set danh sách tài khoản
+        }
+    };
+
+    useEffect(() => {
+        fetchAccounts();
+    }, [currentPage, currentLimit]);
+
+    const handlePageClick = async (event) => {
+        setCurrentPage(+event.selected + 1);
+    }
 
     const addModal = useModal();
     const updateModal = useModal();
@@ -48,6 +51,17 @@ const AccountTable = () => {
         setDataModal(account);
         deleteModal.open();
     };
+
+    const confirmDeleteAccount = async () => {
+    let response = await deleteUser(dataModal);
+    if (response && +response.data.EC === 0) {
+      toast.success(response.data.EM);
+      await fetchAccounts();
+      deleteModal.close();
+    } else {
+      toast.error(response.data.EM);
+    }
+  };
 
     return (
         <div className="student-table-wrapper">
@@ -98,11 +112,12 @@ const AccountTable = () => {
                         {listAccounts && listAccounts.length > 0 ? (
                             listAccounts.map((account, index) => (
                                 <tr key={`account-${index}`}>
+                                    {console.log(account)}
                                     <td>{index + 1}</td>
                                     <td>{account.HoTen}</td>
                                     <td>{account.TenDangNhap}</td>
                                     <td>{account.SoDienThoai}</td>
-                                    <td>{account.NhomNguoiDung}</td>
+                                    <td>{account.nhomnguoidung.TenNhom}</td>
                                     <td>
                                         <div className="action-buttons">
                                             <button
@@ -132,11 +147,38 @@ const AccountTable = () => {
                 </table>
             </div>
 
+               {/* pagination */}
+            {totalPages > 0 &&
+                <div className="student-footer">
+                    <ReactPaginate
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={3}
+                        marginPagesDisplayed={2}
+                        pageCount={totalPages}
+                        previousLabel="Previous"
+                        pageClassName="page-item"
+                        pageLinkClassName="number page-link"
+                        previousClassName="page-item"
+                        previousLinkClassName="prev page-link"
+                        nextClassName="page-item"
+                        nextLinkClassName="next page-link"
+                        nextLabel="Next"
+                        breakLabel="..."
+                        breakClassName="page-item"
+                        breakLinkClassName="break page-link"
+                        containerClassName="pagination"
+                        activeClassName="active"
+                        renderOnZeroPageCount={null}
+                        forcePage={currentPage - 1} // reset trang hiện tại khi sort 
+                    />
+                </div>
+            }
+
             {addModal.isOpen && (
                 <ModalAddAccount
                     show={addModal.isOpen}
                     handleClose={addModal.close}
-                    fetchAccounts={() => { }}
+                    fetchAccounts={fetchAccounts}
                 />
             )}
 
@@ -144,7 +186,7 @@ const AccountTable = () => {
                 <ModalUpdateAccount
                     show={updateModal.isOpen}
                     handleClose={updateModal.close}
-                    fetchAccounts={() => { }}
+                    fetchAccounts={fetchAccounts}
                     dataModalAccount={dataModalAccount}
                 />
             )}
@@ -153,7 +195,7 @@ const AccountTable = () => {
                 <ModalDeleteAccount
                     show={deleteModal.isOpen}
                     handleClose={deleteModal.close}
-                    confirmDeleteAccount={() => { }}
+                    confirmDeleteAccount= {confirmDeleteAccount}
                     dataModal={dataModal}
                 />
             )}
