@@ -68,7 +68,8 @@ const checkUserPermission = (req, res, next) => {
   
   if (nonSecurePaths.includes(req.path) || req.path === "/account" || req.path ==="/year/read" 
   || req.path ==="/test/read" || req.path ==="/report/options" || req.path === "/classGrade/read" 
-  || req.path ==="/group/read"  || req.path.startsWith("/permission/by-group/") ||req.path ==="/permission/assign" )
+  || req.path ==="/group/read"  || req.path.startsWith("/permission/by-group/") ||req.path ==="/permission/assign"
+  || req.path === "/classList/filter" )
     return next();
   if (req.user) {
     let roles = req.user.groupWithPermissions.chucnangs;

@@ -5,10 +5,10 @@ const getAllClassLists = () => {
     return axios.get('/api/classList/read');
 };
 
-// Get class list by ID
-const getClassListById = (id) => {
-    return axios.get(`/api/classList/getById/${id}`);
-};
+// // Get class list by ID
+// const getClassListById = (id) => {
+//     return axios.get(`/api/classList/getById/${id}`);
+// };
 
 // Get class list by class name and year
 const getClassListByNameAndYear = (tenLop, namHoc) => {
@@ -16,20 +16,20 @@ const getClassListByNameAndYear = (tenLop, namHoc) => {
     return axios.get(`/api/classList/filter?tenLop=${tenLop}&namHoc=${namHoc}`);
 };
 
-// Create a new class list
-const createClassList = (data) => {
-    return axios.post('/api/classList/create', data);
-};
+// // Create a new class list
+// const createClassList = (data) => {
+//     return axios.post('/api/classList/create', data);
+// };
 
-// Update a class list
-const updateClassList = (id, data) => {
-    return axios.put(`/api/classList/update/${id}`, data);
-};
+// // Update a class list
+// const updateClassList = (id, data) => {
+//     return axios.put(`/api/classList/update/${id}`, data);
+// };
 
-// Delete a class list
-const deleteClassList = (id) => {
-    return axios.delete(`/api/classList/delete/${id}`);
-};
+// // Delete a class list
+// const deleteClassList = (id) => {
+//     return axios.delete(`/api/classList/delete/${id}`);
+// };
 
 // Add a student to a class
 const addStudentToClass = (data) => {
