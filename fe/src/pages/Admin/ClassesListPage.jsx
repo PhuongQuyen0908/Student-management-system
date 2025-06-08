@@ -1,25 +1,65 @@
 import React from 'react';
 import ClassListTable from '../../components/Table/ClassListTable';
+import useClassesListPage from '../../hooks/useClassesListPage';
 import '../../styles/Page/ClassesListPage.scss';
 import '../../styles/FilterGroup.scss';
+
 const ClassesListPage = () => {
+    const {
+        years,
+        classes,
+        selectedYear,
+        selectedClass,
+        studentCount,
+        loading,
+        handleYearChange,
+        handleClassChange,
+        setStudentCount
+    } = useClassesListPage();
+
     return (
         <div className="classeslist-page-container">
             <div className="classeslist-header">
                 <h2 className="classeslist-title">Danh sách lớp</h2>
                 <div className="filter-group">
-                    <select>
-                        <option>2023 - 2024</option>
-                        <option>2022 - 2023</option>
+                    <select 
+                        value={selectedYear} 
+                        onChange={(e) => handleYearChange(e.target.value)}
+                        disabled={loading || years.length === 0}
+                    >
+                        {years.length > 0 ? (
+                            years.map((year, index) => (
+                                <option key={index} value={year}>{year}</option>
+                            ))
+                        ) : (
+                            <option value="">Không có năm học</option>
+                        )}
                     </select>
-                    <select>
-                        <option>Lớp 10A1</option>
-                        <option>Lớp 10A2</option>
+                    <select 
+                        value={selectedClass} 
+                        onChange={(e) => handleClassChange(e.target.value)}
+                        disabled={loading || classes.length === 0}
+                    >
+                        {classes.length > 0 ? (
+                            classes.map((cls, index) => (
+                                <option key={index} value={cls}>{cls}</option>
+                            ))
+                        ) : (
+                            <option value="">Không có lớp học</option>
+                        )}
                     </select>
-                    <input type="text" value="40" readOnly />
+                    <input 
+                        type="text" 
+                        value={`Sĩ số: ${studentCount}`} 
+                        readOnly 
+                    />
                 </div>
             </div>
-            <ClassListTable />
+            <ClassListTable 
+                selectedYear={selectedYear} 
+                selectedClass={selectedClass} 
+                setStudentCount={setStudentCount}
+            />
         </div>
     );
 };

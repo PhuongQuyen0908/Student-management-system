@@ -15,12 +15,12 @@ const ModalAddGrade = ({ show, handleClose, onAdd, student, context, testTypes }
 
     const handleAdd = () => {
         onAdd({
-            HoTen: student?.name,
+            MaHocSinh: student.id,
             TenLop: context?.class,
             TenMonHoc: context?.subject,
             TenHocKy: context?.semester,
             TenNamHoc: context?.year,
-            DiemTP: {...grades}
+            DiemTP: { ...grades }
         });
         handleClose();
     };

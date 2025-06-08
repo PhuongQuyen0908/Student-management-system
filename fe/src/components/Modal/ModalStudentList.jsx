@@ -1,18 +1,89 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { fetchAllStudent } from '../../services/studentServices';
+import { addStudentToClass, getClassListByNameAndYear } from '../../services/classListService';
+import { toast } from 'react-toastify';
 
-const ModalStudentList = ({ show, handleClose }) => {
+const ModalStudentList = ({ show, handleClose, selectedYear, selectedClass, onSave }) => {
     const [searchTerm, setSearchTerm] = useState('');
+    const [students, setStudents] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [selectedStudents, setSelectedStudents] = useState([]);
+    const [existingStudentIds, setExistingStudentIds] = useState([]);
 
-    const students = [
-        { id: 1, name: 'minhzzzzz', gender: 'Nam', birthYear: 2024, address: 'TP Biên Hòa', email: 'abcd@gmail.com' },
-        { id: 2, name: 'minhzz', gender: 'Nữ', birthYear: 2003, address: 'ádƒ xcv ứ', email: 'mizz@gm.com' },
-        { id: 3, name: 'luyenzzzz', gender: 'Nam', birthYear: 2002, address: 'abcd BH', email: 'luyenzz@gm.com' },
-    ];
+    useEffect(() => {
+        if (show) {
+            fetchAvailableStudents();
+        }
+    }, [show, selectedClass, selectedYear]);
 
-    const filteredStudents = students.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase())
+    const fetchAvailableStudents = async () => {
+        setLoading(true);
+        try {
+            // First, get the list of students already in the class
+            const classResponse = await getClassListByNameAndYear(selectedClass, selectedYear);
+            let existingIds = [];
+            
+            if (classResponse?.data?.EC === 0 && classResponse.data.DT.length > 0) {
+                const classData = classResponse.data.DT[0];
+                existingIds = (classData.ct_dsls || []).map(item => item.MaHocSinh);
+                setExistingStudentIds(existingIds);
+            }
+            
+            // Then, get all students
+            const response = await fetchAllStudent(1, 100, '', 'HoTen', 'asc');
+            if (response?.data?.DT?.users) {
+                // Filter out students already in the class
+                const allStudents = response.data.DT.users;
+                const availableStudents = allStudents.filter(
+                    student => !existingIds.includes(student.MaHocSinh)
+                );
+                
+                setStudents(availableStudents);
+            } else {
+                toast.error('Không thể tải danh sách học sinh');
+            }
+        } catch (error) {
+            console.error('Error fetching students:', error);
+            toast.error('Lỗi kết nối máy chủ');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const toggleStudentSelection = (student) => {
+        if (selectedStudents.includes(student.MaHocSinh)) {
+            setSelectedStudents(selectedStudents.filter(id => id !== student.MaHocSinh));
+        } else {
+            setSelectedStudents([...selectedStudents, student.MaHocSinh]);
+        }
+    };
+
+    const toggleAllStudents = () => {
+        if (selectedStudents.length === filteredStudents.length) {
+            setSelectedStudents([]);
+        } else {
+            setSelectedStudents(filteredStudents.map(student => student.MaHocSinh));
+        }
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            // Call API to add selected students to class
+            // Implementation will depend on your backend
+            toast.success('Thêm học sinh thành công');
+            if (onSave) onSave(selectedStudents);
+            handleClose();
+        } catch (error) {
+            toast.error('Lỗi khi thêm học sinh vào lớp');
+        }
+    };
+
+    // Filter students based on search term
+    const filteredStudents = students.filter(student => 
+        student.HoTen?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.Email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -26,7 +97,7 @@ const ModalStudentList = ({ show, handleClose }) => {
                     <input
                         type="text"
                         className="form-control"
-                        placeholder="Search.."
+                        placeholder="Tìm kiếm..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                     />
@@ -37,7 +108,13 @@ const ModalStudentList = ({ show, handleClose }) => {
                     <table className="table table-bordered table-striped">
                         <thead className="table-success text-center">
                             <tr>
-                                <th><input type="checkbox" /></th>
+                                <th>
+                                    <input 
+                                        type="checkbox" 
+                                        checked={selectedStudents.length === filteredStudents.length && filteredStudents.length > 0}
+                                        onChange={toggleAllStudents}
+                                    />
+                                </th>
                                 <th>STT</th>
                                 <th>Họ và tên</th>
                                 <th>Giới tính</th>
@@ -47,26 +124,49 @@ const ModalStudentList = ({ show, handleClose }) => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredStudents.map((student, index) => (
-                                <tr key={student.id}>
-                                    <td><input type="checkbox" /></td>
-                                    <td>{index + 1}</td>
-                                    <td>{student.name}</td>
-                                    <td>{student.gender}</td>
-                                    <td>{student.birthYear}</td>
-                                    <td>{student.address}</td>
-                                    <td>{student.email}</td>
+                            {loading ? (
+                                <tr>
+                                    <td colSpan="7" className="text-center">Đang tải...</td>
                                 </tr>
-                            ))}
+                            ) : filteredStudents.length > 0 ? (
+                                filteredStudents.map((student, index) => (
+                                    <tr key={student.MaHocSinh}>
+                                        <td className="text-center">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedStudents.includes(student.MaHocSinh)}
+                                                onChange={() => toggleStudentSelection(student)}
+                                            />
+                                        </td>
+                                        <td>{index + 1}</td>
+                                        <td>{student.HoTen}</td>
+                                        <td>{student.GioiTinh}</td>
+                                        <td>{student.NgaySinh ? new Date(student.NgaySinh).getFullYear() : ''}</td>
+                                        <td>{student.DiaChi}</td>
+                                        <td>{student.Email}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="7" className="text-center">Không tìm thấy học sinh</td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="secondary" onClick={handleClose}>Đóng</Button>
-                <Button variant="primary">Lưu thay đổi</Button>
+                <Button 
+                    variant="primary" 
+                    onClick={handleSaveChanges}
+                    disabled={selectedStudents.length === 0}
+                >
+                    Lưu thay đổi ({selectedStudents.length})
+                </Button>
             </Modal.Footer>
         </Modal>
     );
 };
+
 export default ModalStudentList;

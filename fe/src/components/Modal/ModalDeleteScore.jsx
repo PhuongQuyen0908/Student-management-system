@@ -32,7 +32,7 @@ const ModalDeleteScore = ({ show, handleClose, student, testTypes, context, onDe
   const handleDelete = async () => {
     if (selectedTypes.length === 0) return;
     await onDelete({
-      HoTen: student.name,
+      MaHocSinh: student.id,
       TenLop: context.class,
       TenMonHoc: context.subject,
       TenHocKy: context.semester,
@@ -91,7 +91,7 @@ const ModalDeleteScore = ({ show, handleClose, student, testTypes, context, onDe
                 />
                 <label className="form-check-label" htmlFor={`delete-score-${type.MaLoaiKiemTra}`}>
                   {type.TenLoaiKiemTra} (
-                    {exists?.Diem ?? 'Chưa có'}
+                  {exists?.Diem ?? 'Chưa có'}
                   )
                 </label>
               </div>
