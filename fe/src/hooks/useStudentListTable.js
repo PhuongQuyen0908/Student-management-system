@@ -50,15 +50,15 @@ const useStudentListTable = (selectedYear) => {
     console.log("Search term:", value);
   };
 
-   const handleSort = (field) => {
-  if (field === sortField) {
-    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
-  } else {
-    setSortField(field);
-    setSortOrder("asc");
-  }
-  setCurrentPage(1); // Reset to first page on sort change
-};
+  const handleSort = (field) => {
+    if (field === sortField) {
+      setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+    setCurrentPage(1); // Reset to first page on sort change
+  };
   return {
     listStudents,
     handlePageClick,
@@ -70,7 +70,7 @@ const useStudentListTable = (selectedYear) => {
     handleSort,
     sortField,
     sortOrder,
-    
+
   };
 };
 
