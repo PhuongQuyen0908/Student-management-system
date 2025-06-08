@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import reportService from "../services/subjectGradeService";
+import subjectGradeService from "../services/subjectGradeService";
 import { toast } from "react-toastify";
 
 const useSubjectGradeTable = (filters) => {
@@ -15,7 +15,7 @@ const useSubjectGradeTable = (filters) => {
 
   // Fetch test types from DB
   useEffect(() => {
-    reportService.getTests().then(res => {
+    subjectGradeService.getTests().then(res => {
       if (Array.isArray(res.data?.data)) setTestTypes(res.data.data);
     });
   }, []);
@@ -26,36 +26,52 @@ const useSubjectGradeTable = (filters) => {
       setError("Vui lòng chọn đầy đủ bộ lọc để xem bảng điểm.");
       return;
     }
+
     const fetchData = async () => {
       setLoading(true);
       setError("");
       try {
-        const res = await reportService.getSubjectSummary({
+        const res = await subjectGradeService.getSubjectSummary({
           tenLop: filters.class,
           tenHocKy: filters.semester,
           tenNamHoc: filters.year,
           tenMonHoc: filters.subject,
         });
-        const diemChiTiet = res?.data?.DT?.DT?.DiemChiTiet;
-        if (res?.data?.EC === 0 && Array.isArray(diemChiTiet)) {
-          setGrades(
-            diemChiTiet.map((item) => ({
-              name: item.HoTen,
-              diemTP: item.DiemTP,
-              diemTB: item.DiemTB,
-            }))
-          );
+
+        if (res?.data?.EC === 0 && res?.data?.DT?.EC === -1) {
+          setGrades([]);
+          setError(res.data.DT.EM || "Lỗi khi truy vấn dữ liệu");
+          return;
+        }
+
+        if (res?.data?.EC === 0 && res?.data?.DT) {
+          const summary = res.data.DT;
+          if (summary.DT && summary.DT.DiemChiTiet && Array.isArray(summary.DT.DiemChiTiet)) {
+            setGrades(
+              summary.DT.DiemChiTiet.map((item) => ({
+                id: item.MaHocSinh,
+                name: item.HoTen,
+                diemTP: item.DiemTP || [],
+                diemTB: item.DiemTB,
+              }))
+            );
+          } else {
+            setGrades([]);
+            setError("Chưa có dữ liệu điểm cho lớp/môn học này");
+          }
         } else {
           setGrades([]);
-          setError(res?.data?.EM || "Không có dữ liệu điểm");
+          setError(res?.data?.EM || "Không thể lấy dữ liệu điểm");
         }
       } catch (err) {
+        console.error("Error fetching grades:", err);
         setGrades([]);
         setError("Không thể kết nối đến máy chủ");
       } finally {
         setLoading(false);
       }
     };
+
     fetchData();
   }, [filters, refreshFlag, testTypes]);
 
@@ -93,15 +109,18 @@ const useSubjectGradeTable = (filters) => {
           LoaiKiemTra: type.TenLoaiKiemTra,
           Diem: data.DiemTP[type.TenLoaiKiemTra]
         }));
+
       const payload = {
-        HoTen: data.HoTen,
+        MaHocSinh: data.MaHocSinh,
         TenLop: filters.class,
         TenMonHoc: filters.subject,
         TenHocKy: filters.semester,
         TenNamHoc: filters.year,
         DiemTP: filledScores
       };
-      const res = await reportService.addScore(payload);
+
+      const res = await subjectGradeService.addScore(payload);
+
       if (res?.data?.EC === 0) {
         toast.success("Thêm điểm thành công");
         closeAddModal();
@@ -109,7 +128,8 @@ const useSubjectGradeTable = (filters) => {
       } else {
         toast.error(res?.data?.EM || "Không thể thêm điểm");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error adding score:", error);
       toast.error("Không thể kết nối đến máy chủ");
     }
   };
@@ -123,15 +143,18 @@ const useSubjectGradeTable = (filters) => {
           LoaiKiemTra: type.TenLoaiKiemTra,
           Diemmoi: data.DiemTP.find(d => d.LoaiKiemTra === type.TenLoaiKiemTra)?.Diemmoi
         }));
+
       const payload = {
-        HoTen: data.HoTen || data.name,
+        MaHocSinh: data.MaHocSinh,
         TenLop: filters.class,
         TenMonHoc: filters.subject,
         TenHocKy: filters.semester,
         TenNamHoc: filters.year,
         DiemTP: filledScores
       };
-      const res = await reportService.editScore(payload);
+
+      const res = await subjectGradeService.editScore(payload);
+
       if (res?.data?.EC === 0) {
         toast.success("Cập nhật điểm thành công");
         closeEditModal();
@@ -139,21 +162,33 @@ const useSubjectGradeTable = (filters) => {
       } else {
         toast.error(res?.data?.EM || "Không thể cập nhật điểm");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error updating score:", error);
       toast.error("Không thể kết nối đến máy chủ");
     }
   };
 
   const removeGrade = async (data) => {
     try {
-      const res = await reportService.deleteScore(data);
+      const payload = {
+        MaHocSinh: data.MaHocSinh,
+        TenLop: filters.class,
+        TenMonHoc: filters.subject,
+        TenHocKy: filters.semester,
+        TenNamHoc: filters.year,
+        DiemTP: data.DiemTP
+      };
+
+      const res = await subjectGradeService.deleteScore(payload);
+
       if (res?.data?.EC === 0) {
         toast.success("Xóa điểm thành công");
         setRefreshFlag(f => f + 1);
       } else {
         toast.error(res?.data?.EM || "Không thể xóa điểm");
       }
-    } catch {
+    } catch (error) {
+      console.error("Error deleting score:", error);
       toast.error("Không thể kết nối đến máy chủ");
     }
   };

@@ -42,27 +42,27 @@ const getSubjectSummary = async (req, res) => {
 
 const addScore = async (req, res) => {
   try {
-    const { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
-    const new_bdchitietmonhoc = await reportAPIService.addScore(HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
+    const { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
+    const new_bdchitietmonhoc = await reportAPIService.addScore(MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
     return res.status(200).json({
-      EM: 'add score successfully!',
+      EM: 'Thêm điểm thành công',
       EC: 0, 
-      DT: new_bdchitietmonhoc, 
+      DT: new_bdchitietmonhoc
     });
   } catch (error) {
     console.log("error when adding score: ", error);
     return res.status(500).json({ 
-      EM: 'error when adding score',
+      EM: 'Lỗi khi thêm điểm',
       EC: -1, 
-      DT: [], 
+      DT: [] 
     });
   }
 }
 
 const deleteScore = async (req, res) => {
   try {
-    const { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
-    const deleteScoreList = await reportAPIService.deleteScore(HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
+    const { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
+    const deleteScoreList = await reportAPIService.deleteScore(MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
     return res.status(200).json({
       EM: 'Xóa điểm thành công',
       EC: 0, 
@@ -70,14 +70,18 @@ const deleteScore = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Lỗi server khi xoá điểm!" });
+    return res.status(500).json({
+      EM: "Lỗi server khi xoá điểm!",
+      EC: -1,
+      DT: []
+    });
   }
 };
 
 const editScore = async (req, res) => {
   try {
-    const { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
-    const editScoreList = await reportAPIService.editScore(HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
+    const { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
+    const editScoreList = await reportAPIService.editScore(MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
     return res.status(200).json({
       EM: 'Chỉnh sửa điểm thành công',
       EC: 0, 
@@ -85,7 +89,11 @@ const editScore = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: "Lỗi server khi chỉnh sửa điểm!" });
+    return res.status(500).json({
+      EM: "Lỗi server khi chỉnh sửa điểm!",
+      EC: -1,
+      DT: []
+    });
   }  
 };
 

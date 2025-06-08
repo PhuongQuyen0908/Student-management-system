@@ -11,17 +11,17 @@ const subjectGradeService = {
     }),
 
   // 3. Thêm điểm kiểm tra cho học sinh
-  addScore: ({ HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
-    axios.post('/api/report/add-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
+  addScore: ({ MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
+    axios.post('/api/report/add-score', { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
 
   // 4. Xoá điểm kiểm tra
-  deleteScore: ({ HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
-    axios.post('/api/report/delete-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
+  deleteScore: ({ MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
+    axios.post('/api/report/delete-score', { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
 
   // 5. Chỉnh sửa điểm kiểm tra
-  editScore: ({ HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
-    axios.post('/api/report/edit-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
-  
+  editScore: ({ MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>
+    axios.post('/api/report/edit-score', { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
+
   // 6. Lấy danh sách loại kiểm tra
   getTests: () => axios.get("/api/test/read"),
 };

@@ -28,7 +28,7 @@ const ModalUpdateGrade = ({ show, handleClose, grade, onSave, testTypes }) => {
                 Diemmoi: grades[type.TenLoaiKiemTra]
             }));
         onSave({
-            HoTen: grade.name,
+            MaHocSinh: grade.id,
             DiemTP: filledScores
         });
         handleClose();

@@ -1,7 +1,7 @@
 import express from "express";
 import apiController from "../controller/apiController.js";
 import studentController from "../controller/studentController.js";
-import classListController from "..//controller/classListController";
+import classListController from "../controller/classListController";
 import semesterController from "../controller/semesterController";
 // import gradeController from "../controller/gradeController" //fix sau
 //Fix lại đổi gradeController thành classController
@@ -41,9 +41,12 @@ const initApiRoutes = (app) => {
   //Danh sách lớp
   router.get("/classList/read/", classListController.readClassList);
   router.get("/classList/getById/:id", classListController.getClassListById);
+  router.get("/classList/filter", classListController.getClassListByNameAndYear);
   router.post("/classList/create", classListController.createClassList);
   router.put("/classList/update/:id", classListController.updateClassList);
   router.delete("/classList/delete/:id", classListController.deleteClassList);
+  router.post("/classList/addStudent", classListController.addStudentToClass);
+  router.delete("/classList/removeStudent/:id", classListController.removeStudentFromClass);
 
   //grades
   router.get('/grades/subject-summary', gradesController.getSubjectSummary);

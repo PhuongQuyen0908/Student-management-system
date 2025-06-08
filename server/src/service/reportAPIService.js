@@ -114,7 +114,7 @@ const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc) => {
       include: [
         {
           model: db.hocsinh,
-          attributes: ['HoTen'],
+          attributes: ['HoTen', 'MaHocSinh'],
           required: true, 
         },
       ],
@@ -154,7 +154,7 @@ const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc) => {
 
     const data = await Promise.all(ctDsl.map(async (ct) => {
       const hocSinh = ct.hocsinh?.HoTen || "Không xác định";
-    
+      const maHocSinh = ct.hocsinh?.MaHocSinh;
       const qth = quaTrinhHocList.find(q => q.MaCT_DSL === ct.MaCT_DSL);
       const bdMonHoc = qth
         ? bdMonHocList.find(bd => bd.MaQuaTrinhHoc === qth.MaQuaTrinhHoc)
@@ -176,6 +176,7 @@ const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc) => {
     
       return {
         HoTen: hocSinh,
+        MaHocSinh: maHocSinh,
         DiemTP: diemTP,
         DiemTB: diemTB
       };
@@ -206,34 +207,41 @@ const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc) => {
 }
 };
 
-const addScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
+const addScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
   try {
     const lop = await db.lop.findOne({ where: { TenLop } });
     const monHoc = await db.monhoc.findOne({ where: { TenMonHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy } });
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc } });
-    const hocSinh = await db.hocsinh.findOne({ where: { HoTen } });
+    const hocSinh = await db.hocsinh.findByPk(MaHocSinh);
 
     if (!lop || !monHoc || !hocKy || !namHoc || !hocSinh) {
       return { EM: 'Không tìm thấy thông tin học sinh', EC: -1, DT: null };
     }
 
+    // Validation logic for scores
     const minScore = await getThamSo("DiemToiThieu");
     const maxScore = await getThamSo("DiemToiDa");
 
     for (const d of DiemTP) {
       const diemSo = parseFloat(d.Diem);
       if (isNaN(diemSo) || diemSo < minScore || diemSo > maxScore) {
-        return { EM: 'Điểm ${diemSo} không hợp lệ. Phải nằm trong khoảng từ ${minScore} đến ${maxScore}.', EC: -1, DT: null }
+        return { EM: `Điểm ${diemSo} không hợp lệ. Phải nằm trong khoảng từ ${minScore} đến ${maxScore}.`, EC: -1, DT: null }
       }
     }
 
+    // Find related records
     const dsl = await db.danhsachlop.findOne({ where: { MaLop: lop.MaLop, MaNamHoc: namHoc.MaNamHoc } });
-    const ct = await db.ct_dsl.findOne({ where: { MaDanhSachLop: dsl.MaDanhSachLop, MaHocSinh: hocSinh.MaHocSinh } });
+    if (!dsl) return { EM: 'Không tìm thấy danh sách lớp', EC: -1, DT: null };
 
+    const ct = await db.ct_dsl.findOne({ where: { MaDanhSachLop: dsl.MaDanhSachLop, MaHocSinh } });
+    if (!ct) return { EM: 'Học sinh không thuộc lớp này', EC: -1, DT: null };
+
+    // Find or create the study process
     let qth = await db.quatrinhhoc.findOne({ where: { MaCT_DSL: ct.MaCT_DSL, MaHocKy: hocKy.MaHocKy } });
     if (!qth) qth = await db.quatrinhhoc.create({ MaCT_DSL: ct.MaCT_DSL, MaHocKy: hocKy.MaHocKy });
 
+    // Find or create the subject grade record
     let bd = await db.bdmonhoc.findOne({ where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc } });
     if (!bd) bd = await db.bdmonhoc.create({ MaQuaTrinhHoc: qth.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc });
 
@@ -243,12 +251,24 @@ const addScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) =
       const loai = await db.loaikiemtra.findOne({ where: { TenLoaiKiemTra: item.LoaiKiemTra } });
       if (!loai) continue;
 
-    const new_bdchitietmonhoc = await db.bdchitietmonhoc.create({
+      // Check if this score type already exists
+      const existingScore = await db.bdchitietmonhoc.findOne({
+        where: {
+          MaBDMonHoc: bd.MaBDMonHoc,
+          MaLoaiKiemTra: loai.MaLoaiKiemTra
+        }
+      });
+
+      if (existingScore) {
+        return { EM: `Điểm ${item.LoaiKiemTra} đã tồn tại. Hãy sử dụng chức năng sửa điểm.`, EC: -1, DT: [] };
+      }
+
+      const new_bdchitietmonhoc = await db.bdchitietmonhoc.create({
         MaBDMonHoc: bd.MaBDMonHoc,
         MaLoaiKiemTra: loai.MaLoaiKiemTra,
         DiemTPMonHoc: item.Diem,
       });
-    createdChiTietList.push(new_bdchitietmonhoc);
+      createdChiTietList.push(new_bdchitietmonhoc);
     }
 
     await calculateAndUpdateDiemTB(bd.MaBDMonHoc);
@@ -258,35 +278,42 @@ const addScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) =
       EC: 0,
       DT: createdChiTietList
     };
-  }
-    catch (error) {
-      console.error("Lỗi thêm điểm: ", error);
-      return {
-        EM: 'Lỗi khi thêm điểm',
-        EC: -1,
-        DT: []
-      };
+  } catch (error) {
+    console.error("Lỗi thêm điểm: ", error);
+    return {
+      EM: 'Lỗi khi thêm điểm',
+      EC: -1,
+      DT: []
     };
   }
+};
 
-const deleteScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
+const deleteScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
   try {
     const lop = await db.lop.findOne({ where: { TenLop } });
     const monHoc = await db.monhoc.findOne({ where: { TenMonHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy } });
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc } });
-    const hocSinh = await db.hocsinh.findOne({ where: { HoTen } });
+    const hocSinh = await db.hocsinh.findByPk(MaHocSinh);
 
     if (!lop || !monHoc || !hocKy || !namHoc || !hocSinh) {
       return { EM: 'Không tìm thấy thông tin', EC: -1, DT: null };
     }
 
+    // Find related records
     const dsl = await db.danhsachlop.findOne({ where: { MaLop: lop.MaLop, MaNamHoc: namHoc.MaNamHoc } });
-    const ct = await db.ct_dsl.findOne({ where: { MaDanhSachLop: dsl.MaDanhSachLop, MaHocSinh: hocSinh.MaHocSinh } });
-    const qth = await db.quatrinhhoc.findOne({ where: { MaCT_DSL: ct.MaCT_DSL, MaHocKy: hocKy.MaHocKy } });
-    const bd = await db.bdmonhoc.findOne({ where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc } });
+    if (!dsl) return { EM: 'Không tìm thấy danh sách lớp', EC: -1, DT: null };
 
-    const destroyScoreList = []
+    const ct = await db.ct_dsl.findOne({ where: { MaDanhSachLop: dsl.MaDanhSachLop, MaHocSinh } });
+    if (!ct) return { EM: 'Học sinh không thuộc lớp này', EC: -1, DT: null };
+
+    const qth = await db.quatrinhhoc.findOne({ where: { MaCT_DSL: ct.MaCT_DSL, MaHocKy: hocKy.MaHocKy } });
+    if (!qth) return { EM: 'Không tìm thấy quá trình học', EC: -1, DT: null };
+
+    const bd = await db.bdmonhoc.findOne({ where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc } });
+    if (!bd) return { EM: 'Không tìm thấy bảng điểm môn học', EC: -1, DT: null };
+
+    const destroyScoreList = [];
     for (const item of DiemTP) {
       const loai = await db.loaikiemtra.findOne({ where: { TenLoaiKiemTra: item.LoaiKiemTra } });
       if (!loai) continue;
@@ -295,7 +322,6 @@ const deleteScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP
         where: {
           MaBDMonHoc: bd.MaBDMonHoc,
           MaLoaiKiemTra: loai.MaLoaiKiemTra,
-          //DiemTPMonHoc: item.Diem,
         },
       });
 
@@ -309,65 +335,80 @@ const deleteScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP
       EC: 0,
       DT: destroyScoreList
     };
-  }
-    catch (error) {
-      console.error("Lỗi xóa điểm: ", error);
-      return {
-        EM: 'Lỗi khi xóa điểm',
-        EC: -1,
-        DT: []
-      };
+  } catch (error) {
+    console.error("Lỗi xóa điểm: ", error);
+    return {
+      EM: 'Lỗi khi xóa điểm',
+      EC: -1,
+      DT: []
     };
-
   }
+};
 
-const editScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
+const editScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
   try {
     const lop = await db.lop.findOne({ where: { TenLop } });
     const monHoc = await db.monhoc.findOne({ where: { TenMonHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy } });
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc } });
-    const hocSinh = await db.hocsinh.findOne({ where: { HoTen } });
+    const hocSinh = await db.hocsinh.findByPk(MaHocSinh);
 
     if (!lop || !monHoc || !hocKy || !namHoc || !hocSinh) {
-      return { EM: 'Không tìm thấy thông tin', EC: -1, DT: null };
-
+      return { EM: 'Không tìm thấy thông tin học sinh', EC: -1, DT: [] };
     }
 
-    const minScore = await getThamSo("DiemToiThieu");
-    const maxScore = await getThamSo("DiemToiDa");
-
-    for (const d of DiemTP) {
-      const diemSo = parseFloat(d.Diemmoi ?? d.Diem);
-      if (isNaN(diemSo) || diemSo < minScore || diemSo > maxScore) {
-        return { EM: 'Điểm ${diemSo} không hợp lệ. Phải nằm trong khoảng từ ${minScore} đến ${maxScore}.', EC: -1, DT: null };
-      }
-    }
-
+    // Find related records
     const dsl = await db.danhsachlop.findOne({ where: { MaLop: lop.MaLop, MaNamHoc: namHoc.MaNamHoc } });
-    const ct = await db.ct_dsl.findOne({ where: { MaDanhSachLop: dsl.MaDanhSachLop, MaHocSinh: hocSinh.MaHocSinh } });
-    const qth = await db.quatrinhhoc.findOne({ where: { MaCT_DSL: ct.MaCT_DSL, MaHocKy: hocKy.MaHocKy } });
-    const bd = await db.bdmonhoc.findOne({ where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc } });
+    if (!dsl) return { EM: 'Không tìm thấy danh sách lớp', EC: -1, DT: [] };
 
-    const editScoreList = []
+    const ct = await db.ct_dsl.findOne({ where: { MaDanhSachLop: dsl.MaDanhSachLop, MaHocSinh } });
+    if (!ct) return { EM: 'Học sinh không thuộc lớp này', EC: -1, DT: [] };
+
+    const qth = await db.quatrinhhoc.findOne({ where: { MaCT_DSL: ct.MaCT_DSL, MaHocKy: hocKy.MaHocKy } });
+    if (!qth) return { EM: 'Không tìm thấy quá trình học', EC: -1, DT: [] };
+
+    const bd = await db.bdmonhoc.findOne({ where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc } });
+    if (!bd) return { EM: 'Không tìm thấy bảng điểm môn học', EC: -1, DT: [] };
+
+    // Process each score update
+    const editScoreList = [];
     for (const item of DiemTP) {
       const loai = await db.loaikiemtra.findOne({ where: { TenLoaiKiemTra: item.LoaiKiemTra } });
       if (!loai) continue;
 
-      const updatedScore = await db.bdchitietmonhoc.update(
-        { DiemTPMonHoc: item.Diemmoi },
-        {
-          where: {
-            MaBDMonHoc: bd.MaBDMonHoc,
-            MaLoaiKiemTra: loai.MaLoaiKiemTra,
-            //DiemTPMonHoc: item.Diem,
-          },
+      // Check if record exists before trying to update
+      const existingRecord = await db.bdchitietmonhoc.findOne({
+        where: {
+          MaBDMonHoc: bd.MaBDMonHoc,
+          MaLoaiKiemTra: loai.MaLoaiKiemTra,
         }
-      );
+      });
 
-      editScoreList.push(updatedScore);
+      let result;
+      if (existingRecord) {
+        // Update existing record
+        result = await db.bdchitietmonhoc.update(
+          { DiemTPMonHoc: item.Diemmoi },
+          {
+            where: {
+              MaBDMonHoc: bd.MaBDMonHoc,
+              MaLoaiKiemTra: loai.MaLoaiKiemTra,
+            },
+          }
+        );
+      } else {
+        // Create new record if it doesn't exist
+        result = await db.bdchitietmonhoc.create({
+          MaBDMonHoc: bd.MaBDMonHoc,
+          MaLoaiKiemTra: loai.MaLoaiKiemTra,
+          DiemTPMonHoc: item.Diemmoi
+        });
+      }
+
+      editScoreList.push(result);
     }
 
+    // Recalculate average score
     await calculateAndUpdateDiemTB(bd.MaBDMonHoc);
 
     return {
@@ -375,15 +416,14 @@ const editScore = async (HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) 
       EC: 0,
       DT: editScoreList
     };
-  }
-    catch (error) {
-      console.error("Lỗi chỉnh sửa điểm: ", error);
-      return {
-        EM: 'Lỗi khi chỉnh sửa điểm',
-        EC: -1,
-        DT: []
-      };
+  } catch (error) {
+    console.error("Lỗi chỉnh sửa điểm: ", error);
+    return {
+      EM: 'Lỗi khi chỉnh sửa điểm',
+      EC: -1,
+      DT: []
     };
+  }
 };
 
 const tinhDiemTBHocKy = async (maQuaTrinhHoc) => {
