@@ -7,6 +7,8 @@ import "react-toastify/dist/ReactToastify.css";
 import { BrowserRouter as Router } from "react-router-dom";
 import Login from "./pages/Login/LoginPage.jsx";
 import AppRoutes from "./routes/AppRoutes.jsx";
+import { FaSpinner } from 'react-icons/fa';
+import "./styles/Spinner.scss"
 
 import ModalAddStudent from "./components/Modal/ModalAddStudent.jsx";
 import ModalUpdateStudent from "./components/Modal/ModalUpdateStudent.jsx";
@@ -27,28 +29,30 @@ function App() {
   console.log("User context in App:", user);
   return (
     <>
-    {user && user.isLoading == true ? 
-    <div>
-      <h1>Loading...</h1>
-       <ToastContainer />  
-    </div>
-    :
-    // <Router>
-    //   <div className="app-container">
-    //     {/* App Route */}
-    //     <Taskbar/>
-    //     <ModalAddStudent />
-    //     <ModalUpdateStudent />
-    //     <AppRoutes />
-    //   </div>
-    //   
-    // </Router>
-    <div>
-    <ToastContainer />  
-    <AppRoutes></AppRoutes>
-    </div>
-    }
-   </>
+      {user && user.isLoading === true ? (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '50px' }}>
+          <FaSpinner className="spinner" size={40} />
+          <p style={{ marginTop: '10px' }}>Đang tải...</p>
+          <ToastContainer />
+        </div>
+      )
+        :
+        // <Router>
+        //   <div className="app-container">
+        //     {/* App Route */}
+        //     <Taskbar/>
+        //     <ModalAddStudent />
+        //     <ModalUpdateStudent />
+        //     <AppRoutes />
+        //   </div>
+        //   
+        // </Router>
+        <div>
+          <ToastContainer />
+          <AppRoutes></AppRoutes>
+        </div>
+      }
+    </>
   );
 }
 

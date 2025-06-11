@@ -8,11 +8,13 @@ import useModal from '../../hooks/useModal';
 import { useEffect, useState } from 'react';
 //import mới 06/06/2025
 import ReactPaginate from 'react-paginate';
-import { fetchAllUsers , deleteUser } from '../../services/userServices';
+import { fetchAllUsers, deleteUser } from '../../services/userServices';
 import { toast } from 'react-toastify';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const AccountTable = () => {
-    const [listAccounts , setListAccounts] = useState([]);
+    const [listAccounts, setListAccounts] = useState([]);
 
     //pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -53,15 +55,15 @@ const AccountTable = () => {
     };
 
     const confirmDeleteAccount = async () => {
-    let response = await deleteUser(dataModal);
-    if (response && +response.data.EC === 0) {
-      toast.success(response.data.EM);
-      await fetchAccounts();
-      deleteModal.close();
-    } else {
-      toast.error(response.data.EM);
-    }
-  };
+        let response = await deleteUser(dataModal);
+        if (response && +response.data.EC === 0) {
+            toast.success(response.data.EM);
+            await fetchAccounts();
+            deleteModal.close();
+        } else {
+            toast.error(response.data.EM);
+        }
+    };
 
     return (
         <div className="student-table-wrapper">
@@ -147,7 +149,7 @@ const AccountTable = () => {
                 </table>
             </div>
 
-               {/* pagination */}
+            {/* pagination */}
             {totalPages > 0 &&
                 <div className="student-footer">
                     <ReactPaginate
@@ -195,7 +197,7 @@ const AccountTable = () => {
                 <ModalDeleteAccount
                     show={deleteModal.isOpen}
                     handleClose={deleteModal.close}
-                    confirmDeleteAccount= {confirmDeleteAccount}
+                    confirmDeleteAccount={confirmDeleteAccount}
                     dataModal={dataModal}
                 />
             )}
