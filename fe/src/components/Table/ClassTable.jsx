@@ -9,6 +9,9 @@ import useClassTable from "../../hooks/useClassTable";
 import ReactPaginate from "react-paginate";
 import "../../styles/Table.scss";
 import { useEffect } from "react";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { fetchAllClasses } from "../../services/classService";
 
 const ClassTable = () => {
   const {
@@ -76,8 +79,46 @@ const ClassTable = () => {
 
   useEffect(() => {
     fetchGrades();
-  },[])
+  }, [])
 
+  const exportToExcel = async () => {
+    try {
+      const response = await fetchAllClasses(
+        {
+          search: searchTerm,
+          page: 1,
+          limit: 10000,
+          sortField: "MaLop",
+          sortOrder: "asc"
+        });
+
+      if (response && response.data && response.data.EC === 0) {
+        const allClasses = response.data.DT.classes;
+
+        const data = allClasses.map(classes => ({
+          'Mã lớp học': classes.MaLop,
+          'Tên lớp học': classes.TenLop,
+          'Khối lớp': classes.TenKhoi
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách học sinh');
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const file = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        saveAs(file, `QuanLyLopHoc.xlsx`);
+      } else {
+        toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
+      }
+    } catch (error) {
+      console.error("Error exporting students to Excel:", error);
+      toast.error("Lỗi khi xuất file Excel");
+    }
+  };
 
   return (
     <div className="class-table-wrapper">
@@ -87,6 +128,7 @@ const ClassTable = () => {
         searchTerm={searchTerm}
         placeholder="Tìm kiếm lớp học..."
         addLabel="Thêm lớp học"
+        onExportClick={exportToExcel}
       />
 
       <div className="table-container">
@@ -94,7 +136,7 @@ const ClassTable = () => {
           <thead>
             <tr>
               <th>
-                STT
+                Mã lớp học
                 <button
                   className="sort-button"
                   value={"MaLop"}
@@ -193,7 +235,7 @@ const ClassTable = () => {
         </div>
       )}
 
-   
+
       {addModal.isOpen && (
         <ModalAddClass
           show={addModal.isOpen}

@@ -12,6 +12,9 @@ import "../../styles/Table.scss";
 
 //ngày 2/06/2025
 import { FaSort } from "react-icons/fa";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { fetchAllSubject } from "../../services/subjectServices";
 
 const SubjectTable = () => {
   const {
@@ -84,6 +87,45 @@ const SubjectTable = () => {
     return result;
   };
 
+  const exportToExcel = async () => {
+    try {
+      const response = await fetchAllSubject(
+        {
+          search: searchTerm,
+          page: 1,
+          limit: 10000,
+          sortField: "MaMonHoc",
+          sortOrder: "asc"
+        });
+
+      if (response && response.data && response.data.EC === 0) {
+        const allSubjects = response.data.DT.subjects;
+
+        const data = allSubjects.map(subject => ({
+          'Mã môn học': subject.MaMonHoc,
+          'Tên môn học': subject.TenMonHoc,
+          'Hệ số': subject.HeSo
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách học sinh');
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const file = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        saveAs(file, `DanhSachMonHoc.xlsx`);
+      } else {
+        toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
+      }
+    } catch (error) {
+      console.error("Error exporting students to Excel:", error);
+      toast.error("Lỗi khi xuất file Excel");
+    }
+  };
+
   return (
     <div className="subject-table-wrapper">
       <TableHeaderAction
@@ -92,6 +134,7 @@ const SubjectTable = () => {
         searchTerm={searchTerm}
         placeholder="Tìm kiếm môn học..."
         addLabel="Thêm môn học"
+        onExportClick={exportToExcel}
       />
 
       <div className="table-container">
