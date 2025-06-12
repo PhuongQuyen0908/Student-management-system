@@ -54,8 +54,8 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
                                         <td>{student.email}</td>
                                         <td>
                                             <div className="action-buttons">
-                                                <button 
-                                                    className="icon-button delete" 
+                                                <button
+                                                    className="icon-button delete"
                                                     title="Xoá"
                                                     onClick={() => handleRemoveStudent(student.id)}
                                                 >
@@ -67,9 +67,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan="7" className="text-center">
-                                        Không có học sinh nào trong lớp này
-                                    </td>
+                                    <td colSpan="5">Bạn không có quyền xem danh sách</td>
                                 </tr>
                             )}
                         </tbody>

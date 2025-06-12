@@ -3,16 +3,23 @@ import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
 import { toast } from "react-toastify";
 
-import { fetchAllPermissions ,  fetchAllPermissionsByGroup ,assignGroupPermissions} from "../../services/roleServices";
+import { fetchAllPermissions, fetchAllPermissionsByGroup, assignGroupPermissions } from "../../services/roleServices";
 import '../../styles/ModalAssignFunction.scss'; // Import CSS styles for the modal
 import _, { set } from "lodash";
 
+import React, { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
-const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
+
+const ModalAssignFunction = ({ show, handleClose, MaNhom, TenNhom }) => {
     const [permissions, setPermissions] = useState([]);
     const [groupedPermissions, setGroupedPermissions] = useState({});
     const [assignRolesByGroup, setAssignRolesByGroup] = useState([]);
+    const { user } = useContext(UserContext);
+    const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
 
+    // Kiểm tra quyền từ userPermissions
+    const canAssign = userPermissions.some(p => p.TenManHinhDuocLoad === "/permission/assign");
 
 
     const fetchPermissions = async () => {
@@ -30,7 +37,7 @@ const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
         }
     }
 
-    
+
     const buildDataPermissionByGroup = (groupPermissions, permissions) => {
         let result = [];
         if (permissions && permissions.length > 0) {
@@ -67,12 +74,12 @@ const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
     }
     useEffect(() => {
         fetchPermissions();
-   
+
     }, []);
 
     useEffect(() => {
         fetchPermissionsByGroup(MaNhom);
-    },[permissions]);
+    }, [permissions]);
 
     useEffect(() => {
         //Group từng quyền theo nhóm
@@ -88,18 +95,18 @@ const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
     const handleTogglePermission = (MaChucNang) => {
         const _assignRolesByGroup = _.cloneDeep(assignRolesByGroup);
         const index = _assignRolesByGroup.findIndex(item => item.MaChucNang === MaChucNang);
-        if(index > -1) {
+        if (index > -1) {
             _assignRolesByGroup[index].isAssigned = !_assignRolesByGroup[index].isAssigned;
         }
         setAssignRolesByGroup(_assignRolesByGroup);
     };
 
-    const buildDataPermissionToSave = () =>{
+    const buildDataPermissionToSave = () => {
         let data = {}
         data.MaNhom = +MaNhom;
         data.DanhSachQuyen = assignRolesByGroup.filter(item => item.isAssigned).map(item => {
             return {
-                MaNhom : +MaNhom,
+                MaNhom: +MaNhom,
                 MaChucNang: item.MaChucNang,
             }
         });
@@ -109,16 +116,21 @@ const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
     }
 
     const handleSave = async () => {
-        let data =  buildDataPermissionToSave();
-        const res =  await assignGroupPermissions(data);
-        if (res.data && res.data.EC === 0 ){
+        if (!canAssign) {
+            toast.warning("Bạn không có quyền gán quyền cho nhóm người dùng.");
+            return;
+        }
+
+        let data = buildDataPermissionToSave();
+        const res = await assignGroupPermissions(data);
+        if (res.data && res.data.EC === 0) {
             toast.success(res.data.EM || "Đã lưu quyền chức năng!");
             handleClose();
 
-        }else{
+        } else {
             toast.error(res.data.EM || "Lỗi khi lưu quyền chức năng!");
         }
-       
+
     };
 
 
@@ -142,7 +154,7 @@ const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
                                             type="checkbox"
                                             className="form-check-input"
                                             checked={permission.isAssigned}
-                                            disabled ={MaNhom ===1}
+                                            disabled={MaNhom === 1}
                                             onChange={() => handleTogglePermission(permission.MaChucNang)}
                                         />
                                         <span className="form-check-label">{permission.TenChucNang}</span>
@@ -156,7 +168,7 @@ const ModalAssignFunction = ({ show, handleClose, MaNhom , TenNhom }) => {
             </Modal.Body>
             <Modal.Footer>
                 <Button variant="warning" onClick={handleSave}>
-                    Save
+                    Lưu
                 </Button>
             </Modal.Footer>
         </Modal>
