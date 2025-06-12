@@ -7,6 +7,83 @@ db.danhsachlop.belongsTo(db.lop, { foreignKey: 'MaLop' });
 db.danhsachlop.hasMany(db.ct_dsl, { foreignKey: 'MaDanhSachLop' });
 db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: 'MaHocSinh' });
 
+import { Op, or } from 'sequelize';
+
+const buildResponse = (EM,EC,DT) => ({EM,EC,DT});
+const buildStudentSearchClause = (search) => {
+    if (!search || !search.trim()) {
+        return {}; // Không tìm kiếm nếu chuỗi rỗng
+    }
+    const terms= search.trim().split(/\s+/); 
+    const orConditions = [];
+    for(const term of terms){
+      orConditions.push(
+        { HoTen: { [Op.like]: `%${term}%` } },
+        { Email: { [Op.like]: `%${term}%` } },
+        { DiaChi: { [Op.like]: `%${term}%` } },
+        { GioiTinh: { [Op.like]: `%${term}%` } },
+        { NgaySinh: { [Op.like]: `%${term}%` } },
+      )
+    }
+    return { [Op.or]: orConditions };
+}
+
+const getAllStudentOfClass = async (MaDanhSachLop, page, limit, sortField, sortOrder, search) => {
+  //Hiển thị danh sách học sinh có tìm kiếm, phân trang, sắp xếp
+  try{
+    const validFields = ['HoTen', 'Email', 'DiaChi', 'GioiTinh', 'NgaySinh']; // Các trường hợp hợp lệ để sắp xếp
+    // Kiểm tra xem sortField có hợp lệ không
+    if (!validFields.includes(sortField)) {
+      sortField = 'HoTen'; // Mặc định sắp xếp theo HoTen nếu trường không hợp lệ
+    }
+    sortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'; // Chỉ cho phép ASC hoặc DESC
+    const offset = (page - 1) * limit; // Tính toán offset cho phân trang
+    const searchClause = buildStudentSearchClause(search); // Tạo điều kiện tìm kiếm
+    const {count, rows } = await db.ct_dsl.findAndCountAll({
+      where: {
+        MaDanhSachLop: MaDanhSachLop //Tìm theo danh sách lớp
+      },
+      //Lấy các thuộc tính cần thiết từ ct_dsl
+      attributes: ['MaCT_DSL', 'MaHocSinh'],
+      include: [
+        {
+        model: db.hocsinh,
+        where: searchClause,
+        required: true // Sử dụng INNER JOIN để chỉ lấy các kết quả khớp với tìm kiếm
+        }
+      ],
+      offset: offset,
+      limit,
+      order: [[db.hocsinh, sortField, sortOrder]],
+      distinct: true
+    });
+    const totalPages = Math.ceil(count / limit); // Tính tổng số trang
+    const data = {
+      totalItems: count,
+      totalPages: totalPages,
+      currentPage: parseInt(page),
+      students: rows.map(item => ({ // map dữ liệu 
+          MaCT_DSL: item.MaCT_DSL,
+          MaHocSinh: item.hocsinh.MaHocSinh,
+          HoTen: item.hocsinh.HoTen,
+          Email: item.hocsinh.Email,
+          DiaChi: item.hocsinh.DiaChi,
+          GioiTinh: item.hocsinh.GioiTinh,
+          NgaySinh: item.hocsinh.NgaySinh,
+      })),
+      sortField: sortField,
+      sortOrder: sortOrder,
+    };
+
+    if(data.students.length === 0){
+      return buildResponse('Không tìm thấy học sinh',1,data);
+    }
+    return buildResponse('Lấy danh sách học sinh',0,data);
+  }catch (e){
+    console.log(e.message);
+    return buildResponse('Lỗi phía server. Lấy dữ liệu thất bại', -1, []); 
+  }
+}
 const getAllClassList = async () => {
   try {
     const danhSach = await db.danhsachlop.findAll({
@@ -50,30 +127,55 @@ const getClassListById = async (id) => {
   }
 };
 
-const createClassList = async ({TenLop,NamHoc}) => {
+const createClassList = async ({ TenLop, TenNamHoc }) => {
   try {
-    //Validaation đầu vào
-    if(!TenLop||!NamHoc){
-      throw new Error("Thiếu thông tin");
+    if (!TenLop || !TenNamHoc) {
+      return buildResponse('Thiếu thông tin lớp hoặc năm học', 1, []);
     }
-    // Kiểm tra lớp có tồn tại không
-    const lop = classService.checkClassExists(TenLop);
-    if(!lop){
-      return json.status(404).json({message: "Không tìm thấy lớp học"});
+
+    // Kiểm tra tồn tại
+    const classExists = await classService.checkClassExists(TenLop);
+    if (!classExists) {
+      return buildResponse('Không tìm thấy lớp học', 1, []);
     }
-    const namhoc = schoolYearService.checkSchoolYearExists(NamHoc);
-    if(!namhoc){
-      return json.status(404).json({message: "Không tìm thấy năm học"});
+
+    const yearExists = await schoolYearService.checkSchoolYearExists(TenNamHoc);
+    if (!yearExists) {
+      return buildResponse('Không tìm thấy năm học', 1, []);
     }
-    // Tạo mới danh sách lớp với dữ liệu được truyền vào
+
+    // Truy vấn lấy chi tiết MaLop và MaNamHoc
+    const lop = await db.lop.findOne({ where: { TenLop } });
+    const namhoc = await db.namhoc.findOne({ where: { TenNamHoc } });
+
+    if (!lop || !namhoc) {
+      return buildResponse('Không thể truy xuất thông tin lớp hoặc năm học', 1, []);
+    }
+
+    // Kiểm tra trùng
+    const existing = await db.danhsachlop.findOne({
+      where: {
+        MaLop: lop.MaLop,
+        MaNamHoc: namhoc.MaNamHoc
+      }
+    });
+
+    if (existing) {
+      return buildResponse('Danh sách lớp đã tồn tại, không thể tạo mới', 1, existing);
+    }
+
+    // Tạo mới
     const created = await db.danhsachlop.create({
       MaLop: lop.MaLop,
       MaNamHoc: namhoc.MaNamHoc,
-      SiSo: 0 // Default value
+      SiSo: 0
     });
-    return created;
+
+    return buildResponse('Tạo danh sách lớp thành công', 0, created);
+
   } catch (error) {
-    throw new Error('Lỗi tạo danh sách lớp: ' + error.message);
+    console.error("Lỗi createClassList:", error);
+    return buildResponse('Lỗi phía server: ' + error.message, -1, []);
   }
 };
 
@@ -128,12 +230,11 @@ const getClassListByNameAndYear = async (tenLop, namHoc) => {
     });
 
     if (danhSach.length === 0) {
-      throw new Error('Không tìm thấy danh sách lớp theo tên và năm học');
+      return buildResponse('Không tìm thấy danh sách lớp', 1, []);
     }
-
-    return danhSach;
+    return buildResponse('Thành công', 0, danhSach);
   } catch (error) {
-    throw new Error('Lỗi tìm danh sách lớp theo tên và năm học: ' + error.message);
+    return buildRespone('Lỗi khi lấy danh sách lớp', -1, []); 
   }
 };
 
@@ -149,7 +250,7 @@ const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
     });
     
     if (existingRecord) {
-      throw new Error('Học sinh đã tồn tại trong lớp này');
+      return buildResponse('Học sinh đã tồn tại trong danh sách lớp. Không thể thêm', 1,existingRecord);
     }
     
     // Add student to class
@@ -165,10 +266,10 @@ const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
         SiSo: (classList.SiSo || 0) + 1
       });
     }
-    
-    return newRecord;
+
+    return buildResponse('Thêm học sinh vào lớp thành công', 0, newRecord);
   } catch (error) {
-    throw new Error('Lỗi thêm học sinh vào lớp: ' + error.message);
+    return buildResponse('Lỗi thêm học sinh vào lớp: ' + error.message, -1, []);
   }
 };
 
@@ -182,7 +283,7 @@ const removeStudentFromClass = async (MaCT_DSL) => {
       // Get the record to find MaDanhSachLop
       const record = await db.ct_dsl.findByPk(MaCT_DSL);
       if (!record) {
-        throw new Error('Không tìm thấy học sinh trong lớp');
+        return;
       }
       
       const MaDanhSachLop = record.MaDanhSachLop;
@@ -255,5 +356,6 @@ export default {
   deleteClassList,
   getClassListByNameAndYear,
   addStudentToClass,
-  removeStudentFromClass
+  removeStudentFromClass,
+  getAllStudentOfClass
 };

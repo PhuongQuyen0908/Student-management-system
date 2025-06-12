@@ -17,6 +17,50 @@ const readClassList = async (req, res) => {
   }
 };
 
+const readStudentsOfClass = async (req, res) => {
+  try {
+    const MaDanhSachLop = req.params.id;
+    if (!MaDanhSachLop) {
+        return res.status(400).json({ 
+            EM: 'Thiếu ID của danh sách lớp.',
+            EC: 1, 
+            DT: null 
+        });
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const sortField = req.query.sortField || 'HoTen'; // Mặc định sắp xếp theo tên
+    const sortOrder = req.query.sortOrder || 'ASC';   // Mặc định thứ tự tăng dần
+    const search = req.query.search || '';           // Mặc định không tìm kiếm
+
+    const responseData = await classListAPIService.getAllStudentOfClass(
+        MaDanhSachLop, 
+        page, 
+        limit, 
+        sortField, 
+        sortOrder, 
+        search
+    );
+
+    if (responseData.EC === 0) {
+        return res.status(200).json(responseData);
+    } else if (responseData.EC === 1) {
+        return res.status(404).json(responseData);
+    } else {
+        return res.status(500).json(responseData);
+    }
+
+  } catch (error) {
+    // Bắt các lỗi không lường trước được (ví dụ: lỗi kết nối DB, lỗi cú pháp...)
+    console.error('Lỗi nghiêm trọng trong controller readStudentsOfClass:', error);
+    return res.status(500).json({
+      EM: 'Đã có lỗi nghiêm trọng xảy ra ở phía server.',
+      EC: -1,
+      DT: null
+    });
+  }
+};
 const getClassListById = async (req, res) => {
   try {
     const id = req.params.id;
@@ -48,9 +92,9 @@ const getClassListByNameAndYear = async (req, res) => {
     
     const danhSach = await classListAPIService.getClassListByNameAndYear(tenLop, namHoc);
     res.status(200).json({ 
-      EM: 'Lấy danh sách lớp thành công',
-      EC: 0,
-      DT: danhSach 
+      EM: danhSach.EM,
+      EC: danhSach.EC,
+      DT: danhSach.DT,
     });
   } catch (error) {
     res.status(500).json({ 
@@ -63,11 +107,12 @@ const getClassListByNameAndYear = async (req, res) => {
 
 const createClassList = async (req, res) => {
   try {
+    console.log(req.body);
     const created = await classListAPIService.createClassList(req.body);
     res.status(201).json({ 
-      EM: 'Tạo danh sách lớp thành công',
-      EC: 0,
-      DT: created 
+      EM: created.EM,
+      EC: created.EC,
+      DT: created.DT
     });
   } catch (error) {
     res.status(500).json({ 
@@ -127,13 +172,13 @@ const addStudentToClass = async (req, res) => {
     
     const result = await classListAPIService.addStudentToClass(MaDanhSachLop, MaHocSinh);
     res.status(201).json({ 
-      EM: 'Thêm học sinh vào lớp thành công',
-      EC: 0,
-      DT: result 
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT
     });
   } catch (error) {
     res.status(500).json({ 
-      EM: error.message,
+      EM: 'Lỗi server',
       EC: -1,
       DT: [] 
     });
@@ -174,5 +219,6 @@ export default {
   deleteClassList,
   getClassListByNameAndYear,
   addStudentToClass,
-  removeStudentFromClass
+  removeStudentFromClass,
+  readStudentsOfClass
 };
