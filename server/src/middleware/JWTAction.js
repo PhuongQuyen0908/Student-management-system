@@ -50,7 +50,7 @@ const checkUserJWT = (req, res, next) => {
       next();
     } else {
       return res.status(401).json({
-        EM: "Not authenticated the user",
+        EM: "Người dùng chưa được xác thực",
         EC: -1,
         DT: "",
       });
@@ -69,7 +69,7 @@ const checkUserPermission = (req, res, next) => {
   if (nonSecurePaths.includes(req.path) || req.path === "/account" || req.path ==="/year/read" 
   || req.path ==="/test/read" || req.path ==="/report/options" || req.path === "/classGrade/read" 
   || req.path ==="/group/read"  || req.path.startsWith("/permission/by-group/") ||req.path ==="/permission/assign"
-  || req.path === "/classList/filter" )
+  || req.path === "/classList/filter" || req.path ==="/user/change-password" )
     return next();
   if (req.user) {
     let roles = req.user.groupWithPermissions.chucnangs;
