@@ -41,6 +41,17 @@ const removeStudentFromClass = (id) => {
   return axios.delete(`/api/classList/removeStudent/${id}`);
 };
 
+const getStudentsOfClass = (classId, options = {}) => {
+  // classId ở đây tương ứng với :id trong route
+  // options là một object { page, limit, search, sortField, sortOrder }
+  if (!classId) {
+    return Promise.reject(new Error("Class ID is required"));
+  }
+  // URL này khớp với route đã sửa: /classList/getStudentInClass/:id
+  return axios.get(`/api/classList/getStudentInClass/${classId}`, {
+    params: options
+  });
+};
 export {
   getAllClassLists,
   getClassListById,
@@ -49,5 +60,6 @@ export {
   updateClassList,
   deleteClassList,
   addStudentToClass,
-  removeStudentFromClass
+  removeStudentFromClass, 
+  getStudentsOfClass
 };

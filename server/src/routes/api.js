@@ -77,6 +77,7 @@ const initApiRoutes = (app) => {
   router.delete("/classList/delete/:id", classListController.deleteClassList);
   router.post("/classList/addStudent", classListController.addStudentToClass);
   router.delete("/classList/removeStudent/:id", classListController.removeStudentFromClass);
+  router.get("/classList/getStudentInClass/:id", classListController.readStudentsOfClass);
 
   //grades
   router.get('/grades/subject-summary', gradesController.getSubjectSummary);
@@ -108,7 +109,7 @@ const initApiRoutes = (app) => {
   router.put("/class/update/:id", classController.updateClass);
   router.delete("/class/delete/:id", classController.deleteClass);
 
-  // //Tham số
+  // Tham số
   router.get("/paramenter/read", paramenterController.getAllParamenters); 
   router.put("/paramenter/update/:id", paramenterController.updateParamenter);
 

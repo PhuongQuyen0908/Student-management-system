@@ -29,7 +29,7 @@ const getSchoolYearById = async (id) => {
 const checkSchoolYearExists = async (SchoolYearName) => {
   try {
     const existingSchoolYear = await db.namhoc.findOne({
-      where: { NamHoc: SchoolYearName }
+      where: { TenNamHoc: SchoolYearName }
     });
     return existingSchoolYear !== null; // Trả về true nếu năm học đã tồn tại, ngược lại trả về false
   } catch (error) {
