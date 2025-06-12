@@ -143,7 +143,7 @@ const StudentTable = () => {
                 placeholder="Tìm kiếm học sinh..."
                 addLabel="Thêm học sinh"
                 //ẩn nút nếu k có quyền
-                hideAdd={(userPermissions.TenManHinhDuocLoad === "/student/create")}
+                hideAdd={!(userPermissions.some(p => p.TenManHinhDuocLoad === "/student/create"))}
                 onExportClick={exportToExcel}
             />
 
@@ -223,10 +223,11 @@ const StudentTable = () => {
                                     </tr>
                                 ))}
                             </>
-                            :
-                            <>
-                                <tr><td>Bạn không có quyền xem danh sách</td></tr>
-                            </>}
+                            : (
+                                <tr>
+                                    <td colSpan="5">Bạn không có quyền xem danh sách</td>
+                                </tr>
+                            )}
                     </tbody>
                 </table>
             </div>

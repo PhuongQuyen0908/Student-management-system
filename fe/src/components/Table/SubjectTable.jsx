@@ -15,8 +15,18 @@ import { FaSort } from "react-icons/fa";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { fetchAllSubject } from "../../services/subjectServices";
+import React, { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const SubjectTable = () => {
+  const { user } = useContext(UserContext);
+  const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
+
+  // Kiểm tra quyền từ userPermissions
+  const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/subject/create");
+  const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/subject/update");
+  const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/subject/delete");
+
   const {
     addModal,
     updateModal,
@@ -135,6 +145,7 @@ const SubjectTable = () => {
         placeholder="Tìm kiếm môn học..."
         addLabel="Thêm môn học"
         onExportClick={exportToExcel}
+        hideAdd={!canCreate}
       />
 
       <div className="table-container">
@@ -187,27 +198,31 @@ const SubjectTable = () => {
                   <td>{highlightText(subject.HeSo, searchTerm)}</td>
                   <td>
                     <div className="action-buttons">
-                      <button
-                        className="icon-button edit"
-                        onClick={() => handleEditSubject(subject)}
-                        title="Chỉnh sửa"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="icon-button delete"
-                        onClick={() => handleDeleteSubject(subject)}
-                        title="Xoá"
-                      >
-                        <FaTrash />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          className="icon-button edit"
+                          onClick={() => handleEditSubject(subject)}
+                          title="Chỉnh sửa"
+                        >
+                          <FaEdit />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          className="icon-button delete"
+                          onClick={() => handleDeleteSubject(subject)}
+                          title="Xoá"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="5">Không tìm thấy môn học nào</td>
+                <td colSpan="5">Bạn không có quyền xem danh sách</td>
               </tr>
             )}
           </tbody>

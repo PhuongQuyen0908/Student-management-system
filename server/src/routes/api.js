@@ -60,6 +60,7 @@ const initApiRoutes = (app) => {
   router.post("/user/create", userController.createFunc);
   router.put("/user/update", userController.updateFunc);
   router.delete("/user/delete", userController.deleteFunc);
+  router.post("/user/change-password", userController.changePassword); // đổi mật khẩu
 
   //CRUD student
   router.get("/student/read", studentController.readFunc);

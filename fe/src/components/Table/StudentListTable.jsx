@@ -1,19 +1,21 @@
 import TableHeaderAction from '../TableHeaderAction';
 import '../../styles/Table.scss';
 
-
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import ReactPaginate from 'react-paginate';
 import useStudentListTable from '../../hooks/useStudentListTable';
 import { fetchStudentWithYear } from "../../services/studentServices";
-
 
 //import 29/05/2025
 import { FaSort } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
+// import context
+import { UserContext } from '../../context/UserContext';
+
 const StudentListTable = ({ selectedYear }) => {
+    const { isAvailable } = useContext(UserContext); // lấy phân quyền
 
     const {
         listStudents,
@@ -27,7 +29,6 @@ const StudentListTable = ({ selectedYear }) => {
         sortField, // trường đang sắp xếp
         sortOrder // thứ tự sắp xếp
     } = useStudentListTable(selectedYear);
-
 
     useEffect(() => {
         fetchStudents();
@@ -80,6 +81,7 @@ const StudentListTable = ({ selectedYear }) => {
 
         return result.length > 0 ? result : text;
     };
+
     const exportToExcel = async () => {
         try {
             const response = await fetchStudentWithYear(
@@ -120,7 +122,6 @@ const StudentListTable = ({ selectedYear }) => {
             toast.error("Lỗi khi xuất file Excel");
         }
     };
-
 
     return (
         <div className="studentlist-table-wrapper">

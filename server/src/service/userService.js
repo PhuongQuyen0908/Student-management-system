@@ -218,10 +218,63 @@ const deleteUser = async (TenDangNhap) => {
   }
 };
 
+const checkPassword = (inputPassword , databasePassword) =>{
+    return inputPassword ===  databasePassword;
+}
+
+const changePasswordUser = async (TenDangNhap, MatKhauCu , MatKhauMoi, XacNhanMatKhau) => {
+  try {
+    let user = await db.nguoidung.findOne({
+      where: { TenDangNhap: TenDangNhap },
+    });
+    if (MatKhauMoi !== XacNhanMatKhau) {
+      return {
+        EM: "Mật khẩu mới và mật khẩu xác nhận lại không khớp",
+        EC: 1,
+        DT: '',
+      };
+    }
+    if (user) {
+      let isCorrectPassword = checkPassword( MatKhauCu , user.MatKhau);
+      if (isCorrectPassword === true) {
+        if(MatKhauMoi === MatKhauCu){
+          return {
+            EM: "Mật khẩu mới không được trùng với mật khẩu cũ",
+            EC: 1,
+            DT: '',
+          };
+        }
+      await user.update({
+        MatKhau: MatKhauMoi,
+      });
+      return {
+        EM: "Cập nhật mật khẩu thành công",
+        EC: 0,
+        DT: '',
+      };
+    } else {
+      //not found
+      return {
+        EM: "Không tìm thấy người dùng hoặc mật khẩu cũ không đúng",
+        EC: 1,
+        DT: [],
+      };
+  }
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "something wrongs with service",
+      EC: -1,
+      DT: [],
+    };
+  }
+}
 module.exports = {
   getAllUser,
   createNewUser,
   updateUser,
   deleteUser,
   getUserWithPagination,
+  changePasswordUser
 };

@@ -27,6 +27,10 @@ const deleteUser = (User) => {
   });
 };
 
+const changePassword = (data) => {
+  return axios.post(`/api/user/change-password`, data);
+};
+
 const updateUser = (userData) => {
   return axios.put(`/api/user/update`, { ...userData });
 };
@@ -43,4 +47,4 @@ const fetchGroup = ()=>{ //dùng để lấy danh sách nhóm người dùng cho
   return axios.get('api/group/read');
 }
 
-export { loginUser , getUserAccount , logoutUser , fetchAllUsers, createUser, fetchGroup , deleteUser, updateUser };
+export { loginUser , getUserAccount , logoutUser , fetchAllUsers, createUser, fetchGroup , deleteUser, updateUser,changePassword };

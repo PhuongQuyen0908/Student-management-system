@@ -19,9 +19,7 @@ const handleUserLogin = async (rawData) =>{
     })
 
     if (user) {
-      console.log("Found user with value login", user.TenDangNhap);
       let isCorrectPassword = checkPassword(rawData.password, user.MatKhau);
-      console.log("check password", isCorrectPassword);
       if (isCorrectPassword === true) {
         //let token
 
@@ -30,6 +28,7 @@ const handleUserLogin = async (rawData) =>{
         let payload ={
           groupWithPermissions,
           username: user.TenDangNhap,
+          HoTen: user.HoTen,
         }
         let token = createJWT(payload);
         return {
@@ -38,7 +37,8 @@ const handleUserLogin = async (rawData) =>{
           DT: {
             access_token:token,
             groupWithPermissions: groupWithPermissions,
-            username: user.TenDangNhap
+            username: user.TenDangNhap,
+            HoTen: user.HoTen,
           },
         };
       }

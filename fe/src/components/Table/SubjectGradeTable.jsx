@@ -6,8 +6,17 @@ import ModalDeleteScore from '../Modal/ModalDeleteScore';
 import TableHeaderAction from '../TableHeaderAction';
 import useSubjectGradeTable from '../../hooks/useSubjectGradeTable';
 import '../../styles/Table.scss';
+import React, { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const SubjectGradeTable = ({ filters }) => {
+  const { user } = useContext(UserContext);
+  const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
+
+  const canAdd = userPermissions.some(p => p.TenManHinhDuocLoad === "/report/add-score");
+  const canEdit = userPermissions.some(p => p.TenManHinhDuocLoad === "/report/edit-score");
+  const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/report/delete-score");
+
   const {
     grades,
     loading,
@@ -65,28 +74,35 @@ const SubjectGradeTable = ({ filters }) => {
                   <td>{student.diemTB}</td>
                   <td>
                     <div className="action-buttons">
-                      <button
-                        className="icon-button edit"
-                        title="Chỉnh sửa điểm"
-                        onClick={() => openEditModal(student)}>
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="icon-button add"
-                        title="Thêm điểm mới"
-                        onClick={() => openAddModal(student)}>
-                        <FaPlus />
-                      </button>
-                      <button
-                        className="icon-button delete"
-                        title="Xóa điểm"
-                        onClick={() => openDeleteModal(student)}>
-                        <FaTrash />
-                      </button>
+                      {canEdit && (
+                        <button
+                          className="icon-button edit"
+                          title="Chỉnh sửa điểm"
+                          onClick={() => openEditModal(student)}>
+                          <FaEdit />
+                        </button>
+                      )}
+                      {canAdd && (
+                        <button
+                          className="icon-button add"
+                          title="Thêm điểm mới"
+                          onClick={() => openAddModal(student)}>
+                          <FaPlus />
+                        </button>
+                      )}
+                      {canDelete && (
+                        <button
+                          className="icon-button delete"
+                          title="Xóa điểm"
+                          onClick={() => openDeleteModal(student)}>
+                          <FaTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
+
             </tbody>
           </table>
         </div>

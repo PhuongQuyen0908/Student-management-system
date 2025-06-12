@@ -28,12 +28,13 @@ const UserProvider = ({ children }) => {
     let response = await getUserAccount();
     if (response.data && +response.data.EC === 0) {
       let groupWithPermissions = response.data.DT.groupWithPermissions;
-       let username = response.data.DT.username;
+      let username = response.data.DT.username;
+      let HoTen = response.data.DT.HoTen;
       let token = response.data.DT.access_token;
       let data = {
         isAuthenticated:true,
         token: token, 
-       account: { groupWithPermissions, username },
+       account: { groupWithPermissions, username ,HoTen },
       }
       setUser(data)
     }else{
@@ -63,6 +64,7 @@ const UserProvider = ({ children }) => {
     DanhSachMonHoc: ['/subject/read', '/subject/create', '/subject/update', '/subject/delete'],
     BangDiemMonHoc: ['/report/subject-summary' ,'/report/add-score' , '/report/edit-score', '/report/delete-score'],
     DanhSachLopHoc: ['/class/read', '/class/create', '/class/update', '/class/delete'],
+    DanhSachLop: ['/classList/read' ,'/classList/addStudent' ,'/classList/removeStudent'],
     BaoCaoMonHoc: ['/report/subject-report'],
     BaoCaoHocKy: ['/report/semester-report'],
     ThayDoiQuyDinh: ['/paramenter/read', '/paramenter/update'],
