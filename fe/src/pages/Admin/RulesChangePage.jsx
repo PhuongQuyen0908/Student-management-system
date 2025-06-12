@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "../../styles/Page/RulesChangePage.scss";
 import TableHeaderAction from "../../components/TableHeaderAction";
-import { useState } from "react";
 import useParamenterTable from "../../hooks/useParamenter";
-import { useEffect } from "react";
-import '../../styles/FilterGroup.scss';
+import "../../styles/FilterGroup.scss";
+import { UserContext } from "../../context/UserContext";
+import { toast } from "react-toastify"; // Đảm bảo đã cài toastify
+
 const PARAMS = [
   { key: "TuoiToiThieu", label: "Số tuổi tối thiểu" },
   { key: "TuoiToiDa", label: "Số tuổi tối đa" },
@@ -16,11 +17,15 @@ const PARAMS = [
 ];
 
 const RulesChangePage = () => {
-  const { parameterList, handleUpdateParamenter } = useParamenterTable();
+  const { user } = useContext(UserContext);
+  const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
+  const canUpdate = userPermissions.some(
+    (p) => p.TenManHinhDuocLoad === "/paramenter/update"
+  );
 
+  const { parameterList, handleUpdateParamenter } = useParamenterTable();
   const [values, setValues] = useState({});
 
-  // Khi parameterList thay đổi, cập nhật state values
   useEffect(() => {
     const newValues = {};
     PARAMS.forEach((param) => {
@@ -30,17 +35,18 @@ const RulesChangePage = () => {
     setValues(newValues);
   }, [parameterList]);
 
-  // Xử lý thay đổi input
   const handleChange = (key, value) => {
     setValues((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Xử lý khi ấn Lưu
   const handleSave = (key) => {
+    if (!canUpdate) {
+      toast.warning("Bạn không có quyền thay đổi quy định.");
+      return;
+    }
     handleUpdateParamenter(key, { GiaTri: values[key] });
   };
 
-  //Lấy giá trị từng tham số từ state values
   const {
     TuoiToiThieu = "",
     TuoiToiDa = "",
@@ -50,6 +56,7 @@ const RulesChangePage = () => {
     DiemQuaMon = "",
     SiSoToiDa = "",
   } = values;
+
   return (
     <div className="ruleschange-page-container">
       <div className="ruleschange-card full">
@@ -124,7 +131,7 @@ const RulesChangePage = () => {
               <input
                 type="number"
                 value={DiemToiDa}
-                onChange={(e) => handleChange("TuoiToiDa", e.target.value)}
+                onChange={(e) => handleChange("DiemToiDa", e.target.value)}
               />
               <button onClick={() => handleSave("DiemToiDa")}>Lưu</button>
             </div>
@@ -148,7 +155,7 @@ const RulesChangePage = () => {
               <input
                 type="number"
                 value={DiemQuaMon}
-                onChange={(e) => handleChange("DiemQuanMon", e.target.value)}
+                onChange={(e) => handleChange("DiemQuaMon", e.target.value)}
               />
               <button onClick={() => handleSave("DiemQuaMon")}>Lưu</button>
             </div>

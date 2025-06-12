@@ -12,8 +12,17 @@ import { useEffect } from "react";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { fetchAllClasses } from "../../services/classService";
+import React, { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const ClassTable = () => {
+  const { user } = useContext(UserContext);
+  const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
+
+  // Kiểm tra quyền từ userPermissions
+  const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/class/create");
+  const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/class/update");
+  const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/class/delete");
   const {
     gradesList,
     classList,
@@ -129,6 +138,7 @@ const ClassTable = () => {
         placeholder="Tìm kiếm lớp học..."
         addLabel="Thêm lớp học"
         onExportClick={exportToExcel}
+        hideAdd={!canCreate}
       />
 
       <div className="table-container">
@@ -182,29 +192,31 @@ const ClassTable = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button
-                        className="icon-button edit"
-                        onClick={() => handleOpenUpdateModal(classItem)}
-                        title="Chỉnh sửa"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="icon-button delete"
-                        onClick={() => handleOpenDeleteModal(classItem)}
-                        title="Xóa"
-                      >
-                        <FaTrash />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          className="icon-button edit"
+                          onClick={() => handleOpenUpdateModal(classItem)}
+                          title="Chỉnh sửa"
+                        >
+                          <FaEdit />
+                        </button>
+                      )}
+                      {canUpdate && (
+                        <button
+                          className="icon-button delete"
+                          onClick={() => handleOpenDeleteModal(classItem)}
+                          title="Xóa"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-                  Không có dữ liệu
-                </td>
+                <td colSpan="5">Bạn không có quyền xem danh sách</td>
               </tr>
             )}
           </tbody>
