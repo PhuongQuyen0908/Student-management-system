@@ -9,8 +9,20 @@ import useClassTable from "../../hooks/useClassTable";
 import ReactPaginate from "react-paginate";
 import "../../styles/Table.scss";
 import { useEffect } from "react";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { fetchAllClasses } from "../../services/classService";
+import React, { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const ClassTable = () => {
+  const { user } = useContext(UserContext);
+  const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
+
+  // Kiểm tra quyền từ userPermissions
+  const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/class/create");
+  const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/class/update");
+  const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/class/delete");
   const {
     gradesList,
     classList,
@@ -76,8 +88,46 @@ const ClassTable = () => {
 
   useEffect(() => {
     fetchGrades();
-  },[])
+  }, [])
 
+  const exportToExcel = async () => {
+    try {
+      const response = await fetchAllClasses(
+        {
+          search: searchTerm,
+          page: 1,
+          limit: 10000,
+          sortField: "MaLop",
+          sortOrder: "asc"
+        });
+
+      if (response && response.data && response.data.EC === 0) {
+        const allClasses = response.data.DT.classes;
+
+        const data = allClasses.map(classes => ({
+          'Mã lớp học': classes.MaLop,
+          'Tên lớp học': classes.TenLop,
+          'Khối lớp': classes.TenKhoi
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(data);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách học sinh');
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const file = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        });
+
+        saveAs(file, `QuanLyLopHoc.xlsx`);
+      } else {
+        toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
+      }
+    } catch (error) {
+      console.error("Error exporting students to Excel:", error);
+      toast.error("Lỗi khi xuất file Excel");
+    }
+  };
 
   return (
     <div className="class-table-wrapper">
@@ -87,6 +137,8 @@ const ClassTable = () => {
         searchTerm={searchTerm}
         placeholder="Tìm kiếm lớp học..."
         addLabel="Thêm lớp học"
+        onExportClick={exportToExcel}
+        hideAdd={!canCreate}
       />
 
       <div className="table-container">
@@ -94,7 +146,7 @@ const ClassTable = () => {
           <thead>
             <tr>
               <th>
-                STT
+                Mã lớp học
                 <button
                   className="sort-button"
                   value={"MaLop"}
@@ -140,29 +192,31 @@ const ClassTable = () => {
                   </td>
                   <td>
                     <div className="action-buttons">
-                      <button
-                        className="icon-button edit"
-                        onClick={() => handleOpenUpdateModal(classItem)}
-                        title="Chỉnh sửa"
-                      >
-                        <FaEdit />
-                      </button>
-                      <button
-                        className="icon-button delete"
-                        onClick={() => handleOpenDeleteModal(classItem)}
-                        title="Xóa"
-                      >
-                        <FaTrash />
-                      </button>
+                      {canUpdate && (
+                        <button
+                          className="icon-button edit"
+                          onClick={() => handleOpenUpdateModal(classItem)}
+                          title="Chỉnh sửa"
+                        >
+                          <FaEdit />
+                        </button>
+                      )}
+                      {canUpdate && (
+                        <button
+                          className="icon-button delete"
+                          onClick={() => handleOpenDeleteModal(classItem)}
+                          title="Xóa"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4} style={{ textAlign: "center" }}>
-                  Không có dữ liệu
-                </td>
+                <td colSpan="5">Bạn không có quyền xem danh sách</td>
               </tr>
             )}
           </tbody>
@@ -193,7 +247,7 @@ const ClassTable = () => {
         </div>
       )}
 
-   
+
       {addModal.isOpen && (
         <ModalAddClass
           show={addModal.isOpen}

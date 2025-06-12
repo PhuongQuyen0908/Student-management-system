@@ -5,7 +5,7 @@ import '../../styles/Page/ClassesPage.scss'
 const ClassesPage = () => {
     return (
         <div className="classes-page-container">
-            <h2 className="classes-title">Danh sách lớp học</h2>
+            <h2 className="classes-title">Quản lý lớp học</h2>
             <ClassTable />
         </div>
     );

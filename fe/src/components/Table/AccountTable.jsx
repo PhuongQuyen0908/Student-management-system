@@ -8,11 +8,23 @@ import useModal from '../../hooks/useModal';
 import { useEffect, useState } from 'react';
 //import mới 06/06/2025
 import ReactPaginate from 'react-paginate';
-import { fetchAllUsers , deleteUser } from '../../services/userServices';
+import { fetchAllUsers, deleteUser } from '../../services/userServices';
 import { toast } from 'react-toastify';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import React, { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const AccountTable = () => {
-    const [listAccounts , setListAccounts] = useState([]);
+    const { user } = useContext(UserContext);
+    const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
+
+    // Kiểm tra quyền từ userPermissions
+    const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/user/create");
+    const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/user/update");
+    const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/user/delete");
+
+    const [listAccounts, setListAccounts] = useState([]);
 
     //pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -53,15 +65,15 @@ const AccountTable = () => {
     };
 
     const confirmDeleteAccount = async () => {
-    let response = await deleteUser(dataModal);
-    if (response && +response.data.EC === 0) {
-      toast.success(response.data.EM);
-      await fetchAccounts();
-      deleteModal.close();
-    } else {
-      toast.error(response.data.EM);
-    }
-  };
+        let response = await deleteUser(dataModal);
+        if (response && +response.data.EC === 0) {
+            toast.success(response.data.EM);
+            await fetchAccounts();
+            deleteModal.close();
+        } else {
+            toast.error(response.data.EM);
+        }
+    };
 
     return (
         <div className="student-table-wrapper">
@@ -70,6 +82,7 @@ const AccountTable = () => {
                 onSearchChange={() => { }}
                 placeholder="Tìm kiếm tài khoản..."
                 addLabel="Thêm tài khoản"
+                hideAdd={!canCreate}
             />
 
             <div className="table-container">
@@ -120,34 +133,38 @@ const AccountTable = () => {
                                     <td>{account.nhomnguoidung.TenNhom}</td>
                                     <td>
                                         <div className="action-buttons">
-                                            <button
-                                                className="icon-button edit"
-                                                onClick={() => handleEditAccount(account)}
-                                                title="Chỉnh sửa"
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                            <button
-                                                className="icon-button lock"
-                                                onClick={() => handleDeleteAccount(account)}
-                                                title="Xóa"
-                                            >
-                                                <FaLock />
-                                            </button>
+                                            {canUpdate && (
+                                                <button
+                                                    className="icon-button edit"
+                                                    onClick={() => handleEditAccount(account)}
+                                                    title="Chỉnh sửa"
+                                                >
+                                                    <FaEdit />
+                                                </button>
+                                            )}
+                                            {canDelete && (
+                                                <button
+                                                    className="icon-button lock"
+                                                    onClick={() => handleDeleteAccount(account)}
+                                                    title="Xóa"
+                                                >
+                                                    <FaLock />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="6">Không tìm thấy tài khoản</td>
+                                <td colSpan="5">Bạn không có quyền xem danh sách</td>
                             </tr>
                         )}
                     </tbody>
                 </table>
             </div>
 
-               {/* pagination */}
+            {/* pagination */}
             {totalPages > 0 &&
                 <div className="student-footer">
                     <ReactPaginate
@@ -195,7 +212,7 @@ const AccountTable = () => {
                 <ModalDeleteAccount
                     show={deleteModal.isOpen}
                     handleClose={deleteModal.close}
-                    confirmDeleteAccount= {confirmDeleteAccount}
+                    confirmDeleteAccount={confirmDeleteAccount}
                     dataModal={dataModal}
                 />
             )}
