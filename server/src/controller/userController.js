@@ -91,15 +91,35 @@ const getUserAccount = async (req, res) =>{
     DT: {
       access_token:req.token,
       groupWithPermissions:req.user.groupWithPermissions,
-      username:req.user.username    
+      username:req.user.username,
+      HoTen:req.user.HoTen,
     }
   }); 
 }
 
+const changePassword = async (req, res) => {
+  try {
+    const {TenDangNhap, MatKhauCu, MatKhauMoi , XacNhanMatKhau} = req.body;
+    let data = await userService.changePasswordUser(TenDangNhap, MatKhauCu, MatKhauMoi , XacNhanMatKhau);
+    return res.status(200).json({
+      EM: data.EM,
+      EC: data.EC, //error code
+      DT: data.DT, //data
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      EM: "error from server", //error message
+      EC: "-1", //error code
+      DT: "", //data
+    });
+  }
+};
 module.exports = {
   getUserAccount,
   readFunc,
   createFunc,
   updateFunc,
-  deleteFunc
+  deleteFunc,
+  changePassword
 };

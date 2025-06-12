@@ -19,6 +19,7 @@ const testApi = (req, res) => {
         httpOnly: true,
         maxAge: 60 * 60 *1000 , //giới hạn 1 hour
       });
+    
     }
     return res.status(200).json({
       EM: data.EM,
