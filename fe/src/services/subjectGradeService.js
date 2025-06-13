@@ -5,10 +5,11 @@ const subjectGradeService = {
   getOptions: () => axios.get('/api/report/options'),
 
   // 2. Lấy bảng điểm theo môn học của học sinh (BM5.1 - subject summary)
-  getSubjectSummary: ({ tenLop, tenHocKy, tenNamHoc, tenMonHoc }) =>
+  getSubjectSummary: (params) =>
+    // params là object chứa: tenLop, tenHocKy, tenNamHoc, tenMonHoc, page, limit, search, sortField, sortOrder
     axios.get('/api/report/subject-summary', {
-      params: { tenLop, tenHocKy, tenNamHoc, tenMonHoc }
-    }),
+      params:params,
+    }), 
 
   // 3. Thêm điểm kiểm tra cho học sinh
   addScore: ({ MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }) =>

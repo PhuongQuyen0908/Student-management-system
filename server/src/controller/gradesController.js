@@ -20,10 +20,39 @@ const getOptions = async (req, res) => {
   }
 };
 
+// const getSubjectSummary = async (req, res) => {
+//   try {
+//      const { tenLop, tenHocKy, tenNamHoc, tenMonHoc } = req.query;
+//      const summary = await reportAPIService.getSubjectSummary(tenLop, tenHocKy, tenNamHoc, tenMonHoc) 
+//      return res.status(200).json({
+//       EM: 'fetch ok',
+//       EC: 0, 
+//       DT: summary, 
+//     });
+//   } catch (error) {
+//     console.log("Lỗi getSubjectSummary:", error);
+//     return res.status(500).json({ 
+//       EM: 'error when getting subject summary',
+//       EC: -1, 
+//       DT: [], 
+//     });
+//   }
+// };
+
 const getSubjectSummary = async (req, res) => {
   try {
-     const { tenLop, tenHocKy, tenNamHoc, tenMonHoc } = req.query;
-     const summary = await reportAPIService.getSubjectSummary(tenLop, tenHocKy, tenNamHoc, tenMonHoc) 
+     // Lấy các tham số mới từ query
+     const { 
+        tenLop, tenHocKy, tenNamHoc, tenMonHoc, 
+        page, limit, search, sortField, sortOrder 
+     } = req.query;
+
+     // Truyền các tham số mới vào service
+     const summary = await reportAPIService.getSubjectSummary(
+        tenLop, tenHocKy, tenNamHoc, tenMonHoc,
+        page, limit, search, sortField, sortOrder
+     );
+     
      return res.status(200).json({
       EM: 'fetch ok',
       EC: 0, 

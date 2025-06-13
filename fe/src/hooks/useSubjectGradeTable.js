@@ -1,11 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import subjectGradeService from "../services/subjectGradeService";
 import { toast } from "react-toastify";
+import _, { set } from "lodash";
 
 const useSubjectGradeTable = (filters) => {
   const [grades, setGrades] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -13,55 +15,74 @@ const useSubjectGradeTable = (filters) => {
   const [refreshFlag, setRefreshFlag] = useState(0);
   const [testTypes, setTestTypes] = useState([]);
 
+  //New state cho chức năng tìm kiếm + phân trang + sort
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState({ field: 'HoTen', order: 'ASC' });
+
+
   // Fetch test types from DB
   useEffect(() => {
     subjectGradeService.getTests().then(res => {
+      //Giả sử API trả về toàn bộ loại kiểm tra
       if (Array.isArray(res.data?.data)) setTestTypes(res.data.data);
     });
   }, []);
 
-  useEffect(() => {
-    if (!filters || !filters.class || !filters.semester || !filters.year || !filters.subject) {
-      setGrades([]);
-      setError("Vui lòng chọn đầy đủ bộ lọc để xem bảng điểm.");
-      return;
-    }
+  // useEffect(() => {
+  //   if (!filters || !filters.class || !filters.semester || !filters.year || !filters.subject) {
+  //     setGrades([]);
+  //     setError("Vui lòng chọn đầy đủ bộ lọc để xem bảng điểm.");
+  //     return;
+  //   }
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
+      if (!filters || !filters.class || !filters.semester || !filters.year || !filters.subject) {
+        setGrades([]);
+        setError("Vui lòng chọn đầy đủ bộ lọc để xem bảng điểm.");
+        return;
+      }
       setLoading(true);
       setError("");
       try {
-        const res = await subjectGradeService.getSubjectSummary({
+        const params = {
           tenLop: filters.class,
           tenHocKy: filters.semester,
           tenNamHoc: filters.year,
           tenMonHoc: filters.subject,
-        });
-
+          page: currentPage,
+          limit: limit,
+          search: searchTerm,
+          sortField: sortConfig.field,
+          sortOrder: sortConfig.order
+        }
+        
+        const res = await subjectGradeService.getSubjectSummary(params);
         if (res?.data?.EC === 0 && res?.data?.DT?.EC === -1) {
           setGrades([]);
           setError(res.data.DT.EM || "Lỗi khi truy vấn dữ liệu");
           return;
         }
-
-        if (res?.data?.EC === 0 && res?.data?.DT) {
-          const summary = res.data.DT;
-          if (summary.DT && summary.DT.DiemChiTiet && Array.isArray(summary.DT.DiemChiTiet)) {
-            setGrades(
-              summary.DT.DiemChiTiet.map((item) => ({
-                id: item.MaHocSinh,
-                name: item.HoTen,
-                diemTP: item.DiemTP || [],
-                diemTB: item.DiemTB,
-              }))
-            );
-          } else {
+        if (res?.data?.EC === 0 && res.data.DT?.DT) {
+          const {count, rows} = res.data.DT.DT.DiemChiTiet;
+          setGrades(
+            rows.map((item) => ({
+              id: item.MaHocSinh,
+              name: item.HoTen,
+              diemTP: item.DiemTP || [],
+              diemTB: item.DiemTB,
+            }))
+          );
+          setTotalPages(Math.ceil(count/limit));
+          if(rows.length === 0 ){
+            setError("Không có dữ liệu điểm");
+          }
+        } 
+        else {
             setGrades([]);
             setError("Chưa có dữ liệu điểm cho lớp/môn học này");
-          }
-        } else {
-          setGrades([]);
-          setError(res?.data?.EM || "Không thể lấy dữ liệu điểm");
         }
       } catch (err) {
         console.error("Error fetching grades:", err);
@@ -70,10 +91,28 @@ const useSubjectGradeTable = (filters) => {
       } finally {
         setLoading(false);
       }
-    };
+    },[filters.class, filters.semester, filters.year, filters.subject, currentPage, limit, searchTerm, sortConfig.field, sortConfig.order, refreshFlag]);
 
-    fetchData();
-  }, [filters, refreshFlag, testTypes]);
+    useEffect(() => {
+      fetchData();
+    }, [fetchData]);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+    setCurrentPage(1); // Reset về trang 1 khi tìm kiếm
+  };
+
+  const handleSort = (field) => {
+    setSortConfig(current => {
+      const isAsc = current.field === field && current.order === 'ASC';
+      return { field, order: isAsc ? 'DESC' : 'ASC' };
+    });
+    setCurrentPage(1);
+  };
 
   const openEditModal = (student) => {
     setCurrentTarget(student);
@@ -99,6 +138,8 @@ const useSubjectGradeTable = (filters) => {
     setDeleteModalOpen(false);
     setCurrentTarget(null);
   };
+
+
 
   // Dynamic addGrade
   const addGrade = async (data) => {
@@ -194,23 +235,15 @@ const useSubjectGradeTable = (filters) => {
   };
 
   return {
-    grades,
-    loading,
-    error,
-    currentTarget,
-    editModalOpen,
-    addModalOpen,
-    deleteModalOpen,
-    openEditModal,
-    closeEditModal,
-    openAddModal,
-    closeAddModal,
-    openDeleteModal,
-    closeDeleteModal,
-    addGrade,
-    updateGrade,
-    removeGrade,
-    testTypes
+    grades, loading,  error, currentTarget, searchTerm,
+    editModalOpen,  addModalOpen, deleteModalOpen,
+    openEditModal, closeEditModal,  openAddModal, 
+    closeAddModal,  openDeleteModal,  closeDeleteModal,
+    addGrade, updateGrade, removeGrade,
+    testTypes, currentPage, totalPages, sortConfig,
+
+    handleSort, handlePageChange, handleSearchChange,
+    
   };
 };
 
