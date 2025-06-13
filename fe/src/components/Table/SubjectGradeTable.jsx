@@ -1,21 +1,28 @@
 /* eslint-disable no-unused-vars */
-import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import ModalUpdateGrade from '../Modal/ModalUpdateGrade';
-import ModalAddGrade from '../Modal/ModalAddGrade';
-import ModalDeleteScore from '../Modal/ModalDeleteScore';
-import TableHeaderAction from '../TableHeaderAction';
-import useSubjectGradeTable from '../../hooks/useSubjectGradeTable';
-import '../../styles/Table.scss';
+import { FaEdit, FaPlus, FaTrash, FaSort } from "react-icons/fa";
+import ModalUpdateGrade from "../Modal/ModalUpdateGrade";
+import ModalAddGrade from "../Modal/ModalAddGrade";
+import ModalDeleteScore from "../Modal/ModalDeleteScore";
+import TableHeaderAction from "../TableHeaderAction";
+import useSubjectGradeTable from "../../hooks/useSubjectGradeTable";
+import "../../styles/Table.scss";
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
+import ReactPaginate from "react-paginate";
 
 const SubjectGradeTable = ({ filters }) => {
   const { user } = useContext(UserContext);
   const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
 
-  const canAdd = userPermissions.some(p => p.TenManHinhDuocLoad === "/report/add-score");
-  const canEdit = userPermissions.some(p => p.TenManHinhDuocLoad === "/report/edit-score");
-  const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/report/delete-score");
+  const canAdd = userPermissions.some(
+    (p) => p.TenManHinhDuocLoad === "/report/add-score"
+  );
+  const canEdit = userPermissions.some(
+    (p) => p.TenManHinhDuocLoad === "/report/edit-score"
+  );
+  const canDelete = userPermissions.some(
+    (p) => p.TenManHinhDuocLoad === "/report/delete-score"
+  );
 
   const {
     grades,
@@ -24,8 +31,8 @@ const SubjectGradeTable = ({ filters }) => {
     currentTarget,
     editModalOpen,
     addModalOpen,
-    openEditModal,
     deleteModalOpen,
+    openEditModal,
     closeEditModal,
     openAddModal,
     closeAddModal,
@@ -34,13 +41,72 @@ const SubjectGradeTable = ({ filters }) => {
     addGrade,
     updateGrade,
     removeGrade,
-    testTypes
+    testTypes,
+    sortConfig,
+    searchTerm,
+    currentPage,
+    totalPages,
+    handlePageChange,
+    handleSearchChange,
+    handleSort,
   } = useSubjectGradeTable(filters);
+
+  const removeAccents = (str) => {
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  };
+
+  const highlightText = (text, keyword) => {
+    if (!keyword || !text) return text;
+    if (typeof text !== "string") text = String(text);
+
+    const normalizedText = removeAccents(text).toLowerCase();
+    const normalizedKeyword = removeAccents(keyword).toLowerCase();
+
+    let result = [];
+    let lastIndex = 0;
+
+    // Tìm vị trí match trong normalizedText
+    const regex = new RegExp(
+      normalizedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&"),
+      "gi"
+    );
+    let match;
+
+    while ((match = regex.exec(normalizedText)) !== null) {
+      const start = match.index;
+      const end = start + match[0].length;
+
+      // Phần trước match (chuỗi gốc)
+      if (lastIndex < start) {
+        result.push(text.slice(lastIndex, start));
+      }
+
+      // Phần match (chuỗi gốc)
+      //màu highlight
+      result.push(
+        <b key={start} style={{ color: "red" }}>
+          {text.slice(start, end)}
+        </b>
+      );
+
+      lastIndex = end;
+    }
+    // Phần còn lại sau cùng
+    if (lastIndex < text.length) {
+      result.push(text.slice(lastIndex));
+    }
+
+    return result.length > 0 ? result : text;
+  };
+
+  const handlePageClick = (e) => {
+    handlePageChange(e.selected + 1);
+  };
 
   return (
     <div className="subjectgrade-table-wrapper">
       <TableHeaderAction
-        onSearchChange={() => { }}
+        onSearchChange={handleSearchChange}
         placeholder="Tìm kiếm học sinh..."
         hideAdd={true}
       />
@@ -51,24 +117,78 @@ const SubjectGradeTable = ({ filters }) => {
           <table className="table">
             <thead>
               <tr>
-                <th>Họ và tên</th>
-                {testTypes.map(type => (
-                  <th key={type.MaLoaiKiemTra}>{type.TenLoaiKiemTra}</th>
+                <th>
+                  Họ và tên
+                  <button
+                    className="sort-button"
+                    title="Sắp xếp"
+                    value="HoTen"
+                    onClick={() => handleSort("HoTen")}
+                  >
+                    <FaSort />
+                  </button>
+                </th>
+                {testTypes.map((type) => (
+                  <th key={type.MaLoaiKiemTra}>
+                    {type.TenLoaiKiemTra}
+
+                    <button
+                      className="sort-button"
+                      title="Sắp xếp"
+                      value={type.TenLoaiKiemTra}
+                      onClick={() => handleSort(type.TenLoaiKiemTra.trim())}
+                    >
+                      <FaSort />
+                    </button>
+                  </th>
                 ))}
-                <th>Điểm trung bình môn</th>
+                {/* {testTypes.map((type) => {
+                  console.log(
+                    "Rendering sort for field: '",
+                    type.TenLoaiKiemTra,
+                    "'"
+                  );
+                  return (
+                    <th
+                      key={type.MaLoaiKiemTra}
+                      className="sortable-header"
+                      onClick={() => handleSort(type.TenLoaiKiemTra.trim)}
+                    >
+                      {type.TenLoaiKiemTra}
+                    </th>
+                  );
+                })} */}
+                <th>
+                  Điểm trung bình môn
+                  <button
+                    className="sort-button"
+                    title="Sắp xếp"
+                    value="DiemTB"
+                    onClick={() => handleSort("DiemTB")}
+                  >
+                    <FaSort />
+                  </button>
+                </th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
               {grades.length === 0 && (
-                <tr><td colSpan={testTypes.length + 3}>Không có dữ liệu điểm</td></tr>
+                <tr>
+                  <td colSpan={testTypes.length + 3}>Không có dữ liệu điểm</td>
+                </tr>
               )}
               {grades.map((student, idx) => (
-                <tr key={idx}>
-                  <td>{student.name}</td>
-                  {testTypes.map(type => (
+                <tr key={student.id || idx}>
+                  <td>{highlightText(student.name, searchTerm)} </td>
+                  {testTypes.map((type) => (
                     <td key={type.MaLoaiKiemTra}>
-                      {student.diemTP?.find(d => d.LoaiKiemTra === type.TenLoaiKiemTra)?.Diem ?? ""}
+                      {highlightText(
+                        student.diemTP?.find(
+                          (d) => d.LoaiKiemTra === type.TenLoaiKiemTra
+                        )?.Diem ?? "",
+                        searchTerm
+                      )}
                     </td>
                   ))}
                   <td>{student.diemTB}</td>
@@ -78,7 +198,8 @@ const SubjectGradeTable = ({ filters }) => {
                         <button
                           className="icon-button edit"
                           title="Chỉnh sửa điểm"
-                          onClick={() => openEditModal(student)}>
+                          onClick={() => openEditModal(student)}
+                        >
                           <FaEdit />
                         </button>
                       )}
@@ -86,7 +207,8 @@ const SubjectGradeTable = ({ filters }) => {
                         <button
                           className="icon-button add"
                           title="Thêm điểm mới"
-                          onClick={() => openAddModal(student)}>
+                          onClick={() => openAddModal(student)}
+                        >
                           <FaPlus />
                         </button>
                       )}
@@ -94,7 +216,8 @@ const SubjectGradeTable = ({ filters }) => {
                         <button
                           className="icon-button delete"
                           title="Xóa điểm"
-                          onClick={() => openDeleteModal(student)}>
+                          onClick={() => openDeleteModal(student)}
+                        >
                           <FaTrash />
                         </button>
                       )}
@@ -102,9 +225,33 @@ const SubjectGradeTable = ({ filters }) => {
                   </td>
                 </tr>
               ))}
-
             </tbody>
           </table>
+        </div>
+      )}
+      {totalPages > 0 && (
+        <div className="student-footer">
+          <ReactPaginate
+            onPageChange={handlePageClick}
+            pageRangeDisplayed={3}
+            marginPagesDisplayed={2}
+            pageCount={totalPages}
+            previousLabel="Previous"
+            pageClassName="page-item"
+            pageLinkClassName="number page-link"
+            previousClassName="page-item"
+            previousLinkClassName="prev page-link"
+            nextClassName="page-item"
+            nextLinkClassName="next page-link"
+            nextLabel="Next"
+            breakLabel="..."
+            breakClassName="page-item"
+            breakLinkClassName="break page-link"
+            containerClassName="pagination"
+            activeClassName="active"
+            renderOnZeroPageCount={null}
+            forcePage={currentPage - 1} // vì currentPage bắt đầu từ 1, trong khi ReactPaginate bắt đầu từ 0
+          />
         </div>
       )}
 

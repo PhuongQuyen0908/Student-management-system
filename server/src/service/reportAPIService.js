@@ -1,5 +1,5 @@
 import db from "../models/index.js";
-const { Op } = db.Sequelize;
+const { Op, Sequelize } = db.Sequelize;
 const { hocsinh, ct_dsl, bdchitietmonhoc, loaikiemtra, danhsachlop, lop, bdmonhoc, monhoc } = db;
 
 db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: 'MaHocSinh' });
@@ -81,130 +81,280 @@ const calculateAndUpdateDiemTB = async (MaBDMonHoc) => {
   return diemTB;
 };
  
-const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc) => {
-  try {
+// const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc) => {
+//   try {
 
+//     if (!tenLop || !tenHocKy || !tenNamHoc || !tenMonHoc) {
+//       return { EM: 'Thông tin nhập không đầy đủ', EC: -1, DT: null };
+//     }
+
+//     const lop = await db.lop.findOne({ where: { TenLop: tenLop } });
+//     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc: tenNamHoc } });
+//     const hocKy = await db.hocky.findOne({ where: { TenHocKy: tenHocKy } });
+//     const monHoc = await db.monhoc.findOne({ where: { TenMonHoc: tenMonHoc } });
+    
+//     console.log(lop);
+//     if (!lop || !namHoc || !hocKy || !monHoc) {
+//       return { EM: 'Không tìm thấy thông tin', EC: -1, DT: null };
+//     }
+
+//     const danhSachLop = await db.danhsachlop.findOne({
+//       where: {
+//         MaLop: lop.MaLop,
+//         MaNamHoc: namHoc.MaNamHoc,
+//       },
+//     });
+
+//     if (!danhSachLop) {
+//       return { EM: 'Không tìm thấy lớp', EC: -1, DT: null };
+//     }
+
+//     const ctDsl = await db.ct_dsl.findAll({
+//       where: { MaDanhSachLop: danhSachLop.MaDanhSachLop },
+//       include: [
+//         {
+//           model: db.hocsinh,
+//           attributes: ['HoTen', 'MaHocSinh'],
+//           required: true, 
+//         },
+//       ],
+//     });
+
+//     const maCTs = ctDsl.map(item => item.MaCT_DSL);
+
+//     const quaTrinhHocList = await db.quatrinhhoc.findAll({
+//       where: {
+//         MaCT_DSL: { [Op.in]: maCTs },
+//         MaHocKy: hocKy.MaHocKy
+//       }
+//     });
+
+//     const maQTHs = quaTrinhHocList.map(qth => qth.MaQuaTrinhHoc);
+
+//     const bdMonHocList = await db.bdmonhoc.findAll({
+//       where: {
+//         MaQuaTrinhHoc: { [Op.in]: maQTHs },
+//         MaMonHoc: monHoc.MaMonHoc
+//       }
+//     });
+
+//     const maBDs = bdMonHocList.map(bd => bd.MaBDMonHoc);
+
+//     const bdChiTietList = await db.bdchitietmonhoc.findAll({
+//       where: {
+//         MaBDMonHoc: { [Op.in]: maBDs }
+//       },
+//       include: [
+//         {
+//           model: db.loaikiemtra,
+//           attributes: ['TenLoaiKiemTra', 'HeSo']
+//         }
+//       ]
+//     });
+
+//     const data = await Promise.all(ctDsl.map(async (ct) => {
+//       const hocSinh = ct.hocsinh?.HoTen || "Không xác định";
+//       const maHocSinh = ct.hocsinh?.MaHocSinh;
+//       const qth = quaTrinhHocList.find(q => q.MaCT_DSL === ct.MaCT_DSL);
+//       const bdMonHoc = qth
+//         ? bdMonHocList.find(bd => bd.MaQuaTrinhHoc === qth.MaQuaTrinhHoc)
+//         : null;
+    
+//       const diemTP = bdMonHoc
+//         ? bdChiTietList
+//             .filter(bd => bd.MaBDMonHoc === bdMonHoc.MaBDMonHoc)
+//             .map(bd => ({
+//               LoaiKiemTra: bd.loaikiemtra?.TenLoaiKiemTra || "Không rõ",
+//               Diem: bd.DiemTPMonHoc,
+//               HeSo: bd.loaikiemtra?.HeSo || 1
+//             }))
+//         : [];
+    
+//       const diemTB = bdMonHoc
+//         ? await calculateAndUpdateDiemTB(bdMonHoc.MaBDMonHoc)
+//         : null;
+    
+//       return {
+//         HoTen: hocSinh,
+//         MaHocSinh: maHocSinh,
+//         DiemTP: diemTP,
+//         DiemTB: diemTB
+//       };
+//     }));
+    
+
+//   const summary = {
+//     TenLop: tenLop,
+//     TenMonHoc: tenMonHoc,
+//     TenHocKy: tenHocKy,
+//     TenNamHoc: tenNamHoc,
+//     DiemChiTiet: data
+//   };
+
+//   return {
+//     EM: 'OK',
+//     EC: 0,
+//     DT: summary
+//   };
+
+// } catch (error) {
+//   console.error("Lỗi getSubjectSummary: ", error);
+//   return {
+//     EM: 'Lỗi khi truy vấn',
+//     EC: -1,
+//     DT: null
+//   };
+// }
+// };
+
+const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc, page = 1, limit = 10, search = '', sortField = 'HoTen', sortOrder = 'ASC') => {
+  try {
+    // Phần lấy thông tin ban đầu giữ nguyên
     if (!tenLop || !tenHocKy || !tenNamHoc || !tenMonHoc) {
       return { EM: 'Thông tin nhập không đầy đủ', EC: -1, DT: null };
     }
-
     const lop = await db.lop.findOne({ where: { TenLop: tenLop } });
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc: tenNamHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy: tenHocKy } });
     const monHoc = await db.monhoc.findOne({ where: { TenMonHoc: tenMonHoc } });
-    
-    console.log(lop);
     if (!lop || !namHoc || !hocKy || !monHoc) {
       return { EM: 'Không tìm thấy thông tin', EC: -1, DT: null };
     }
-
-    const danhSachLop = await db.danhsachlop.findOne({
-      where: {
-        MaLop: lop.MaLop,
-        MaNamHoc: namHoc.MaNamHoc,
-      },
-    });
-
+    const danhSachLop = await db.danhsachlop.findOne({ where: { MaLop: lop.MaLop, MaNamHoc: namHoc.MaNamHoc } });
     if (!danhSachLop) {
       return { EM: 'Không tìm thấy lớp', EC: -1, DT: null };
     }
 
-    const ctDsl = await db.ct_dsl.findAll({
-      where: { MaDanhSachLop: danhSachLop.MaDanhSachLop },
-      include: [
-        {
+    // --- LOGIC MỚI CHO SẮP XẾP NÂNG CAO ---
+    const offset = (page - 1) * limit;
+
+    //Chức năng tìm kiếm
+    let mainWhereClause = { MaDanhSachLop: danhSachLop.MaDanhSachLop };
+        const cleanSearch = search.trim(); // Loại bỏ khoảng trắng thừa
+
+        if (cleanSearch) {
+            const numericSearch = parseFloat(cleanSearch);
+            // Kiểm tra có phải là số thuần túy không (không chứa ký tự khác)
+            const isNumericSearch = !isNaN(numericSearch) && /^\d+(\.\d+)?$/.test(cleanSearch);
+
+            if (isNumericSearch) {
+                // NẾU TÌM THEO SỐ: tìm học sinh có điểm đó
+                mainWhereClause = {
+                    ...mainWhereClause,
+                    [Op.and]: [
+                        Sequelize.literal(`
+                            EXISTS (
+                                SELECT 1 FROM quatrinhhoc qth
+                                JOIN bdmonhoc bdm ON qth.MaQuaTrinhHoc = bdm.MaQuaTrinhHoc
+                                JOIN bdchitietmonhoc bdct ON bdm.MaBDMonHoc = bdct.MaBDMonHoc
+                                WHERE qth.MaCT_DSL = ct_dsl.MaCT_DSL 
+                                  AND bdm.MaMonHoc = ${monHoc.MaMonHoc}
+                                  AND qth.MaHocKy = ${hocKy.MaHocKy}
+                                  AND bdct.DiemTPMonHoc = ${numericSearch}
+                            )
+                        `)
+                    ]
+                };
+            } else {
+                // NẾU TÌM THEO CHỮ: tìm theo tên với điều kiện AND cho mỗi từ
+                const terms = cleanSearch.split(/\s+/).filter(Boolean);
+                const nameConditions = terms.map(term => ({
+                    // Sử dụng cú pháp '$model.column$' để tham chiếu đến cột của bảng được include
+                    '$hocsinh.HoTen$': { [Op.like]: `%${term}%` }
+                }));
+
+                mainWhereClause = {
+                    ...mainWhereClause,
+                    [Op.and]: nameConditions
+                };
+            }
+        }
+
+
+    let orderClause = [];
+    const mainQueryAttributes = ['MaCT_DSL', 'MaHocSinh', 'MaDanhSachLop'];
+    
+    // Đảm bảo sortOrder an toàn
+    const safeSortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+    const allTestTypes = await db.loaikiemtra.findAll({ attributes: ['TenLoaiKiemTra'], raw: true });
+    const testTypeNames = allTestTypes.map(t => t.TenLoaiKiemTra.trim());
+
+    if (testTypeNames.includes(sortField)) {
+        // Sắp xếp theo cột điểm thành phần bằng subquery
+        const subQuery = `(
+            SELECT AVG(DiemTPMonHoc) FROM bdchitietmonhoc AS bdct
+            INNER JOIN bdmonhoc AS bdm ON bdct.MaBDMonHoc = bdm.MaBDMonHoc
+            INNER JOIN quatrinhhoc AS qth ON bdm.MaQuaTrinhHoc = qth.MaQuaTrinhHoc
+            INNER JOIN loaikiemtra AS lkt ON bdct.MaLoaiKiemTra = lkt.MaLoaiKiemTra
+            WHERE qth.MaCT_DSL = ct_dsl.MaCT_DSL 
+            AND bdm.MaMonHoc = ${monHoc.MaMonHoc}
+            AND qth.MaHocKy = ${hocKy.MaHocKy}
+            AND TRIM(lkt.TenLoaiKiemTra) = '${sortField}'
+        )`;
+        mainQueryAttributes.push([Sequelize.literal(subQuery), 'sort_score']);
+        orderClause.push([Sequelize.col('sort_score'), safeSortOrder]);
+    } else {
+        orderClause.push([db.hocsinh, 'HoTen', safeSortOrder]);
+    }
+
+    const { count, rows: ctDsl } = await db.ct_dsl.findAndCountAll({
+      attributes: mainQueryAttributes,
+      where: mainWhereClause,
+      include: [{
           model: db.hocsinh,
           attributes: ['HoTen', 'MaHocSinh'],
-          required: true, 
-        },
-      ],
+          required: true,
+      }],
+      limit: parseInt(limit),
+      offset: parseInt(offset),
+      order: orderClause,
+      distinct: true, // Quan trọng để count hoạt động đúng
+      subQuery: false // Cần thiết khi có subquery phức tạp trong where/order
     });
-
+    
+    // === Phần lấy điểm chi tiết và tính điểm TB giữ nguyên ===
     const maCTs = ctDsl.map(item => item.MaCT_DSL);
-
-    const quaTrinhHocList = await db.quatrinhhoc.findAll({
-      where: {
-        MaCT_DSL: { [Op.in]: maCTs },
-        MaHocKy: hocKy.MaHocKy
-      }
-    });
-
+    if(maCTs.length === 0) {
+        // Trả về rỗng nếu không có học sinh nào phù hợp
+        return { EM: 'OK', EC: 0, DT: { TenLop: tenLop, TenMonHoc: tenMonHoc, TenHocKy: tenHocKy, TenNamHoc: tenNamHoc, DiemChiTiet: { rows: [], count: 0 } }};
+    }
+    const quaTrinhHocList = await db.quatrinhhoc.findAll({ where: { MaCT_DSL: { [Op.in]: maCTs }, MaHocKy: hocKy.MaHocKy } });
     const maQTHs = quaTrinhHocList.map(qth => qth.MaQuaTrinhHoc);
-
-    const bdMonHocList = await db.bdmonhoc.findAll({
-      where: {
-        MaQuaTrinhHoc: { [Op.in]: maQTHs },
-        MaMonHoc: monHoc.MaMonHoc
-      }
-    });
-
+    const bdMonHocList = await db.bdmonhoc.findAll({ where: { MaQuaTrinhHoc: { [Op.in]: maQTHs }, MaMonHoc: monHoc.MaMonHoc } });
     const maBDs = bdMonHocList.map(bd => bd.MaBDMonHoc);
+    const bdChiTietList = await db.bdchitietmonhoc.findAll({ where: { MaBDMonHoc: { [Op.in]: maBDs } }, include: [{ model: db.loaikiemtra, attributes: ['TenLoaiKiemTra', 'HeSo'] }] });
 
-    const bdChiTietList = await db.bdchitietmonhoc.findAll({
-      where: {
-        MaBDMonHoc: { [Op.in]: maBDs }
-      },
-      include: [
-        {
-          model: db.loaikiemtra,
-          attributes: ['TenLoaiKiemTra', 'HeSo']
-        }
-      ]
-    });
-
-    const data = await Promise.all(ctDsl.map(async (ct) => {
-      const hocSinh = ct.hocsinh?.HoTen || "Không xác định";
-      const maHocSinh = ct.hocsinh?.MaHocSinh;
+    let data = await Promise.all(ctDsl.map(async (ct) => {
       const qth = quaTrinhHocList.find(q => q.MaCT_DSL === ct.MaCT_DSL);
-      const bdMonHoc = qth
-        ? bdMonHocList.find(bd => bd.MaQuaTrinhHoc === qth.MaQuaTrinhHoc)
-        : null;
-    
-      const diemTP = bdMonHoc
-        ? bdChiTietList
-            .filter(bd => bd.MaBDMonHoc === bdMonHoc.MaBDMonHoc)
-            .map(bd => ({
-              LoaiKiemTra: bd.loaikiemtra?.TenLoaiKiemTra || "Không rõ",
-              Diem: bd.DiemTPMonHoc,
-              HeSo: bd.loaikiemtra?.HeSo || 1
-            }))
-        : [];
-    
-      const diemTB = bdMonHoc
-        ? await calculateAndUpdateDiemTB(bdMonHoc.MaBDMonHoc)
-        : null;
-    
-      return {
-        HoTen: hocSinh,
-        MaHocSinh: maHocSinh,
-        DiemTP: diemTP,
-        DiemTB: diemTB
-      };
+      const bdMonHoc = qth ? bdMonHocList.find(bd => bd.MaQuaTrinhHoc === qth.MaQuaTrinhHoc) : null;
+      const diemTP = bdMonHoc ? bdChiTietList.filter(bd => bd.MaBDMonHoc === bdMonHoc.MaBDMonHoc).map(bd => ({ LoaiKiemTra: bd.loaikiemtra?.TenLoaiKiemTra || "Không rõ", Diem: bd.DiemTPMonHoc, HeSo: bd.loaikiemtra?.HeSo || 1 })) : [];
+      const diemTB = bdMonHoc ? await calculateAndUpdateDiemTB(bdMonHoc.MaBDMonHoc) : null;
+      return { HoTen: ct.hocsinh.HoTen, MaHocSinh: ct.hocsinh.MaHocSinh, DiemTP: diemTP, DiemTB: diemTB };
     }));
     
+    // Sắp xếp theo Điểm TB (post-processing vì nó được tính toán)
+    if (sortField === 'DiemTB') {
+      data.sort((a, b) => {
+        const valA = a.DiemTB === null ? -Infinity : a.DiemTB;
+        const valB = b.DiemTB === null ? -Infinity : b.DiemTB;
+        return safeSortOrder === 'ASC' ? valA - valB : valB - valA;
+      });
+    }
+    const summary = {
+      TenLop: tenLop,
+      TenMonHoc: tenMonHoc,
+      TenHocKy: tenHocKy,
+      TenNamHoc: tenNamHoc,
+      DiemChiTiet: { rows: data, count: count }
+    };
 
-  const summary = {
-    TenLop: tenLop,
-    TenMonHoc: tenMonHoc,
-    TenHocKy: tenHocKy,
-    TenNamHoc: tenNamHoc,
-    DiemChiTiet: data
-  };
+    return { EM: 'OK', EC: 0, DT: summary };
 
-  return {
-    EM: 'OK',
-    EC: 0,
-    DT: summary
-  };
-
-} catch (error) {
-  console.error("Lỗi getSubjectSummary: ", error);
-  return {
-    EM: 'Lỗi khi truy vấn',
-    EC: -1,
-    DT: null
-  };
-}
+  } catch (error) {
+    console.error("Lỗi getSubjectSummary: ", error);
+    return { EM: 'Lỗi khi truy vấn', EC: -1, DT: null };
+  }
 };
 
 const addScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP) => {
