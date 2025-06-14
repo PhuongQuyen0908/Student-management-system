@@ -11,7 +11,7 @@ import ReactPaginate from 'react-paginate';
 import { fetchGroup, createGroup } from '../../services/roleServices'; // fetchGroup này dành cho admin
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
-
+import { set } from 'lodash';
 const DecentralizationTable = () => {
     const { user } = useContext(UserContext);
     const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
@@ -27,9 +27,26 @@ const DecentralizationTable = () => {
     const assignModal = useModal();
 
     const [selectedGroup, setSelectedGroup] = useState(null);
+    //Tìm kiếm nhóm quyền
+    const [searchTerm, setSearchTerm] = useState("");
+
+    //sort
+    const [sortField, setSortField] = useState("MaNhom");
+    const [sortOrder, setSortOrder] = useState("asc");
+
+    const handleSort = (field) => {
+        if (field === sortField) {
+            setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortOrder("asc");
+        }
+    };
+
+
 
     const fetchGroups = async () => {
-        let response = await fetchGroup();
+        let response = await fetchGroup(searchTerm , sortField, sortOrder);
         if (response && response.data && response.data.EC === 0) {
             setUserGroup(response.data.DT);
         }
@@ -37,23 +54,72 @@ const DecentralizationTable = () => {
 
     useEffect(() => {
         fetchGroups();
-    }, []);
-
+    }, [searchTerm , sortField, sortOrder]);
+    //gán quyền
     const handleAssignPermission = (group) => {
         setSelectedGroup(group);
         assignModal.open();
     };
 
+    //thêm nhóm quyền
     const handleAddRole = (newRole) => {
         setUserGroup((prev) => [...prev, { id: Date.now(), TenNhomQuyen: newRole }]);
         addRoleModal.close();
+    };
+
+    //hàm highlightText để làm nổi bật từ khóa tìm kiếm trong bảng
+    const removeAccents = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
+
+    const highlightText = (text, keyword) => {
+
+        if (!keyword || !text) return text;
+        if (typeof text !== "string") text = String(text);
+
+        const normalizedText = removeAccents(text).toLowerCase();
+        const normalizedKeyword = removeAccents(keyword).toLowerCase();
+
+        let result = [];
+        let lastIndex = 0;
+
+        // Tìm vị trí match trong normalizedText
+        const regex = new RegExp(normalizedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "gi");
+        let match;
+
+        while ((match = regex.exec(normalizedText)) !== null) {
+            const start = match.index;
+            const end = start + match[0].length;
+
+            // Phần trước match (chuỗi gốc)
+            if (lastIndex < start) {
+                result.push(text.slice(lastIndex, start));
+            }
+
+            // Phần match (chuỗi gốc)
+            //màu highlight
+            result.push(
+                <b key={start} style={{ color: "red" }}>
+                    {text.slice(start, end)}
+                </b>
+            );
+
+            lastIndex = end;
+        }
+
+        // Phần còn lại sau cùng
+        if (lastIndex < text.length) {
+            result.push(text.slice(lastIndex));
+        }
+
+        return result.length > 0 ? result : text;
     };
 
     return (
         <div className="student-table-wrapper">
             <TableHeaderAction
                 onAddClick={addRoleModal.open}
-                onSearchChange={() => { }}
+                onSearchChange={(e) => { setSearchTerm(e.target.value) }}
                 placeholder="Tìm kiếm nhóm quyền..."
                 addLabel="Thêm nhóm quyền"
                 hideAdd={!canCreate}
@@ -63,14 +129,14 @@ const DecentralizationTable = () => {
                 <table className="table">
                     <thead>
                         <tr>
-                            <th>STT
-                                <button className="sort-button" title="Sắp xếp">
+                            <th>Mã Nhóm
+                                <button className="sort-button" title="Sắp xếp" onClick={() => handleSort("MaNhom")}>
                                     <FaSort />
                                 </button>
                             </th>
                             <th>
                                 Tên nhóm quyền
-                                <button className="sort-button" title="Sắp xếp">
+                                <button className="sort-button" title="Sắp xếp" onClick={() => handleSort("TenNhom")}>
                                     <FaSort />
                                 </button>
                             </th>
@@ -84,9 +150,9 @@ const DecentralizationTable = () => {
                         {userGroup.length > 0 ? (
                             userGroup.map((group, index) => (
                                 <tr key={`group-${index}`}>
-                                    <td>{group.MaNhom}</td>
-                                    <td>{group.TenNhom}</td>
-                                    <td>{group.MoTa ? group.MoTa : "Chưa có mô tả "}</td>
+                                    <td>{highlightText(group.MaNhom, searchTerm)}</td>
+                                    <td>{highlightText(group.TenNhom, searchTerm)}</td>
+                                    <td>{highlightText(group.MoTa ? group.MoTa : "Chưa có mô tả ", searchTerm)}</td>
                                     <td>
                                         <div className="action-buttons">
                                             {canReadPermission && (

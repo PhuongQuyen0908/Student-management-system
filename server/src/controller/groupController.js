@@ -40,7 +40,12 @@ const readFunc = async (req, res) => {
 
 const getGroupsForAdmin = async (req, res) => {
     try {
-        let data = await groupApiService.GetGroupsForAdmin();
+        let search = req.query.search ? req.query.search : ""; //nếu có seach truyền vào
+        //sort
+        let sortField = req.query.sortField;
+        let sortOrder = req.query.sortOrder
+
+        let data = await groupApiService.GetGroupsForAdmin(search ,sortField, sortOrder);
         return res.status(200).json({
             EM: data.EM,
             EC: data.EC, // error code
