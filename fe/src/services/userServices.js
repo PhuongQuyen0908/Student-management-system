@@ -34,11 +34,15 @@ const changePassword = (data) => {
 const updateUser = (userData) => {
   return axios.put(`/api/user/update`, { ...userData });
 };
-const fetchAllUsers = (page, limit ) => {
+const fetchAllUsers = (page, limit ,search="",sortField,sortOrder ) => {
   return axios.get('api/user/read', {
     params: {
       page,
       limit,
+      search,
+      sortField,
+      sortOrder,
+
     },
   });
 };

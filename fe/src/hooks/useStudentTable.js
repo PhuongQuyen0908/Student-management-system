@@ -68,7 +68,6 @@ const useStudentTable = () => {
   const handleSearchChange = (event) => {
     const value = event.target.value;
     setSearchTerm(value);
-    console.log("Search term:", value);
   };
 
 

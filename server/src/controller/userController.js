@@ -5,8 +5,13 @@ const readFunc = async (req, res) => {
     if (req.query.page && req.query.limit) {
       let page = req.query.page;
       let limit = req.query.limit;
+      let search = req.query.search ? req.query.search : ""; //nếu có seach truyền vào
+      //sort 
+      let sortField = req.query.sortField;
+      let sortOrder = req.query.sortOrder 
+      console.log("search là gì ", search);
 
-      let data = await userService.getUserWithPagination(+page, +limit); // chuyển thành số để dùng sql
+      let data = await userService.getUserWithPagination(+page, +limit ,search ,sortField, sortOrder); // chuyển thành số để dùng sql
       return res.status(200).json({
         EM: data.EM,
         EC: data.EC, //error code

@@ -1,5 +1,4 @@
-import db from '../models/index.js';
-
+import db from "../models/index.js";
 
 const checkUserExist = async (username) => {
   let user = await db.nguoidung.findOne({
@@ -25,10 +24,12 @@ const checkPhoneExist = async (userPhone) => {
   return false;
 };
 
-
 const CheckPhoneUpdate = async (userPhone, TenDangNhap) => {
   let user = await db.nguoidung.findOne({
-    where: { SoDienThoai: userPhone, TenDangNhap: { [db.Sequelize.Op.ne]: TenDangNhap } },
+    where: {
+      SoDienThoai: userPhone,
+      TenDangNhap: { [db.Sequelize.Op.ne]: TenDangNhap },
+    },
   });
   if (user) {
     return true; // Số điện thoại đã được sử dụng bởi người dùng khác
@@ -36,11 +37,10 @@ const CheckPhoneUpdate = async (userPhone, TenDangNhap) => {
   return false; // Số điện thoại không bị trùng
 };
 
-
 const getAllUser = async () => {
   try {
     let users = await db.nguoidung.findAll({
-      attributes: [ "TenDangNhap", "SoDienThoai" , "HoTen"],
+      attributes: ["TenDangNhap", "SoDienThoai", "HoTen"],
       include: { model: db.nhomnguoidung, attributes: ["TenNhom"] },
     });
     if (users) {
@@ -66,16 +66,49 @@ const getAllUser = async () => {
   }
 };
 
-const getUserWithPagination = async (page, limit) => {
+const getUserWithPagination = async (
+  page,
+  limit,
+  search = "",
+  sortField,
+  sortOrder
+) => {
   try {
     let offset = (page - 1) * limit; // tính offset cho phân trang
+
+    // Tạo điều kiện tìm kiếm nếu có
+    const whereClause = search
+      ? {
+          [db.Sequelize.Op.or]: [
+            { TenDangNhap: { [db.Sequelize.Op.like]: `%${search}%` } },
+            { SoDienThoai: { [db.Sequelize.Op.like]: `%${search}%` } },
+            { HoTen: { [db.Sequelize.Op.like]: `%${search}%` } },
+            {
+              "$nhomnguoidung.TenNhom$": {
+                [db.Sequelize.Op.like]: `%${search}%`,
+              },
+            },
+          ],
+        }
+      : {};
 
     const { count, rows } = await db.nguoidung.findAndCountAll({
       offset: offset,
       limit: limit,
-      attributes: [ "TenDangNhap", "SoDienThoai" , "HoTen"],
-      include: { model: db.nhomnguoidung, attributes: ["MaNhom" , "TenNhom"] },
-      order: [["MaNhom", "DESC"]],
+      attributes: ["TenDangNhap", "SoDienThoai", "HoTen"],
+      include: { model: db.nhomnguoidung, attributes: ["MaNhom", "TenNhom"] },
+      where: whereClause, // Thêm điều kiện tìm kiếm
+      // Sắp xếp theo trường và thứ tự
+      order:
+        sortField === "TenNhom"
+          ? [
+              [
+                { model: db.nhomnguoidung },
+                "TenNhom",
+                sortOrder.toUpperCase() || "ASC",
+              ],
+            ]
+          : [[sortField, sortOrder.toUpperCase() || "ASC"]],
     });
 
     let totalPages = Math.ceil(count / limit); // tính tổng số trang
@@ -101,7 +134,7 @@ const getUserWithPagination = async (page, limit) => {
 
 const createNewUser = async (data) => {
   try {
-      //check null
+    //check null
     const { TenDangNhap, HoTen, SoDienThoai, MatKhau, MaNhom } = data;
     if (!TenDangNhap || !HoTen || !SoDienThoai || !MatKhau || !MaNhom) {
       return {
@@ -116,7 +149,7 @@ const createNewUser = async (data) => {
       return {
         EM: "Tên đăng nhập đã tồn tại hoặc số điện thoại đã được sử dụng",
         EC: 1,
-        DT: '',
+        DT: "",
       };
     }
     let isPhoneExist = await checkPhoneExist(SoDienThoai);
@@ -124,11 +157,11 @@ const createNewUser = async (data) => {
       return {
         EM: "Tên đăng nhập đã tồn tại hoặc số điện thoại đã được sử dụng",
         EC: 1,
-        DT: '',
+        DT: "",
       };
     }
 
-    await db.nguoidung.create( data );
+    await db.nguoidung.create(data);
     return {
       EM: "Tạo người dùng thành công",
       EC: 0,
@@ -148,12 +181,15 @@ const updateUser = async (data) => {
         DT: "group",
       };
     }
-    const isPhoneExist = await CheckPhoneUpdate(data.SoDienThoai , data.TenDangNhap);
+    const isPhoneExist = await CheckPhoneUpdate(
+      data.SoDienThoai,
+      data.TenDangNhap
+    );
     if (isPhoneExist) {
-      return {  
+      return {
         EM: "Số điện thoại đã được sử dụng",
         EC: 1,
-        DT: '',
+        DT: "",
       };
     }
     let user = await db.nguoidung.findOne({
@@ -170,7 +206,7 @@ const updateUser = async (data) => {
       return {
         EM: "Cập nhật người dùng thành công",
         EC: 0,
-        DT: '',
+        DT: "",
       };
     } else {
       //not found
@@ -218,11 +254,16 @@ const deleteUser = async (TenDangNhap) => {
   }
 };
 
-const checkPassword = (inputPassword , databasePassword) =>{
-    return inputPassword ===  databasePassword;
-}
+const checkPassword = (inputPassword, databasePassword) => {
+  return inputPassword === databasePassword;
+};
 
-const changePasswordUser = async (TenDangNhap, MatKhauCu , MatKhauMoi, XacNhanMatKhau) => {
+const changePasswordUser = async (
+  TenDangNhap,
+  MatKhauCu,
+  MatKhauMoi,
+  XacNhanMatKhau
+) => {
   try {
     let user = await db.nguoidung.findOne({
       where: { TenDangNhap: TenDangNhap },
@@ -231,35 +272,35 @@ const changePasswordUser = async (TenDangNhap, MatKhauCu , MatKhauMoi, XacNhanMa
       return {
         EM: "Mật khẩu mới và mật khẩu xác nhận lại không khớp",
         EC: 1,
-        DT: '',
+        DT: "",
       };
     }
     if (user) {
-      let isCorrectPassword = checkPassword( MatKhauCu , user.MatKhau);
+      let isCorrectPassword = checkPassword(MatKhauCu, user.MatKhau);
       if (isCorrectPassword === true) {
-        if(MatKhauMoi === MatKhauCu){
+        if (MatKhauMoi === MatKhauCu) {
           return {
             EM: "Mật khẩu mới không được trùng với mật khẩu cũ",
             EC: 1,
-            DT: '',
+            DT: "",
           };
         }
-      await user.update({
-        MatKhau: MatKhauMoi,
-      });
-      return {
-        EM: "Cập nhật mật khẩu thành công",
-        EC: 0,
-        DT: '',
-      };
-    } else {
-      //not found
-      return {
-        EM: "Không tìm thấy người dùng hoặc mật khẩu cũ không đúng",
-        EC: 1,
-        DT: [],
-      };
-  }
+        await user.update({
+          MatKhau: MatKhauMoi,
+        });
+        return {
+          EM: "Cập nhật mật khẩu thành công",
+          EC: 0,
+          DT: "",
+        };
+      } else {
+        //not found
+        return {
+          EM: "Không tìm thấy người dùng hoặc mật khẩu cũ không đúng",
+          EC: 1,
+          DT: [],
+        };
+      }
     }
   } catch (error) {
     console.log(error);
@@ -269,12 +310,12 @@ const changePasswordUser = async (TenDangNhap, MatKhauCu , MatKhauMoi, XacNhanMa
       DT: [],
     };
   }
-}
+};
 module.exports = {
   getAllUser,
   createNewUser,
   updateUser,
   deleteUser,
   getUserWithPagination,
-  changePasswordUser
+  changePasswordUser,
 };

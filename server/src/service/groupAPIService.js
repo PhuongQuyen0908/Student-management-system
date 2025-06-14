@@ -1,4 +1,6 @@
 import db from '../models/index.js';
+const { Op, fn, col, where } = require("sequelize");
+
 
 const CreateGroup = async (groupData) => { // chỉ đang hỗ trợ tạo cùng lúc 1 nhóm
  try{
@@ -52,9 +54,20 @@ const GetAllGroups = async () => {
 }
 
 
-const GetGroupsForAdmin = async () => {
+const GetGroupsForAdmin = async (search ="" ,sortField ,sortOrder) => {
     try {
-        const groups = await db.nhomnguoidung.findAll();
+        // Tìm kiếm nhóm theo tên nếu có
+       const whereClause = search ? {
+           [Op.or]: [
+            { MaNhom: isNaN(Number(search)) ? -1 : Number(search) },
+            { TenNhom: { [Op.like]: `%${search}%` } },
+            { MoTa: { [Op.like]: `%${search}%` } },
+          ],
+        } : {};
+        const groups = await db.nhomnguoidung.findAll({
+            where: whereClause, // <-- Thêm dòng này để lọc theo search
+            order: [[sortField || 'MaNhom', sortOrder || 'ASC']], // Sắp xếp theo trường và thứ tự
+        });
         return {
             EM: "Lấy danh sách nhóm thành công",
             EC: 0,

@@ -1,7 +1,14 @@
 import axios from "../setup/axios";
 
-const fetchGroup = () =>{
-    return axios.get('api/group/read-for-admin');
+const fetchGroup = (search="" ,sortField ,sortOrder) =>{
+    return axios.get('api/group/read-for-admin',{
+        params: {
+            search,
+            sortField,
+            sortOrder,
+
+        },
+    });
 }
 
 const createGroup = (groupData) => {

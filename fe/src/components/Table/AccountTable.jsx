@@ -30,9 +30,14 @@ const AccountTable = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentLimit, setCurrentLimit] = useState(7);
     const [totalPages, setTotalPages] = useState(10);
+    //search
+    const [searchTerm, setSearchTerm] = useState("");
+    //sort
+    const [sortField, setSortField] = useState("HoTen");
+    const [sortOrder, setSortOrder] = useState("asc");
 
     const fetchAccounts = async () => {
-        let response = await fetchAllUsers(currentPage, currentLimit);
+        let response = await fetchAllUsers(currentPage, currentLimit, searchTerm, sortField, sortOrder);
         if (response && response.data && response.data.EC === 0) {
             setTotalPages(response.data.DT.totalPages);
             setListAccounts(response.data.DT.users); // set danh sách tài khoản
@@ -41,7 +46,7 @@ const AccountTable = () => {
 
     useEffect(() => {
         fetchAccounts();
-    }, [currentPage, currentLimit]);
+    }, [currentPage, currentLimit , searchTerm, sortField, sortOrder]);
 
     const handlePageClick = async (event) => {
         setCurrentPage(+event.selected + 1);
@@ -75,11 +80,78 @@ const AccountTable = () => {
         }
     };
 
+
+    //Search Accounts
+  
+    const handleSearchChange = (event) => {
+        const value = event.target.value;
+        setSearchTerm(value);
+    }
+    // Sort Accounts
+
+    const handleSort = (field) => {
+        if (field === sortField) {
+            setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+        } else {
+            setSortField(field);
+            setSortOrder("asc");
+        }
+        setCurrentPage(1); // Reset to first page on sort change
+    };
+
+
+    // highlightText function để làm nổi bật từ khóa tìm kiếm trong bảng
+    // Hàm remove dấu tiếng Việt
+    const removeAccents = (str) => {
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    };
+
+    const highlightText = (text, keyword) => {
+        if (!keyword || !text) return text;
+        if (typeof text !== "string") text = String(text);
+
+        const normalizedText = removeAccents(text).toLowerCase();
+        const normalizedKeyword = removeAccents(keyword).toLowerCase();
+
+        let result = [];
+        let lastIndex = 0;
+
+        // Tìm vị trí match trong normalizedText
+        const regex = new RegExp(normalizedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "gi");
+        let match;
+
+        while ((match = regex.exec(normalizedText)) !== null) {
+            const start = match.index;
+            const end = start + match[0].length;
+
+            // Phần trước match (chuỗi gốc)
+            if (lastIndex < start) {
+                result.push(text.slice(lastIndex, start));
+            }
+
+            // Phần match (chuỗi gốc)
+            //màu highlight
+            result.push(
+                <b key={start} style={{ color: "red" }}>
+                    {text.slice(start, end)}
+                </b>
+            );
+
+            lastIndex = end;
+        }
+        // Phần còn lại sau cùng
+        if (lastIndex < text.length) {
+            result.push(text.slice(lastIndex));
+        }
+
+        return result.length > 0 ? result : text;
+    };
+
     return (
         <div className="student-table-wrapper">
             <TableHeaderAction
                 onAddClick={addModal.open}
-                onSearchChange={() => { }}
+                onSearchChange={(e) => { handleSearchChange(e) }}
                 placeholder="Tìm kiếm tài khoản..."
                 addLabel="Thêm tài khoản"
                 hideAdd={!canCreate}
@@ -90,31 +162,31 @@ const AccountTable = () => {
                     <thead>
                         <tr>
                             <th>STT
-                                <button className="sort-button" title="Sắp xếp">
+                                <button className="sort-button" title="Sắp xếp"  >
                                     <FaSort />
                                 </button>
                             </th>
                             <th>
                                 Họ tên
-                                <button className="sort-button" title="Sắp xếp">
+                                <button className="sort-button" title="Sắp xếp" onClick ={() => handleSort("HoTen")}>
                                     <FaSort />
                                 </button>
                             </th>
                             <th>
                                 Tên đăng nhập
-                                <button className="sort-button" title="Sắp xếp">
+                                <button className="sort-button" title="Sắp xếp" onClick={() => handleSort("TenDangNhap")}>
                                     <FaSort />
                                 </button>
                             </th>
                             <th>
                                 Số điện thoại
-                                <button className="sort-button" title="Sắp xếp">
+                                <button className="sort-button" title="Sắp xếp" onClick={() => handleSort("SoDienThoai")}>
                                     <FaSort />
                                 </button>
                             </th>
                             <th>
                                 Vai trò
-                                <button className="sort-button" title="Sắp xếp">
+                                <button className="sort-button" title="Sắp xếp" onClick={() => handleSort("TenNhom")}>
                                     <FaSort />
                                 </button>
                             </th>
@@ -125,12 +197,11 @@ const AccountTable = () => {
                         {listAccounts && listAccounts.length > 0 ? (
                             listAccounts.map((account, index) => (
                                 <tr key={`account-${index}`}>
-                                    {console.log(account)}
-                                    <td>{index + 1}</td>
-                                    <td>{account.HoTen}</td>
-                                    <td>{account.TenDangNhap}</td>
-                                    <td>{account.SoDienThoai}</td>
-                                    <td>{account.nhomnguoidung.TenNhom}</td>
+                                    <td>{(currentPage - 1) * currentLimit + index + 1}</td>
+                                    <td>{highlightText(account.HoTen ,searchTerm)}</td>
+                                    <td>{highlightText(account.TenDangNhap,searchTerm)}</td>
+                                    <td>{highlightText(account.SoDienThoai,searchTerm)}</td>
+                                    <td>{highlightText(account.nhomnguoidung.TenNhom,searchTerm)}</td>
                                     <td>
                                         <div className="action-buttons">
                                             {canUpdate && (
