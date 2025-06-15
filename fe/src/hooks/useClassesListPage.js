@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getAllClassLists } from '../services/classListService';
 import { toast } from 'react-toastify';
-
+import { getAllSchoolYear } from '../services/paramenterService';
+import { getAllClasses } from '../services/classService';
 
 //Xử lý danh sách lớp khi người dùng chọn lớp và năm học
 const useClassesListPage = () => {
@@ -19,32 +19,36 @@ const useClassesListPage = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const response = await getAllClassLists();
-            
-            if (response.data && response.data.EC === 0) {
-                const classLists = response.data.DT || [];
-                console.log('Class lists:', classLists);
-                
-                const uniqueYears = [...new Set(classLists.map(item => 
-                    item.namhoc?.TenNamHoc
-                ))].filter(Boolean);
-                
-                const uniqueClasses = [...new Set(classLists.map(item => 
-                    item.lop?.TenLop
-                ))].filter(Boolean);
-                
-                console.log('Unique years:', uniqueYears);
-                console.log('Unique classes:', uniqueClasses);
-                
-                setYears(uniqueYears);
-                setClasses(uniqueClasses);
-                
-                // Set default selections
-                if (uniqueYears.length > 0) setSelectedYear(uniqueYears[0]);
-                if (uniqueClasses.length > 0) setSelectedClass(uniqueClasses[0]);
-            } else {
-                toast.error(response.data?.EM || 'Failed to fetch data');
-            }
+
+            const yearResponse = await getAllSchoolYear();
+            const classResponse = await getAllClasses();
+
+            if (yearResponse?.data && Array.isArray(yearResponse.data.data)) {
+                    const schoolYears = yearResponse.data.data || [];
+                    // Sắp xếp năm học mới nhất lên đầu (cải thiện UX)
+                    const sortedYears = schoolYears.sort((a, b) => b.TenNamHoc.localeCompare(a.TenNamHoc));
+                    setYears(sortedYears);
+                    // Tự động chọn năm học mới nhất làm mặc định
+                    if (sortedYears.length > 0) {
+                        setSelectedYear(sortedYears[0].TenNamHoc);
+                    }
+                } else {
+                    toast.error(yearResponse?.data?.EM || 'Không thể tải danh sách năm học');
+                }
+
+           // Xử lý API lớp học
+                if (classResponse?.data?.EC === 0) {
+                    // Vì không có phân trang, backend trả về trực tiếp mảng dữ liệu trong DT
+                    const classData = classResponse.data.DT || [];
+                    setClasses(classData);
+                    // Tự động chọn lớp đầu tiên làm mặc định
+                    if (classData.length > 0) {
+                        setSelectedClass(classData[0].TenLop);
+                    }
+                } else {
+                    toast.error(classResponse?.data?.EM || 'Không thể tải danh sách lớp');
+                }
+
         } catch (error) {
             console.error('Error fetching class lists:', error);
             toast.error('Error fetching class lists');
