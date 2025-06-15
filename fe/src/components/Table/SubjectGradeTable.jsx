@@ -3,6 +3,7 @@ import { FaEdit, FaPlus, FaTrash, FaSort } from "react-icons/fa";
 import ModalUpdateGrade from "../Modal/ModalUpdateGrade";
 import ModalAddGrade from "../Modal/ModalAddGrade";
 import ModalDeleteScore from "../Modal/ModalDeleteScore";
+import ModalAddTestType from "../Modal/ModalAddTestType";
 import TableHeaderAction from "../TableHeaderAction";
 import useSubjectGradeTable from "../../hooks/useSubjectGradeTable";
 import "../../styles/Table.scss";
@@ -22,6 +23,9 @@ const SubjectGradeTable = ({ filters }) => {
   );
   const canDelete = userPermissions.some(
     (p) => p.TenManHinhDuocLoad === "/report/delete-score"
+  );
+  const canManageTestTypes = userPermissions.some(
+    (p) => p.TenManHinhDuocLoad === "/test/create"
   );
 
   const {
@@ -49,6 +53,10 @@ const SubjectGradeTable = ({ filters }) => {
     handlePageChange,
     handleSearchChange,
     handleSort,
+    addTestTypeModalOpen,
+    openAddTestTypeModal,
+    closeAddTestTypeModal,
+    addTestType
   } = useSubjectGradeTable(filters);
 
   const removeAccents = (str) => {
@@ -108,7 +116,9 @@ const SubjectGradeTable = ({ filters }) => {
       <TableHeaderAction
         onSearchChange={handleSearchChange}
         placeholder="Tìm kiếm học sinh..."
-        hideAdd={true}
+        addLabel="Thêm cột điểm"
+        onAddClick={openAddTestTypeModal}
+        hideAdd={!canManageTestTypes}
       />
       {loading && <p>Đang tải dữ liệu...</p>}
       {error && <p>{error}</p>}
@@ -203,7 +213,7 @@ const SubjectGradeTable = ({ filters }) => {
                           <FaEdit />
                         </button>
                       )}
-                      {canAdd && (
+                      {/*canAdd && (
                         <button
                           className="icon-button add"
                           title="Thêm điểm mới"
@@ -211,7 +221,7 @@ const SubjectGradeTable = ({ filters }) => {
                         >
                           <FaPlus />
                         </button>
-                      )}
+                      )*/}
                       {canDelete && (
                         <button
                           className="icon-button delete"
@@ -282,6 +292,13 @@ const SubjectGradeTable = ({ filters }) => {
           testTypes={testTypes}
           context={filters}
           onDelete={removeGrade}
+        />
+      )}
+      {addTestTypeModalOpen && (
+        <ModalAddTestType
+          show={addTestTypeModalOpen}
+          handleClose={closeAddTestTypeModal}
+          onSubmit={addTestType}
         />
       )}
     </div>

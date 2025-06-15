@@ -507,6 +507,20 @@ const editScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, Diem
       return { EM: 'Không tìm thấy thông tin học sinh', EC: -1, DT: [] };
     }
 
+    const minScore = await getThamSo("DiemToiThieu");
+    const maxScore = await getThamSo("DiemToiDa");
+
+    for (const d of DiemTP) {
+      const diemSo = parseFloat(d.Diemmoi);
+      if (isNaN(diemSo) || diemSo < minScore || diemSo > maxScore) {
+        return { 
+          EM: `Điểm ${diemSo} không hợp lệ. Phải nằm trong khoảng từ ${minScore} đến ${maxScore}.`, 
+          EC: -1, 
+          DT: [] 
+        };
+      }
+    }
+
     // Find related records
     const dsl = await db.danhsachlop.findOne({ where: { MaLop: lop.MaLop, MaNamHoc: namHoc.MaNamHoc } });
     if (!dsl) return { EM: 'Không tìm thấy danh sách lớp', EC: -1, DT: [] };

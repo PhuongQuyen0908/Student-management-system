@@ -110,12 +110,13 @@ const deleteScore = async (req, res) => {
 const editScore = async (req, res) => {
   try {
     const { MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP } = req.body;
-    const editScoreList = await reportAPIService.editScore(MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
-    return res.status(200).json({
-      EM: 'Chỉnh sửa điểm thành công',
-      EC: 0, 
-      DT: editScoreList
-    });
+    const result = await reportAPIService.editScore(MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP);
+    
+    if (result.EC !== 0) {
+      return res.status(400).json(result);
+    }
+    
+    return res.status(200).json(result);
   } catch (err) {
     console.error(err);
     return res.status(500).json({

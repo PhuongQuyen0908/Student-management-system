@@ -14,6 +14,7 @@ const useSubjectGradeTable = (filters) => {
   const [currentTarget, setCurrentTarget] = useState(null);
   const [refreshFlag, setRefreshFlag] = useState(0);
   const [testTypes, setTestTypes] = useState([]);
+  const [addTestTypeModalOpen, setAddTestTypeModalOpen] = useState(false);
 
   //New state cho chức năng tìm kiếm + phân trang + sort
   const [currentPage, setCurrentPage] = useState(1);
@@ -196,16 +197,19 @@ const useSubjectGradeTable = (filters) => {
 
       const res = await subjectGradeService.editScore(payload);
 
-      if (res?.data?.EC === 0) {
-        toast.success("Cập nhật điểm thành công");
-        closeEditModal();
-        setRefreshFlag(f => f + 1);
-      } else {
+      if (res?.data?.EC !== 0) {
         toast.error(res?.data?.EM || "Không thể cập nhật điểm");
+        return;
       }
+      
+      toast.success("Cập nhật điểm thành công");
+      closeEditModal();
+      setRefreshFlag(f => f + 1);
     } catch (error) {
       console.error("Error updating score:", error);
-      toast.error("Không thể kết nối đến máy chủ");
+      if (!error.response || !error.response.data) {
+        toast.error("Không thể kết nối đến máy chủ");
+      }
     }
   };
 
@@ -234,6 +238,57 @@ const useSubjectGradeTable = (filters) => {
     }
   };
 
+const openAddTestTypeModal = () => {
+  setAddTestTypeModalOpen(true);
+};
+
+const closeAddTestTypeModal = () => {
+  setAddTestTypeModalOpen(false);
+};
+
+const addTestType = async (testTypeData) => {
+  try {
+    const res = await subjectGradeService.createTestType(testTypeData);
+
+    if (res?.data?.message && res.data.message.includes("thành công")) {
+      toast.success(res.data.message);
+
+      const testTypesRes = await subjectGradeService.getTests();
+      if (Array.isArray(testTypesRes.data?.data)) {
+        setTestTypes(testTypesRes.data.data);
+      }
+
+      return true;
+    } else {
+
+      toast.error(res?.data?.message || "Không thể thêm loại kiểm tra");
+      return false;
+    }
+  } catch (error) {
+
+    console.error("Error adding test type:", error);
+
+    if (error.response && error.response.data && error.response.data.message) {
+      toast.error(error.response.data.message);
+    } else {
+      toast.error("Không thể kết nối đến máy chủ");
+    }
+
+    return false;
+  }
+};
+
+const refreshTestTypes = async () => {
+  try {
+    const res = await subjectGradeService.getTests();
+    if (Array.isArray(res.data?.data)) {
+      setTestTypes(res.data.data);
+    }
+  } catch (error) {
+    console.error("Error refreshing test types:", error);
+  }
+};
+
   return {
     grades, loading,  error, currentTarget, searchTerm,
     editModalOpen,  addModalOpen, deleteModalOpen,
@@ -241,9 +296,9 @@ const useSubjectGradeTable = (filters) => {
     closeAddModal,  openDeleteModal,  closeDeleteModal,
     addGrade, updateGrade, removeGrade,
     testTypes, currentPage, totalPages, sortConfig,
-
     handleSort, handlePageChange, handleSearchChange,
-    
+    openAddTestTypeModal, closeAddTestTypeModal,
+    addTestType, refreshTestTypes, addTestTypeModalOpen
   };
 };
 
