@@ -90,6 +90,10 @@ const deleteFunc = async (req, res) => {
 };
 
 const getUserAccount = async (req, res) =>{
+  let response = await userService.getAvatar(req.user.username);
+  //link chạy lấy avatar
+  const avatar =response.DT ? `${req.protocol}://${req.get('host')}${response.DT}` : `${req.protocol}://${req.get('host')}/uploads/Default_avatar.png`;
+
   return res.status(200).json({
     EM: "ok", 
     EC: "0", //error code
@@ -98,6 +102,7 @@ const getUserAccount = async (req, res) =>{
       groupWithPermissions:req.user.groupWithPermissions,
       username:req.user.username,
       HoTen:req.user.HoTen,
+      Avatar: avatar //trả về đường dẫn avatar
     }
   }); 
 }
@@ -120,11 +125,32 @@ const changePassword = async (req, res) => {
     });
   }
 };
+
+const uploadAvatar = async (req, res) => {
+  try {
+    const username = req.body.TenDangNhap;
+    const avatarPath = `/uploads/${req.file.filename}`;
+
+    // Lưu đường dẫn avatar vào database nếu muốn
+    let data = await userService.updateAvatar(username, avatarPath);
+    return res.status(200).json({
+      EM: data.EM,
+      EC: data.EC, //error code
+      DT: data.DT, //data
+    })} catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      EM: "error from server", //error message
+      EC: "-1", //error code
+      DT: "", //data
+    });}
+};
 module.exports = {
   getUserAccount,
   readFunc,
   createFunc,
   updateFunc,
   deleteFunc,
-  changePassword
+  changePassword,
+  uploadAvatar
 };
