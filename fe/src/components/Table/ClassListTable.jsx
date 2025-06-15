@@ -25,7 +25,16 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
     confirmRemoveStudent,
     // fetchStudents,
     // classListId,
+    maxClassSize,
   } = useClassListTable(selectedYear, selectedClass, setStudentCount);
+
+  const isClassFull =
+    maxClassSize !== null && pagination.totalItems >= maxClassSize;
+
+  // 2. Tạo một tooltip để giải thích tại sao nút bị vô hiệu hóa (tốt cho UX)
+  const addButtonTooltip = isClassFull
+    ? `Lớp đã đạt sĩ số tối đa (${maxClassSize})`
+    : "Thêm học sinh mới vào lớp";
 
   const removeAccents = (str) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -73,6 +82,8 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
         searchTerm={searchTerm}
         placeholder="Tìm kiếm học sinh..."
         addLabel="Thêm học sinh"
+        isButtonDisabled={isClassFull} // <-- Prop để vô hiệu hóa nút
+        buttonTooltip={addButtonTooltip} // <-- Prop để hiển thị tooltip
       />
 
       <div className="table-container">
@@ -226,6 +237,9 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
           selectedYear={selectedYear}
           selectedClass={selectedClass}
           onSave={handleAddStudents}
+          maxClassSize={maxClassSize} //Sỉ số tối đa của lớp
+          currentStudentCount={pagination.totalItems} //Sỉ số hiện tại của lớp
+          existingStudentIds={students.map((student) => student.MaHocSinh)} // Danh sách học sinh hiện tại trong lớp
         />
       )}
 

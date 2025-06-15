@@ -21,6 +21,10 @@ const fetchAllClasses = ({ search = "", page = 1, limit = 10, sortField = "MaLop
   return axios.get(`/api/class/read?${query}`);
 }
 
+const getAllClasses = () => {
+  return axios.get("/api/class/read");
+}
+
 const createClass = (data) => {
   return axios.post("/api/class/create",data);
 }
@@ -49,5 +53,6 @@ export {
     getClassById, 
     deleteClass,
     updateCurrentClass,
-    fetchAllGrades
+    fetchAllGrades,
+    getAllClasses
  };

@@ -1,6 +1,8 @@
 import db from '../models/index.js';
 import classService from "./classAPIService.js"
 import schoolYearService from "./yearAPIService.js"
+import paramenterService from "./paramenterAPIService.js";
+
 
 db.danhsachlop.belongsTo(db.namhoc, { foreignKey: 'MaNamHoc' });
 db.danhsachlop.belongsTo(db.lop, { foreignKey: 'MaLop' });
@@ -234,42 +236,131 @@ const getClassListByNameAndYear = async (tenLop, namHoc) => {
     }
     return buildResponse('Thành công', 0, danhSach);
   } catch (error) {
-    return buildRespone('Lỗi khi lấy danh sách lớp', -1, []); 
+    return buildResponse('Lỗi khi lấy danh sách lớp', -1, []); 
   }
 };
 
 // Add student to class
+// const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
+//   const t = await db.sequelize.transaction();
+//   try {
+
+//     // 1. Lấy tất cả các tham số 
+//     const paramsResponse = await parameterService.getAllParamenter(); 
+    
+//     // 2. Kiểm tra kết quả trả về từ service
+//     if (paramsResponse.EC !== 0 || !paramsResponse.DT) {
+//         throw new Error('Không thể tải các quy định của hệ thống.');
+//     }
+
+//     // 3. Tìm tham số siSoToiDa
+//     const paramenterList = paramsResponse.DT;
+//     const siSoToiDaParam = paramenterList.find(param => param.TenThamSo === 'siSoToiDaParam');
+//     if (!siSoToiDaParam  || !siSoToiDaParam.GiaTri) {
+//       throw new Error('Không tìm thấy tham số siSoToiDaParam trong hệ thống.');
+//     }
+//     // 4. Kiểm tra số lượng học sinh trong lớp
+//     const siSoToiDa = parseInt(siSoToiDaParam.GiaTri, 10);
+
+//     // Check if student already exists in the class
+//     const existingRecord = await db.ct_dsl.findOne({
+//       where: {
+//         MaDanhSachLop,
+//         MaHocSinh
+//       }
+//     });
+    
+//     if (existingRecord) {
+//       return buildResponse('Học sinh đã tồn tại trong danh sách lớp. Không thể thêm', 1,existingRecord);
+//     }
+    
+//     // Add student to class
+//     const newRecord = await db.ct_dsl.create({
+//       MaDanhSachLop,
+//       MaHocSinh
+//     });
+    
+//     // Update class size
+//     const classList = await db.danhsachlop.findByPk(MaDanhSachLop);
+//     if (classList) {
+//       await classList.update({
+//         SiSo: (classList.SiSo || 0) + 1
+//       });
+//     }
+
+//     return buildResponse('Thêm học sinh vào lớp thành công', 0, newRecord);
+//   } catch (error) {
+//     return buildResponse('Lỗi thêm học sinh vào lớp: ' + error.message, -1, []);
+//   }
+// };
+
 const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
+  const t = await db.sequelize.transaction();
   try {
-    // Check if student already exists in the class
+    // 1. Lấy tất cả tham số bằng hàm `getAllParamenter` 
+    const paramsResponse = await paramenterService.getAllParamenter(); 
+    
+    // 2. Kiểm tra kết quả trả về từ service
+    if (paramsResponse.EC !== 0 || !paramsResponse.DT) {
+        throw new Error('Không thể tải các quy định của hệ thống.');
+    }
+
+    // 3. Tìm tham số "SiSoToiDa" trong mảng DT (Data)
+    const parameterList = paramsResponse.DT;
+    const siSoToiDaParam = parameterList.find(p => p.TenThamSo === 'SiSoToiDa');
+
+    if (!siSoToiDaParam || !siSoToiDaParam.GiaTri) {
+      throw new Error('Không tìm thấy quy định về Sĩ số tối đa.');
+    }
+    const siSoToiDa = parseInt(siSoToiDaParam.GiaTri, 10);
+
+
+    // 4. Lấy thông tin lớp học hiện tại và khóa nó lại để tránh race condition
+    const classList = await db.danhsachlop.findByPk(MaDanhSachLop, {
+      transaction: t,
+      lock: t.LOCK.UPDATE 
+    });
+
+    if (!classList) {
+        await t.rollback();
+        return buildResponse('Không tìm thấy danh sách lớp.', 1, null);
+    }
+
+    // 5. So sánh sĩ số hiện tại với sĩ số tối đa đã lấy được
+    if (classList.SiSo >= siSoToiDa) {
+      await t.rollback();
+      return buildResponse(`Lớp đã đạt sĩ số tối đa (${siSoToiDa}). Không thể thêm học sinh.`, 2, null);
+    }
+    
+    // 6. Kiểm tra học sinh đã có trong lớp chưa
     const existingRecord = await db.ct_dsl.findOne({
-      where: {
-        MaDanhSachLop,
-        MaHocSinh
-      }
+      where: { MaDanhSachLop, MaHocSinh },
+      transaction: t
     });
     
     if (existingRecord) {
-      return buildResponse('Học sinh đã tồn tại trong danh sách lớp. Không thể thêm', 1,existingRecord);
+      await t.rollback();
+      return buildResponse('Học sinh đã tồn tại trong danh sách lớp. Không thể thêm', 1, existingRecord);
     }
     
-    // Add student to class
+    // 7. Thêm học sinh vào lớp (ct_dsl)
     const newRecord = await db.ct_dsl.create({
       MaDanhSachLop,
       MaHocSinh
-    });
+    }, { transaction: t });
     
-    // Update class size
-    const classList = await db.danhsachlop.findByPk(MaDanhSachLop);
-    if (classList) {
-      await classList.update({
-        SiSo: (classList.SiSo || 0) + 1
-      });
-    }
+    // 8. Cập nhật lại sĩ số của lớp
+    await classList.increment('SiSo', { by: 1, transaction: t });
+
+    // Nếu mọi thứ thành công, commit transaction
+    await t.commit();
 
     return buildResponse('Thêm học sinh vào lớp thành công', 0, newRecord);
   } catch (error) {
-    return buildResponse('Lỗi thêm học sinh vào lớp: ' + error.message, -1, []);
+    // Nếu có bất kỳ lỗi nào, rollback tất cả thay đổi
+    await t.rollback();
+    console.error("Lỗi khi thêm học sinh:", error);
+    return buildResponse('Lỗi phía server: ' + error.message, -1, null);
   }
 };
 

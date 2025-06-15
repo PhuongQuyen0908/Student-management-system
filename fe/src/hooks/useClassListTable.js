@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { getClassListByNameAndYear, removeStudentFromClass, addStudentToClass, getStudentsOfClass, createClassList} from '../services/classListService';
 import { toast } from 'react-toastify';
 import useModal from './useModal';
+import { getAllParameters } from '../services/paramenterService';
 
 import useDebounce from './useDebounce'; //Tránh fetch liên tục
 import { useCallback } from "react";
@@ -31,6 +32,31 @@ const useClassListTable = (selectedYear, selectedClass, setParentStudentCount) =
     // Xóa học sinh khỏi danh sách lớp
     const deleteModal = useModal();
     const [dataModal, setDataModal] = useState(null);
+
+    //New state cho sỉ số của lớp
+    const [maxClassSize, setMaxClassSize] = useState(null);
+    useEffect(() => {
+        const fetchSystemParameters = async () => {
+            try {
+                const response = await getAllParameters();
+                if (response.data && response.data.EC === 0) {
+                    const params = response.data.DT;
+                    const siSoToiDaParam = params.find(p => p.TenThamSo === 'SiSoToiDa');
+                    if (siSoToiDaParam) {
+                        setMaxClassSize(parseInt(siSoToiDaParam.GiaTri, 10));
+                    } else {
+                        toast.error("Không tìm thấy quy định về Sĩ số tối đa trong hệ thống.");
+                        setMaxClassSize(40); // Đặt một giá trị mặc định an toàn
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải quy định hệ thống:", error);
+                toast.error("Không thể tải quy định về sĩ số.");
+                setMaxClassSize(40); // Đặt một giá trị mặc định an toàn khi có lỗi
+            }
+        };
+        fetchSystemParameters();
+    }, []); 
 
     //Lấy ID của danh sách lớp trước
     useEffect(() => {
@@ -198,6 +224,22 @@ const handleAddStudents = async (selectedStudentIds) => {
         toast.error('Không có học sinh nào được chọn');
         return;
     }
+    // --- KIỂM TRA SĨ SỐ Ở FRONTEND ---
+        if (maxClassSize === null) {
+            toast.warn("Đang tải quy định sĩ số, vui lòng thử lại sau giây lát.");
+            return;
+        }
+
+        const currentSize = pagination.totalItems;
+        const studentsToAddCount = selectedStudentIds.length;
+
+        if (currentSize + studentsToAddCount > maxClassSize) {
+            toast.error(`Không thể thêm! Lớp sẽ vượt sĩ số tối đa (${maxClassSize}).` +
+                        `\nLớp hiện có: ${currentSize} học sinh.` +
+                        `\nBạn đang muốn thêm: ${studentsToAddCount} học sinh.`);
+            return; // Dừng lại ngay lập tức
+        }
+        // --- KẾT THÚC KIỂM TRA ---
     let currentClassListId = classListId;
     if(!currentClassListId){
         try{
@@ -225,40 +267,39 @@ const handleAddStudents = async (selectedStudentIds) => {
     try {
         // Track successful and failed adds
         let successCount = 0;
-        let existingCount = 0;
+        let failMessages = [];
+
         
         // Process each student add request sequentially
-        for (const studentId of selectedStudentIds) {
-            try {
-                const response = await addStudentToClass({ 
-                    MaDanhSachLop: currentClassListId, 
-                    MaHocSinh: studentId 
-                });
-            
-                if (response.data && response.data.EC === 0) {
-                    successCount++;
-                }
-                else if(response.data && response.data.EC === 1) {
-                    existingCount++;       
-                }
-            } catch (error) {
-                if (error.response?.data?.EM?.includes('đã tồn tại trong lớp')) {
-                    existingCount++;
-                } else {
-                    throw error; // Re-throw other errors
+       const addPromises = selectedStudentIds.map(studentId =>
+            addStudentToClass({
+                MaDanhSachLop: currentClassListId,
+                MaHocSinh: studentId
+            }).catch(err => ({ error: err })) // Bắt lỗi của từng request
+        );
+
+        const results = await Promise.all(addPromises);
+
+        results.forEach(res => {
+            if (res && res.data && res.data.EC === 0) {
+                successCount++;
+            } else {
+                // Gom các thông báo lỗi lại
+                const errorMessage = res.data?.EM || res.error?.response?.data?.EM || "Lỗi không xác định";
+                if (!failMessages.includes(errorMessage)) {
+                    failMessages.push(errorMessage);
                 }
             }
-        }
-        
+        });
         // Show a single toast with the results
         if (successCount > 0) {
             toast.success(`Đã thêm ${successCount} học sinh vào lớp`);
         }
-        
-        if (existingCount > 0) {
-            toast.warning(`${existingCount} học sinh đã tồn tại trong lớp này`);
+        if (failMessages.length > 0) {
+            failMessages.forEach(msg => toast.error(msg));
         }
-        
+
+        // Đóng modal và tải lại danh sách
         studentListModal.close();
         fetchStudents();
     } catch (error) {
@@ -306,7 +347,8 @@ const handleAddStudents = async (selectedStudentIds) => {
         handleSortChange,
         fetchStudents,
         classListId,
-
+        maxClassSize,
+        
 
     };
 };
