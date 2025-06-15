@@ -4,9 +4,16 @@ require("dotenv").config();
 import configViewEngine from "./config/viewEngine.js";
 //import connection from "./config/connectDB.js";
 import bodyParser from "body-parser";
+const path = require("path");
 
 const app = express();
 const PORT = process.env.PORT || 8083;
+
+const rootDir = path.resolve(); // trỏ về thư mục gốc project
+console.log(">>> rootDir =", rootDir); 
+//app.use(express.static(path.join(__dirname, "public")));
+app.use("/uploads", express.static(path.join(rootDir, "/public/uploads")));
+console.log(">>> uploads path = " + path.join(rootDir, "public/uploads"));
 
 import { connection } from './config/connectDB.js'; 
 configCors(app);

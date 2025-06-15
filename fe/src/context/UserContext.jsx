@@ -31,10 +31,11 @@ const UserProvider = ({ children }) => {
       let username = response.data.DT.username;
       let HoTen = response.data.DT.HoTen;
       let token = response.data.DT.access_token;
+      let Avatar = response.data.DT.Avatar || null;
       let data = {
         isAuthenticated:true,
         token: token, 
-       account: { groupWithPermissions, username ,HoTen },
+       account: { groupWithPermissions, username ,HoTen , Avatar },
       }
       setUser(data)
     }else{

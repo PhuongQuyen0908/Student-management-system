@@ -311,6 +311,66 @@ const changePasswordUser = async (
     };
   }
 };
+
+const updateAvatar = async (TenDangNhap ,Avatar) => {
+  try {
+    let user = await db.nguoidung.findOne({
+      where: { TenDangNhap: TenDangNhap },
+    });
+    if (user) {
+      await user.update({
+        Avatar: Avatar,
+      });
+      return {
+        EM: "Cập nhật avatar thành công",
+        EC: 0,
+        DT: "",
+      };
+    } else {
+      return {
+        EM: "Không tìm thấy người dùng",
+        EC: 1,
+        DT: [],
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "something wrongs with service",
+      EC: -1,
+      DT: [],
+    };
+  }
+};
+
+const getAvatar = async (TenDangNhap) => {
+  try {
+    let user = await db.nguoidung.findOne({
+      where: { TenDangNhap: TenDangNhap },
+      attributes: ["Avatar"],
+    });
+    if (user) {
+      return {
+        EM: "Lấy avatar thành công",
+        EC: 0,
+        DT: user.Avatar,
+      };
+    } else {
+      return {
+        EM: "Không tìm thấy người dùng",
+        EC: 1,
+        DT: "",
+      };
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      EM: "something wrongs with service",
+      EC: -1,
+      DT: [],
+    };
+  }
+};
 module.exports = {
   getAllUser,
   createNewUser,
@@ -318,4 +378,6 @@ module.exports = {
   deleteUser,
   getUserWithPagination,
   changePasswordUser,
+  updateAvatar,
+  getAvatar
 };

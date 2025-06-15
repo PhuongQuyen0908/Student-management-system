@@ -54,7 +54,7 @@ const handleUserLogin = async (rawData) =>{
   } catch (error) {
     console.log(error)
     return {
-      EM: "Something wrongs in service...",
+      EM: "Something wrongs in  loginService",
       EC: -2,
     };
   }

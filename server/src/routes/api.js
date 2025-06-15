@@ -26,6 +26,8 @@ import permissionController from "../controller/permissionController.js";
 import userController from "../controller/userController.js";
 import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction.js";
 
+//avatar
+import upload from "../middleware/upload.js";
 const router = express.Router();
 
 /**
@@ -61,6 +63,7 @@ const initApiRoutes = (app) => {
   router.put("/user/update", userController.updateFunc);
   router.delete("/user/delete", userController.deleteFunc);
   router.post("/user/change-password", userController.changePassword); // đổi mật khẩu
+  router.post("/user/upload-avatar", upload.single("Avatar"),userController.uploadAvatar); // đổi avatar
 
   //CRUD student
   router.get("/student/read", studentController.readFunc);
