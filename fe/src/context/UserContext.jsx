@@ -63,7 +63,7 @@ const UserProvider = ({ children }) => {
     DanhSachHocSinh: ['/student/read'],
     TiepNhanHocSinh: ['/student/create', '/student/read' ],
     DanhSachMonHoc: ['/subject/read', '/subject/create', '/subject/update', '/subject/delete'],
-    BangDiemMonHoc: ['/report/subject-summary' ,'/report/add-score' , '/report/edit-score', '/report/delete-score'],
+    BangDiemMonHoc: ['/report/subject-summary' ,'/report/add-score' , '/report/edit-score', '/report/delete-score', '/test/create'],
     DanhSachLopHoc: ['/class/read', '/class/create', '/class/update', '/class/delete'],
     DanhSachLop: ['/classList/read' ,'/classList/addStudent' ,'/classList/removeStudent'],
     BaoCaoMonHoc: ['/report/subject-report'],

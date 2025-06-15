@@ -25,5 +25,8 @@ const subjectGradeService = {
 
   // 6. Lấy danh sách loại kiểm tra
   getTests: () => axios.get("/api/test/read"),
+
+  // 7. Tạo loại kiểm tra mới
+  createTestType: (data) => axios.post('/api/test/create', data),
 };
 export default subjectGradeService;
