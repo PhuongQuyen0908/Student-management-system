@@ -1,4 +1,5 @@
 import db from '../models/index.js';
+const buildRepsponse = (EM, EC, DT) => ({EM,EC, DT});
 // Hàm lấy tất cả các năm học
 const getAllSchoolYears = async () => {
   try {
@@ -31,7 +32,9 @@ const checkSchoolYearExists = async (SchoolYearName) => {
     const existingSchoolYear = await db.namhoc.findOne({
       where: { TenNamHoc: SchoolYearName }
     });
-    return existingSchoolYear !== null; // Trả về true nếu năm học đã tồn tại, ngược lại trả về false
+    if( existingSchoolYear ) {
+      return true; // Năm học đã tồn tại
+    } else return false; // Năm học chưa tồn tại
   } catch (error) {
     throw new Error('Lỗi khi kiểm tra năm học: ' + error.message);
   }
@@ -40,11 +43,32 @@ const checkSchoolYearExists = async (SchoolYearName) => {
 // Hàm tạo năm học học mới
 const createSchoolYear = async (data) => {
   try {
-    const newSchoolYear = await db.namhoc.create(data);
-    return newSchoolYear;
+    const { TenNamHoc } = data;
+
+    // 1. Validate the format (optional but highly recommended)
+    if (!TenNamHoc || !/^\d{4}-\d{4}$/.test(TenNamHoc)) {
+      return buildRepsponse('Tên năm học không hợp lệ. Vui lòng nhập theo định dạng YYYY-YYYY', 1, null);
+    }
+
+    // 2. Split the string to get the two years
+    const years = TenNamHoc.split('-');
+    const nam1 = years[0];
+    const nam2 = years[1];
+
+    // 3. Create the complete data object to be saved
+    const schoolYearDataToCreate = {
+      TenNamHoc: TenNamHoc,
+      Nam1: nam1,
+      Nam2: nam2,
+    };
+
+    // 4. Create the new record using the complete object
+    const newSchoolYear = await db.namhoc.create(schoolYearDataToCreate);
+    return buildRepsponse('Tạo năm học thành công', 0, newSchoolYear);
+
   } catch (error) {
-    throw new Error('Lỗi khi tạo năm học mới: ' + error.message);
-  }
+    // The original error message from the DB will be caught and re-thrown
+    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);}
 };
 
 // Hàm cập nhật năm học học
