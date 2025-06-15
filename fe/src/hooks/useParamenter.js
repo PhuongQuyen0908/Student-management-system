@@ -1,16 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { updateParameter} from '../services/paramenterService';
-import { getAllParameters } from '../services/paramenterService';
+import { updateParameter, getAllParameters } from '../services/paramenterService';
+// Bỏ import liên quan đến năm học ra khỏi hook này
 
 const useParamenterTable = () => {
-    // Lấy ra danh sách tham số
-    // eslint-disable-next-line no-unused-vars
     const [loading, setLoading] = useState(false);
     const [parameterList, setParameterList] = useState([]);
 
-    // Lấy danh sách tham số
-    const fetchParamenterList = async () => {
+    const fetchParamenterList = useCallback(async () => {
         setLoading(true);
         try {
             const res = await getAllParameters();
@@ -21,39 +18,39 @@ const useParamenterTable = () => {
                 toast.error(res?.data?.EM || "Lỗi khi tải danh sách tham số");
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error fetching parameters:", error);
             setParameterList([]);
             toast.error("Không thể kết nối đến máy chủ");
         } finally {
             setLoading(false);
         }
-    }
+    }, []); // useCallback với mảng rỗng
 
     useEffect(() => {
         fetchParamenterList();
-    }, []);
+    }, [fetchParamenterList]);
 
-    // Cập nhật tham số
     const handleUpdateParamenter = async (parameterKey, data) => {
         setLoading(true);
         try {
             const res = await updateParameter(parameterKey, data);
-            console.log(res);
             if (res?.data?.EC === 0) {
-                console.log(res);
                 toast.success(res?.data?.EM || "Cập nhật tham số thành công");
+                // Fetch lại danh sách tham số để UI cập nhật
+                fetchParamenterList(); 
             } else {
                 toast.error(res?.data?.EM || "Cập nhật tham số thất bại");
             }
         } catch (error) {
-            console.log(error);
+            console.error("Error updating parameter:", error);
             toast.error("Không thể kết nối đến máy chủ");
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     return {
+        loading,
         parameterList,
         handleUpdateParamenter,
     };

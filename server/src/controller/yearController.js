@@ -28,16 +28,14 @@ const getSchoolYearById = async (req, res) => {
 const createSchoolYear = async (req, res) => {
   try {
     // Kiểm tra xem năm học đã tồn tại chưa
-    const existingSchoolYear = await yearAPIService.checkSchoolYearExists(req.body.NamHoc);
+    const existingSchoolYear = await yearAPIService.checkSchoolYearExists(req.body.TenNamHoc);
     if (existingSchoolYear) {
-      return res.status(400).json({ message: 'Năm học đã tồn tại, không thể tạo lại.' });
-    }
-
-    // Nếu năm học chưa tồn tại, tiến hành tạo năm học mới
+      return res.status(400).json({ EM: 'Năm học đã tồn tại', EC: 1, DT: null });
+    } 
     const newSchoolYear = await yearAPIService.createSchoolYear(req.body);
-    res.status(201).json({ message: 'Tạo năm học thành công', data: newSchoolYear });
+    res.status(201).json({ EM: newSchoolYear.EM, EC: newSchoolYear.EC, DT: newSchoolYear.DT });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).json({ EM: "Lỗi khi tạo năm học: " + error.message, EC: -1, DT: null });
   }
 };
 
