@@ -352,6 +352,37 @@ const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
     // 8. Cập nhật lại sĩ số của lớp
     await classList.increment('SiSo', { by: 1, transaction: t });
 
+    // 9. Tạo quá trình học (quatrinhhoc) cho học sinh mới
+    const allHocKy = await db.hocky.findAll({transaction: t});
+    for (const hocKy of allHocKy) {
+      // Tạo bản ghi quatrinhhoc nếu chưa tồn tại
+      const [qth] = await db.quatrinhhoc.findOrCreate({
+        where: {
+          MaCT_DSL: newRecord.MaCT_DSL,
+          MaHocKy: hocKy.MaHocKy
+        },
+        defaults: {
+          DiemTB: 0, // Giá trị mặc định
+        },
+        transaction: t
+      });
+
+      //Tạo bản ghi bdmonhoc cho từng môn học trong quá trình học
+      const allMonHoc = await db.monhoc.findAll({transaction: t});
+      for (const monHoc of allMonHoc) {
+        await db.bdmonhoc.findOrCreate({
+          where: {
+            MaQuaTrinhHoc: qth.MaQuaTrinhHoc,
+            MaMonHoc: monHoc.MaMonHoc
+          },
+          defaults: {
+            DiemTP: 0, // Giá trị mặc định
+          },
+          transaction: t
+        });
+      }
+    }
+
     // Nếu mọi thứ thành công, commit transaction
     await t.commit();
 

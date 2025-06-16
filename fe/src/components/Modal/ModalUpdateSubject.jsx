@@ -85,7 +85,7 @@ const ModalUpdateSubject = ({
           setValidInputs(defaultValidInputs);
         }
       } catch (error) {
-        console.error("Lỗi khi cập nhật môn học:", error);
+        console.log("Error updating subject:", error);
       }
     }
   };

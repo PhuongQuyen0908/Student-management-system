@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getClassListByNameAndYear, removeStudentFromClass, addStudentToClass, getStudentsOfClass, createClassList} from '../services/classListService';
 import { toast } from 'react-toastify';
 import useModal from './useModal';
 import { getAllParameters } from '../services/paramenterService';
 
 import useDebounce from './useDebounce'; //Tránh fetch liên tục
-import { useCallback } from "react";
 
 const useClassListTable = (selectedYear, selectedClass, setParentStudentCount) => {
     const [students, setStudents] = useState([]);
@@ -59,140 +58,83 @@ const useClassListTable = (selectedYear, selectedClass, setParentStudentCount) =
     }, []); 
 
     //Lấy ID của danh sách lớp trước
-    useEffect(() => {
-        const fetchClassListId = async () => {
-            if(!selectedYear || !selectedClass) {
+    const fetchClassListData = useCallback(async (isInitialLoad = false) => {
+        if (!selectedYear || !selectedClass) {
+            setStudents([]);
+            setClassListId(null);
+            setPagination(p => ({ ...p, totalItems: 0, totalPages: 1, currentPage: 1 }));
+            if (setParentStudentCount) setParentStudentCount(0);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            // Bước 1: Lấy thông tin lớp
+            const classInfoResponse = await getClassListByNameAndYear(selectedClass, selectedYear);
+
+            if (classInfoResponse.data && classInfoResponse.data.EC === 0 && classInfoResponse.data.DT.length > 0) {
+                // CÓ LỚP, TIẾP TỤC LẤY HỌC SINH
+                const classData = classInfoResponse.data.DT[0];
+                const newClassId = classData.MaDanhSachLop;
+                setClassListId(newClassId);
+                if (setParentStudentCount) setParentStudentCount(classData.SiSo || 0);
+
+                const studentResponse = await getStudentsOfClass(newClassId, {
+                    page: pagination.currentPage,
+                    limit: pagination.limit,
+                    search: debouncedSearchTerm,
+                    sortField,
+                    sortOrder
+                });
+
+                if (studentResponse.data && studentResponse.data.EC === 0) {
+                    const studentData = studentResponse.data.DT;
+                    setStudents(studentData.students || []);
+                    setPagination({
+                        totalItems: studentData.totalItems,
+                        totalPages: studentData.totalPages,
+                        currentPage: studentData.currentPage,
+                        limit: studentData.limit || 10,
+                    });
+                } else {
+                    setStudents([]);
+                    setPagination(p => ({ ...p, totalItems: 0, totalPages: 1, currentPage: 1 }));
+                }
+
+            } else {
+                // CHƯA CÓ LỚP
+                if (isInitialLoad) {
+                    toast.warn(`Lớp ${selectedClass} - Năm học ${selectedYear} chưa được tạo.`);
+                }
                 setClassListId(null);
                 setStudents([]);
-                setPagination(prev => ({ ...prev, totalItems: 0, totalPages: 1, currentPage: 1 }));
+                setPagination(p => ({ ...p, totalItems: 0, totalPages: 1, currentPage: 1 }));
                 if (setParentStudentCount) setParentStudentCount(0);
-                return;
             }
-            try {
-                const response = await getClassListByNameAndYear(selectedClass, selectedYear);
-                //1. Trường hợp API thành công và có dữ liệu
-                if (response.data && response.data.EC === 0 && response.data.DT.length > 0) {
-                    const classData = response.data.DT[0];
-                    setClassListId(classData.MaDanhSachLop);
-                    // Cập nhật sỉ số từ lần gọi đầu tiên
-                    if(setParentStudentCount){
-                        setParentStudentCount(classData.SiSo || 0);
-                    }
-                } else if(response.data && response.data.EC ===1 && response.data.DT.length === 0) {
-                    toast.info("Không có học sinh nào trong danh sách lớp này");
-                    setClassListId(null);
-                    setStudents([]);
-                    setParentStudentCount(0);
-
-                } else{
-                    toast.error(response.data?.EM || "Lỗi khi tải danh sách lớp");
-                    setClassListId(null);
-                }
-            }catch(e) {
-                if (e.response && e.response.status === 404) {
-                    toast.warn(`Danh sách lớp ${selectedClass} cho năm học ${selectedYear} chưa được tạo.`);
-                } else {
-                    const errorMessage = e.response?.data?.EM || e.message || 'Lỗi kết nối đến máy chủ';
-                    toast.error(errorMessage);
-                }
-                setClassListId(null); // Luôn reset khi có lỗi
-            }
-        };
-        fetchClassListId();
-    }, [selectedClass, selectedYear]);
-
-    // Dùng useCallback để tối ưu, tránh tạo lại hàm mỗi lần render
-    const fetchStudents = useCallback(async () => {
-    // Nếu không có classListId, reset state và dừng lại.
-    // useEffect bên trên đã xử lý toast cho trường hợp này rồi.
-    if (!classListId) {
-        setStudents([]);
-        setPagination(prev => ({ ...prev, totalItems: 0, totalPages: 1, currentPage: 1 }));
-        if (setParentStudentCount) setParentStudentCount(0);
-        return;
-    }
-
-    setLoading(true);
-    try {
-        const options = {
-            page: pagination.currentPage,
-            limit: pagination.limit,
-            search: debouncedSearchTerm,
-            sortField,
-            sortOrder
-        };
-        const response = await getStudentsOfClass(classListId, options);
-
-        // Trường hợp API trả về thành công (EC === 0)
-        if (response.data && response.data.EC === 0) {
-            const data = response.data.DT;
-            setStudents(data.students || []);
-            setPagination({
-                totalItems: data.totalItems,
-                totalPages: data.totalPages,
-                currentPage: data.currentPage,
-                limit: data.limit || 10,
-            });
-            // Cập nhật sỉ số ở component cha
-            if (setParentStudentCount) {
-                setParentStudentCount(data.totalItems);
-            }
-            // Chỉ hiện toast khi tìm kiếm mà không thấy, hoặc khi danh sách hoàn toàn rỗng.
-            if (data.totalItems === 0) {
-                // Nếu đang tìm kiếm thì thông báo khác đi
-                if(debouncedSearchTerm) {
-                    toast.info(`Không tìm thấy học sinh nào với từ khóa "${debouncedSearchTerm}"`);
-                } else {
-                    toast.info('Không có học sinh nào trong danh sách lớp này');
-                }
-            }
-        } 
-        // Trường hợp API trả về mã lỗi cụ thể cho trường hợp "rỗng" (EC === 1)
-        // Coi đây là một trường hợp "thành công" nhưng không có dữ liệu
-        else if (response.data && response.data.EC === 1) {
-            setStudents([]); 
-            setPagination(prev => ({ ...prev, totalItems: 0, totalPages: 1, currentPage: 1 }));
-            if (setParentStudentCount) {
-                setParentStudentCount(0);
-            }
-            // Tái sử dụng logic toast ở trên, không cần toast thêm ở đây nữa.
-            // Chỉ cần đảm bảo message từ API được hiển thị nếu có.
-            const message = response.data.EM || 'Không có học sinh nào trong danh sách lớp này';
-            toast.info(message);
-        }
-        // Các lỗi thực sự khác
-        else {  
-            toast.error(response.data?.EM || 'Không thể tải danh sách học sinh');
-            // Khi có lỗi, cũng reset state
+        } catch (error) {
+            const errorMessage = error.response?.data?.EM || 'Lỗi kết nối máy chủ.';
+            if (isInitialLoad) toast.error(errorMessage);
+            setClassListId(null);
             setStudents([]);
-            setPagination(prev => ({ ...prev, totalItems: 0, totalPages: 1, currentPage: 1 }));
+            setPagination(p => ({ ...p, totalItems: 0, totalPages: 1, currentPage: 1 }));
             if (setParentStudentCount) setParentStudentCount(0);
+        } finally {
+            setLoading(false);
         }
-    } catch (error) {
-        console.error('Error fetching students:', error);
-        const errorMessage = error.response?.data?.EM || 'Lỗi kết nối máy chủ khi tải học sinh.';
-        toast.error(errorMessage);
-        setStudents([]); 
-        setPagination(prev => ({ ...prev, totalItems: 0, totalPages: 1, currentPage: 1 }));
-        if (setParentStudentCount) setParentStudentCount(0);
-    } finally {
-        setLoading(false);
-    }
-    // Chú ý đến mảng dependencies của useCallback
-}, [classListId, pagination.currentPage, pagination.limit, debouncedSearchTerm, sortField, sortOrder, setParentStudentCount]);
+    }, [selectedYear, selectedClass, pagination.currentPage, pagination.limit, debouncedSearchTerm, sortField, sortOrder, setParentStudentCount]);
+
 
     // useEffect ĐỂ GỌI API KHI CÁC THAM SỐ THAY ĐỔI 
-     useEffect(() => {
-        // Mỗi khi người dùng tìm kiếm, reset về trang 1
-        setPagination(p => ({...p, currentPage: 1}));
-    }, [debouncedSearchTerm]);
+    useEffect(() => {
+        setPagination(p => ({ ...p, currentPage: 1 }));
+    }, [debouncedSearchTerm, selectedYear, selectedClass]); // Thêm selectedYear/Class để reset trang khi đổi lớp/năm học
 
      useEffect(() => {
-        fetchStudents();
-    }, [fetchStudents]); // fetchStudents giờ đã được bọc trong useCallback
+        fetchClassListData(true);
+    }, [fetchClassListData]); // Dependency array chỉ còn hàm fetch chính
 
    const handleSearchChange = (value) => {
-    setSearchTerm(value);
+    setSearchTerm(value);       
     setCurrentPage(1);
 };
 
@@ -208,7 +150,7 @@ const handleRemoveStudent = (maCT_DSL) => {
             } else {
                 toast.error(response.data?.EM || 'Không thể xóa học sinh');
             }
-            fetchStudents();
+            fetchClassListData();
         } catch (error) {
             console.log(error);
             console.error('Error removing student:', error);
@@ -220,99 +162,62 @@ const handleRemoveStudent = (maCT_DSL) => {
 
 
 const handleAddStudents = async (selectedStudentIds) => {
-    if (!selectedStudentIds || selectedStudentIds.length === 0) {
-        toast.error('Không có học sinh nào được chọn');
+    if (!selectedStudentIds || !selectedStudentIds.length) {
+        toast.warn('Vui lòng chọn học sinh.');
         return;
     }
-    // --- KIỂM TRA SĨ SỐ Ở FRONTEND ---
-        if (maxClassSize === null) {
-            toast.warn("Đang tải quy định sĩ số, vui lòng thử lại sau giây lát.");
-            return;
-        }
 
-        const currentSize = pagination.totalItems;
-        const studentsToAddCount = selectedStudentIds.length;
-
-        if (currentSize + studentsToAddCount > maxClassSize) {
-            toast.error(`Không thể thêm! Lớp sẽ vượt sĩ số tối đa (${maxClassSize}).` +
-                        `\nLớp hiện có: ${currentSize} học sinh.` +
-                        `\nBạn đang muốn thêm: ${studentsToAddCount} học sinh.`);
-            return; // Dừng lại ngay lập tức
-        }
-        // --- KẾT THÚC KIỂM TRA ---
-    let currentClassListId = classListId;
-    if(!currentClassListId){
-        try{
-            toast.info('Danh sách lớp chưa được tạo. Đang tiến hành tạo danh sách lớp mới.....');
-            const response = await createClassList({TenLop: selectedClass, TenNamHoc: selectedYear});
-            if (response.data && response.data.EC === 0) {
-                currentClassListId = response.data.DT.MaDanhSachLop;
-                toast.success("Tạo danh sách lớp thành công");
-                setClassListId(currentClassListId);
-            }else{
-                toast.error(response.data?.EM || "Lỗi khi tạo danh sách lớp");
-            }
-        }catch(error){
-           toast.error("Lỗi khi tạo danh sách lớp.");
-            console.error(error);
-            return; // Dừng hàm
-
-        }
-    }
-    if(!currentClassListId) {
-        toast.error("Không xác định được danh sách lớp để thêm học sinh.");
-        return;
-    }
+    setLoading(true);
+    studentListModal.close();
 
     try {
-        // Track successful and failed adds
-        let successCount = 0;
-        let failMessages = [];
-
+        // BƯỚC 1: LUÔN KIỂM TRA LẠI VỚI SERVER ĐỂ LẤY DỮ LIỆU MỚI NHẤT
+        // Không được tin vào state `classListId` ở đây.
+        let classListResponse = await getClassListByNameAndYear(selectedClass, selectedYear).catch(() => null);
         
-        // Process each student add request sequentially
-       const addPromises = selectedStudentIds.map(studentId =>
-            addStudentToClass({
-                MaDanhSachLop: currentClassListId,
-                MaHocSinh: studentId
-            }).catch(err => ({ error: err })) // Bắt lỗi của từng request
-        );
+        // Lấy ID và sỉ số hiện tại từ kết quả vừa gọi
+        let currentClassId = classListResponse?.data?.DT[0]?.MaDanhSachLop;
+        let currentSize = classListResponse?.data?.DT[0]?.SiSo || 0;
 
-        const results = await Promise.all(addPromises);
-
-        results.forEach(res => {
-            if (res && res.data && res.data.EC === 0) {
-                successCount++;
+        // BƯỚC 2: NẾU KIỂM TRA MÀ VẪN CHƯA CÓ, THÌ MỚI TẠO MỚI (LOGIC TẠO NGẦM)
+        if (!currentClassId) {
+            toast.info(`Đang tạo danh sách cho lớp ${selectedClass}...`);
+            const createResponse = await createClassList({ TenLop: selectedClass, TenNamHoc: selectedYear });
+            
+            if (createResponse.data && createResponse.data.EC === 0) {
+                currentClassId = createResponse.data.DT.MaDanhSachLop;
+                currentSize = 0; // Lớp vừa tạo, sỉ số là 0
             } else {
-                // Gom các thông báo lỗi lại
-                const errorMessage = res.data?.EM || res.error?.response?.data?.EM || "Lỗi không xác định";
-                if (!failMessages.includes(errorMessage)) {
-                    failMessages.push(errorMessage);
-                }
+                // Nếu tạo thất bại, ném lỗi và dừng lại
+                throw new Error(createResponse.data?.EM || "Lỗi khi tạo danh sách lớp.");
             }
-        });
-        // Show a single toast with the results
-        if (successCount > 0) {
-            toast.success(`Đã thêm ${successCount} học sinh vào lớp`);
         }
-        if (failMessages.length > 0) {
-            failMessages.forEach(msg => toast.error(msg));
+        
+        // BƯỚC 3: KIỂM TRA SĨ SỐ VỚI DỮ LIỆU MỚI NHẤT
+        if (maxClassSize !== null && (currentSize + selectedStudentIds.length > maxClassSize)) {
+            throw new Error(`Lớp sẽ vượt sĩ số tối đa (${maxClassSize}).`);
         }
 
-        // Đóng modal và tải lại danh sách
-        studentListModal.close();
-        fetchStudents();
+        // BƯỚC 4: THÊM HỌC SINH
+        const addPromises = selectedStudentIds.map(studentId =>
+            addStudentToClass({ MaDanhSachLop: currentClassId, MaHocSinh: studentId }).catch(err => ({ error: err }))
+        );
+        const results = await Promise.all(addPromises);
+        const successCount = results.filter(r => r && !r.error && r.data.EC === 0).length;
+
+        if (successCount > 0) toast.success(`Đã thêm thành công ${successCount} học sinh.`);
+        if (results.length > successCount) toast.error(`Thêm thất bại ${results.length - successCount} học sinh (có thể đã tồn tại).`);
+
     } catch (error) {
-        console.error('Error adding students:', error);
-        toast.error('Lỗi khi thêm học sinh vào lớp');
+        // Bắt tất cả các lỗi từ việc tạo lớp, kiểm tra sĩ số, v.v.
+        toast.error(error.message || "Đã có lỗi nghiêm trọng xảy ra.");
+        console.error("Lỗi trong quá trình thêm học sinh:", error);
+    } finally {
+        // BƯỚC 5: LUÔN FETCH LẠI DỮ LIỆU ĐỂ CẬP NHẬT GIAO DIỆN
+        await fetchClassListData();
+        setLoading(false);
     }
-};
-
-    // Filter students based on search term
-    // const filteredStudents = students.filter(student => 
-    //     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    //     student.email.toLowerCase().includes(searchTerm.toLowerCase())
-    // );
+};   
 
  const handlePageChange = async (event) => {
     const page = event.selected + 1;
@@ -345,7 +250,7 @@ const handleAddStudents = async (selectedStudentIds) => {
         handleRemoveStudent,
         handlePageChange,
         handleSortChange,
-        fetchStudents,
+        fetchStudents: fetchClassListData,
         classListId,
         maxClassSize,
         

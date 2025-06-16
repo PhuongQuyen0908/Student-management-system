@@ -123,17 +123,23 @@ const useSubjectTable = () => {
                 updateModal.close();
                 setDataModalSubject({}); // reset dữ liệu trong modal
             } else if (response.data.EC === 1) {
-                // Nếu môn học đã tồn tại, hiển thị thông báo lỗi
-                toast.error(response.data.EM || "Môn học đã tồn tại");
+                //Trường hợp trả về API 200 nhưng là lỗi logic
+                toast.error(response?.data?.EM || "Có lỗi khi cập nhật môn học");
             }
-            return response;
+            return response.data;
         } catch (error) {
             // HTTP status 409 - Conflict nếu môn học đã tồn tại
             if (error?.response?.status === 409) {
-                toast.error("Môn học đã tồn tại");
-                return { data: { EC: error.data.EC, EM: error.data.EM } };
+                const errorMessage = error?.response?.data?.EM || "Môn học đã tồn tại";
+                toast.error(errorMessage);
+                return { data: { EC: error.response.data.EC, EM: errorMessage } };
             }
             // Nếu có lỗi khác, hiển thị thông báo lỗi chung
+            else if (error?.response?.status === 400) {
+                const errorMessage = error?.response?.data?.EM || "Dữ liệu không hợp lệ";
+                // toast.error(errorMessage);
+                return { data: { EC: error.response.data.EC, EM: errorMessage } };   
+            }
             toast.error("Lỗi khi cập nhật môn học");
             return { data: { EC: -1, EM: "Lỗi khi cập nhật môn học" } };
         }
