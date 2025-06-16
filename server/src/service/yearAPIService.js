@@ -54,7 +54,9 @@ const createSchoolYear = async (data) => {
     const years = TenNamHoc.split('-');
     const nam1 = years[0];
     const nam2 = years[1];
-
+    if(nam1 >= nam2){
+      return buildRepsponse('Năm bắt đầu phải nhỏ hơn năm kết thúc', 1, null);
+    }
     // 3. Create the complete data object to be saved
     const schoolYearDataToCreate = {
       TenNamHoc: TenNamHoc,

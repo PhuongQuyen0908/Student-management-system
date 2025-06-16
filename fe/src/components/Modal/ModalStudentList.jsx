@@ -7,6 +7,8 @@ import {
   getClassListByNameAndYear,
 } from "../../services/classListService";
 import { toast } from "react-toastify";
+import ReactPaginate from 'react-paginate';
+
 
 const ModalStudentList = ({
   show,
@@ -22,26 +24,37 @@ const ModalStudentList = ({
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  //pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [currentLimit, setCurrentLimit] = useState(100);
+  const [totalPages, setTotalPages] = useState(10);
+
+  const handlePageClick = async (event) => {
+    setCurrentPage(+event.selected + 1);
+  };
 
   useEffect(() => {
     if (show) {
       fetchAvailableStudents(); // Fetch students only when modal is shown
       setSelectedStudents([]);
     }
-  }, [show]);
+  }, [show, currentPage, currentLimit, searchTerm]);
 
   const fetchAvailableStudents = async () => {
-    setLoading(true);
+    //setLoading(true);
 
     try {
       // Then, get all students
-      const response = await fetchAllStudent(1, 100, "", "HoTen", "asc");
+      const response = await fetchAllStudent(currentPage, currentLimit, searchTerm, "MaHocSinh", "asc");
       if (response?.data?.DT?.users) {
         // Filter out students already in the class
         const allStudents = response.data.DT.users;
         const availableStudents = allStudents.filter(
           (student) => !existingStudentIds.includes(student.MaHocSinh)
         );
+        if (response && response.data && response.data.EC === 0) {
+          setTotalPages(response.data.DT.totalPages);
+        }
 
         setStudents(availableStudents);
       } else {
@@ -110,7 +123,8 @@ const ModalStudentList = ({
   const filteredStudents = students.filter(
     (student) =>
       student.HoTen?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      student.Email?.toLowerCase().includes(searchTerm.toLowerCase())
+      student.Email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       student.MaHocSinh?.toString().includes(searchTerm)
   );
 
   return (
@@ -150,7 +164,7 @@ const ModalStudentList = ({
                     onChange={toggleAllStudents}
                   />
                 </th>
-                <th>STT</th>
+                <th>Mã học sinh</th>
                 <th>Họ và tên</th>
                 <th>Giới tính</th>
                 <th>Năm sinh</th>
@@ -175,7 +189,7 @@ const ModalStudentList = ({
                         onChange={() => toggleStudentSelection(student)}
                       />
                     </td>
-                    <td>{index + 1}</td>
+                    <td>{student.MaHocSinh}</td>
                     <td>{student.HoTen}</td>
                     <td>{student.GioiTinh}</td>
                     <td>
@@ -197,6 +211,33 @@ const ModalStudentList = ({
             </tbody>
           </table>
         </div>
+          {/* pagination */}
+            {totalPages > 0 &&
+                <div className="student-footer">
+                    <ReactPaginate
+                        onPageChange={handlePageClick}
+                        pageRangeDisplayed={3}
+                        marginPagesDisplayed={2}
+                        pageCount={totalPages}
+                        previousLabel="Previous"
+                        pageClassName="page-item"
+                        pageLinkClassName="number page-link"
+                        previousClassName="page-item"
+                        previousLinkClassName="prev page-link"
+                        nextClassName="page-item"
+                        nextLinkClassName="next page-link"
+                        nextLabel="Next"
+                        breakLabel="..."
+                        breakClassName="page-item"
+                        breakLinkClassName="break page-link"
+                        containerClassName="pagination"
+                        activeClassName="active"
+                        renderOnZeroPageCount={null}
+                        forcePage={currentPage - 1} // reset trang hiện tại khi sort 
+                    />
+                </div>
+            }
+
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>

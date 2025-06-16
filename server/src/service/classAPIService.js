@@ -162,6 +162,21 @@ const updateClass = async (id, data) => {
 
 const deleteClass = async (id) => {
   try {
+    const count = await db.danhsachlop.count({ 
+      where: {
+        MaLop: id,
+        siso: {
+          [Op.ne]: 0
+        }
+      }
+    });
+    if(count > 0){
+      return buildResponse("Không thể xóa lớp do đang tồn tại danh sách lớp", 1, []);
+    }
+      // Xóa các danh sách lớp liên quan (sĩ số = 0 thì mới tới đây)
+    await db.danhsachlop.destroy({
+      where: { MaLop: id }
+    });
     const deleted = await db.lop.destroy({ where: { MaLop: id } });
     if (!deleted) {
       return buildResponse("Lớp không tồn tại để xóa", 1, []);
