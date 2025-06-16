@@ -24,6 +24,15 @@ const SemesterReportFilter = ({ onSubmit }) => {
         setSelectedYear(defaultYear);
         setSelectedSemester(defaultSemester);
 
+<<<<<<< BeTL
+    })
+    .catch((err) => {
+      console.error(err);
+      setYearOptions([]);
+      setSemesterOptions([]);
+    });
+}, []);
+=======
         // 👇 Gọi báo cáo ban đầu luôn
         if (defaultYear && defaultSemester) {
           onSubmit({
@@ -38,6 +47,7 @@ const SemesterReportFilter = ({ onSubmit }) => {
         setSemesterOptions([]);
       });
   }, []);
+>>>>>>> main
 
   const handleClick = () => {
     onSubmit({
