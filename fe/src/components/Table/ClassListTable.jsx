@@ -268,7 +268,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
         )}
       </div>
       {/* pagination */}
-      {pagination.totalPages > 0 && (
+      {pagination.totalPages >= 0 && (
         <div className="student-footer">
           <ReactPaginate
             onPageChange={handlePageChange}

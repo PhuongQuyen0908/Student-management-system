@@ -176,7 +176,7 @@ const useClassTable = () => {
         deleteModal.close();
         setSelectedClass(null);
       } else {
-        toast.error(res?.EM || "Không thể xóa lớp");
+        toast.error(res.data.EM);
       }
       return res;
     } catch (error) {
