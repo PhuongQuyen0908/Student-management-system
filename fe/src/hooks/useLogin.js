@@ -1,30 +1,32 @@
-import { useState , useContext } from 'react';
+import { useState, useContext } from 'react';
 import { toast } from 'react-toastify';
 
 //đang sửa
 import { loginUser } from "../services/userServices";
-import {  useNavigate  } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
 
 const useLogin = () => {
   let Navigate = useNavigate(); //mới import 
-  const{loginContext} = useContext(UserContext); // mới import
+  const { loginContext } = useContext(UserContext); // mới import
   const [valueLogin, setValueLogin] = useState("");
   const [password, setPassword] = useState("");
   const [objValidInput, setObjValidInput] = useState({
     isValidValueLogin: true,
     isValidPassword: true,
   });
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const handleLogin = async () => {
     if (!valueLogin) {
       setObjValidInput({ ...objValidInput, isValidValueLogin: false });
-      toast.error("Please enter your email address or phone number");
+      toast.error("Vui lòng nhập email");
       return;
     }
     if (!password) {
       setObjValidInput({ ...objValidInput, isValidPassword: false });
-      toast.error("Please enter your password");
+      toast.error("Vui lòng nhập mật khẩu");
       return;
     }
 
@@ -41,17 +43,20 @@ const useLogin = () => {
       };
       localStorage.setItem("jwt", token);
       loginContext(data); //login context 
-      
-       
+
+
       // Navigate("/admin/home"); // fix sau
       toast.success("Đăng nhập thành công");
-       window.location.href = "/admin/home";
-    
+      window.location.href = "/admin/home";
+
     }
-    if (response && response.data && +response.EC !== 0) {
-      //error
-      toast.error(response.EM);
+    else {
+      toast.error("Email hoặc mật khẩu không chính xác");
     }
+    // if (response && response.data && +response.EC !== 0) {
+    //   //error
+    //   toast.error(response.data.EM);
+    // }
 
   };
 
@@ -69,6 +74,8 @@ const useLogin = () => {
     setPassword,
     handleLogin,
     handlePressEnter,
+    showPassword,
+    setShowPassword
   };
 };
 

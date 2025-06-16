@@ -3,6 +3,8 @@ import '../../styles/Page/Login.scss';
 import education from '../../assets/education.jpg';
 import useLogin from '../../hooks/useLogin';
 import { Link } from 'react-router-dom';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
 
 const Login1 = props => {
     const {
@@ -30,7 +32,7 @@ const Login1 = props => {
                         <input
                             type="text"
                             className={objValidInput.isValidValueLogin ? "form-control" : "is-invalid form-control"}
-                            placeholder="Email address or your phone number"
+                            placeholder="Email"
                             value={valueLogin}
                             onChange={(event) => setValueLogin(event.target.value)}
                         />
@@ -38,7 +40,7 @@ const Login1 = props => {
                             <input
                                 type={showPassword ? "text" : "password"}
                                 className={objValidInput.isValidPassword ? "form-control" : "is-invalid form-control"}
-                                placeholder="Password"
+                                placeholder="Mật khẩu"
                                 value={password}
                                 onChange={(event) => setPassword(event.target.value)}
                                 onKeyDown={handlePressEnter}
@@ -48,14 +50,15 @@ const Login1 = props => {
                                 style={{ cursor: "pointer", top: "50%", right: "10px", transform: "translateY(-50%)" }}
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                👁
+                                {showPassword ? <FaEyeSlash /> : <FaEye />}
                             </span>
+
                         </div>
-                        <button className="btn btn-primary" onClick={handleLogin}>Login</button>
+                        <button className="btn btn-primary" onClick={handleLogin}>Đăng nhập</button>
 
                         <span className="text-center">
                             <Link className="forgot-password" to="/forgot-password">
-                                Forgot your password?
+                                Quên mật khẩu
                             </Link>
                         </span>
                     </div>

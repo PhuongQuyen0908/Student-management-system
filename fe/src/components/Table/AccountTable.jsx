@@ -1,6 +1,6 @@
 import '../../styles/Table.scss';
 import TableHeaderAction from '../TableHeaderAction';
-import { FaEdit, FaLock, FaSort } from 'react-icons/fa';
+import { FaEdit, FaLock, FaSort, FaTrash } from 'react-icons/fa';
 import ModalAddAccount from '../Modal/ModalAddAccount';
 import ModalUpdateAccount from '../Modal/ModalUpdateAccount';
 import ModalDeleteAccount from '../Modal/ModalDeleteAccount';
@@ -46,7 +46,7 @@ const AccountTable = () => {
 
     useEffect(() => {
         fetchAccounts();
-    }, [currentPage, currentLimit , searchTerm, sortField, sortOrder]);
+    }, [currentPage, currentLimit, searchTerm, sortField, sortOrder]);
 
     const handlePageClick = async (event) => {
         setCurrentPage(+event.selected + 1);
@@ -82,7 +82,7 @@ const AccountTable = () => {
 
 
     //Search Accounts
-  
+
     const handleSearchChange = (event) => {
         const value = event.target.value;
         setSearchTerm(value);
@@ -147,6 +147,41 @@ const AccountTable = () => {
         return result.length > 0 ? result : text;
     };
 
+    const exportToExcel = async () => {
+        try {
+            const response = await fetchAllUsers(1, 10000, searchTerm, sortField, sortOrder);
+
+            if (response && response.data && response.data.EC === 0) {
+                const allAccounts = response.data.DT.users;
+
+                const data = allAccounts.map(user => ({
+                    'Họ tên': user.HoTen,
+                    'Tên đăng nhập': user.TenDangNhap,
+                    'Số điện thoại': user.SoDienThoai,
+                    'Vai trò': user.nhomnguoidung?.TenNhom || '',
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(data);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách tài khoản');
+
+                const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+                const file = new Blob([excelBuffer], {
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+
+                saveAs(file, `DanhSachTaiKhoan.xlsx`);
+                toast.success("Xuất Excel thành công.");
+            } else {
+                toast.error("Xuất Excel thất bại: " + (response?.data?.EM || "Lỗi không xác định"));
+            }
+        } catch (error) {
+            console.error("Error exporting accounts to Excel:", error);
+            toast.error("Lỗi khi xuất file Excel");
+        }
+    };
+
+
     return (
         <div className="student-table-wrapper">
             <TableHeaderAction
@@ -155,6 +190,7 @@ const AccountTable = () => {
                 placeholder="Tìm kiếm tài khoản..."
                 addLabel="Thêm tài khoản"
                 hideAdd={!canCreate}
+                onExportClick={exportToExcel}
             />
 
             <div className="table-container">
@@ -168,7 +204,7 @@ const AccountTable = () => {
                             </th>
                             <th>
                                 Họ tên
-                                <button className="sort-button" title="Sắp xếp" onClick ={() => handleSort("HoTen")}>
+                                <button className="sort-button" title="Sắp xếp" onClick={() => handleSort("HoTen")}>
                                     <FaSort />
                                 </button>
                             </th>
@@ -198,10 +234,10 @@ const AccountTable = () => {
                             listAccounts.map((account, index) => (
                                 <tr key={`account-${index}`}>
                                     <td>{(currentPage - 1) * currentLimit + index + 1}</td>
-                                    <td>{highlightText(account.HoTen ,searchTerm)}</td>
-                                    <td>{highlightText(account.TenDangNhap,searchTerm)}</td>
-                                    <td>{highlightText(account.SoDienThoai,searchTerm)}</td>
-                                    <td>{highlightText(account.nhomnguoidung.TenNhom,searchTerm)}</td>
+                                    <td>{highlightText(account.HoTen, searchTerm)}</td>
+                                    <td>{highlightText(account.TenDangNhap, searchTerm)}</td>
+                                    <td>{highlightText(account.SoDienThoai, searchTerm)}</td>
+                                    <td>{highlightText(account.nhomnguoidung.TenNhom, searchTerm)}</td>
                                     <td>
                                         <div className="action-buttons">
                                             {canUpdate && (
@@ -219,7 +255,7 @@ const AccountTable = () => {
                                                     onClick={() => handleDeleteAccount(account)}
                                                     title="Xóa"
                                                 >
-                                                    <FaLock />
+                                                    <FaTrash />
                                                 </button>
                                             )}
                                         </div>
