@@ -1,3 +1,4 @@
+import { parse } from "dotenv";
 import subjectAPIService from "../service/subjectAPIService"; 
 
 // Hàm xử lý lấy tất cả môn học
@@ -57,6 +58,14 @@ const getSubjectById = async (req, res) => {
 const createSubject = async (req, res) => {
   try {
     // Kiểm tra xem môn  đã tồn tại chưa
+    const { TenMonHoc, HeSo } = req.body;
+    if (HeSo < 0 ) {
+      return res.status(400).json({
+        EM: 'Hệ số phải lớn hơn hoặc bằng 0',
+        EC: 1,
+        DT: []
+      });
+    }
     const existingSubject = await subjectAPIService.checkSubjectExists(req.body.TenMonHoc);
     if (existingSubject.EC === 0) {
       // HTTP 409 Conflict: Môn học đã tồn tại
@@ -87,8 +96,18 @@ const createSubject = async (req, res) => {
 // Hàm xử lý cập nhật môn học theo ID
 const updateSubject = async (req, res) => {
   try {
-    //Kiểm tra ID môn học có tồn tại không
-    const id = req.params.id;
+    const id = parseInt(req.params.id);
+    const { TenMonHoc, HeSo } = req.body;
+    // Kiểm tra xem hệ số có hợp lệ không
+    if (HeSo < 0) {
+      return res.status(400).json({
+        EM: 'Hệ số phải lớn hơn hoặc bằng 0',
+        EC: 1,
+        DT: []
+      });
+    }
+
+    // Kiểm tra xem môn học có tồn tại không
     const existingSubject = await subjectAPIService.getSubjectById(id);
     if (!existingSubject || existingSubject.EC !== 0) {
       // HTTP 404 Not Found: Môn học không tồn tại
@@ -98,19 +117,23 @@ const updateSubject = async (req, res) => {
         DT: {}
       });
     }
-    // Nếu môn học tồn tại, tiến hành cập nhật
-    // Chỉ cho phép cập nhật nếu tên không trùng với môn học khác
+    // kiểm tra xem có môn học nào có tên giống như môn học đang cập nhật không
     const checkSubject = await subjectAPIService.checkSubjectExists(req.body.TenMonHoc);
+
+    // Kiểm tra lỗi logic và xung đột
+    //Nếu tên môn học đã tồn tại và không phải là chính môn học đang cập nhật
     if (checkSubject.EC === 0 && checkSubject.DT.MaMonHoc !== id) {
       // HTTP 409 Conflict: Môn học đã tồn tại
       return res.status(409).json({
-        EM: 'Môn học đã tồn tại',
+        EM: `Tên môn học "${req.body.TenMonHoc}" đã được sử dụng.`,
         EC: 1,
         DT: checkSubject.DT
       });
-    }
+    } 
+
+    const { MaMonHoc, ...dataToUpdate } = req.body;
     // Nếu môn học chưa tồn tại hoặc là chính môn học đang cập nhật, tiến hành cập nhật
-    const updatedSubject = await subjectAPIService.updateSubject(id, req.body);
+    const updatedSubject = await subjectAPIService.updateSubject(id, dataToUpdate);
     return res.status(200).json({
       EM: updatedSubject.EM,
       EC: updatedSubject.EC,
