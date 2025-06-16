@@ -12,6 +12,11 @@ import { fetchGroup, createGroup } from '../../services/roleServices'; // fetchG
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
 import { set } from 'lodash';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { toast } from 'react-toastify';
+
+
 const DecentralizationTable = () => {
     const { user } = useContext(UserContext);
     const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
@@ -46,7 +51,7 @@ const DecentralizationTable = () => {
 
 
     const fetchGroups = async () => {
-        let response = await fetchGroup(searchTerm , sortField, sortOrder);
+        let response = await fetchGroup(searchTerm, sortField, sortOrder);
         if (response && response.data && response.data.EC === 0) {
             setUserGroup(response.data.DT);
         }
@@ -54,7 +59,7 @@ const DecentralizationTable = () => {
 
     useEffect(() => {
         fetchGroups();
-    }, [searchTerm , sortField, sortOrder]);
+    }, [searchTerm, sortField, sortOrder]);
     //gán quyền
     const handleAssignPermission = (group) => {
         setSelectedGroup(group);
@@ -115,6 +120,36 @@ const DecentralizationTable = () => {
         return result.length > 0 ? result : text;
     };
 
+    const exportToExcel = () => {
+        try {
+            if (!userGroup || userGroup.length === 0) {
+                toast.warning("Không có dữ liệu để xuất Excel");
+                return;
+            }
+
+            const data = userGroup.map(group => ({
+                'Mã nhóm': group.MaNhom,
+                'Tên nhóm quyền': group.TenNhom,
+                'Mô tả': group.MoTa || 'Chưa có mô tả',
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách nhóm quyền');
+
+            const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+            const file = new Blob([excelBuffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+
+            saveAs(file, `DanhSachNhomQuyen.xlsx`);
+            toast.success("Xuất Excel thành công.");
+        } catch (error) {
+            console.error("Error exporting groups to Excel:", error);
+            toast.error("Lỗi khi xuất file Excel");
+        }
+    };
+
     return (
         <div className="student-table-wrapper">
             <TableHeaderAction
@@ -123,6 +158,7 @@ const DecentralizationTable = () => {
                 placeholder="Tìm kiếm nhóm quyền..."
                 addLabel="Thêm nhóm quyền"
                 hideAdd={!canCreate}
+                onExportClick={exportToExcel}
             />
 
             <div className="table-container">

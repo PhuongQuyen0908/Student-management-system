@@ -10,6 +10,7 @@ import { fetchStudentWithYear } from "../../services/studentServices";
 import { FaSort } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { toast } from 'react-toastify';
 
 // import context
 import { UserContext } from '../../context/UserContext';
@@ -114,6 +115,7 @@ const StudentListTable = ({ selectedYear }) => {
                 });
 
                 saveAs(file, `DanhSachHocSinh_${selectedYear}.xlsx`);
+                toast.success("Xuất Excel thành công.");
             } else {
                 toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
             }

@@ -1,7 +1,7 @@
 import '../../styles/Table.scss';
 import TableHeaderAction from '../TableHeaderAction';
 import ModalAddStudent from '../Modal/ModalAddStudent';
-import { FaEdit, FaLock } from 'react-icons/fa';
+import { FaEdit, FaLock, FaTrash } from 'react-icons/fa';
 import useModal from '../../hooks/useModal';
 import ModalUpdateStudent from '../Modal/ModalUpdateStudent';
 //Các import mới
@@ -18,6 +18,7 @@ import { useState } from 'react';
 import { use } from 'react';
 //import mới 06/06/2025
 import { UserContext } from '../../context/UserContext';
+import { toast } from 'react-toastify';
 //07/06/2025
 const StudentTable = () => {
     //ẩn hiện các nút nếu k có quyền
@@ -124,6 +125,7 @@ const StudentTable = () => {
                 });
 
                 saveAs(file, `TiepNhanHocSinh.xlsx`);
+                toast.success("Xuất Excel thành công.");
             } else {
                 toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
             }
@@ -215,7 +217,7 @@ const StudentTable = () => {
                                                 }
                                                 {userPermissions.some(p => p.TenManHinhDuocLoad === "/student/delete") &&
                                                     <button className="icon-button lock" onClick={() => handleDeleteStudent(student)} title="Khóa">
-                                                        <FaLock />
+                                                        <FaTrash />
                                                     </button>
                                                 }
                                             </div>
