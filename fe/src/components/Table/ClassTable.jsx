@@ -14,6 +14,7 @@ import { saveAs } from 'file-saver';
 import { fetchAllClasses } from "../../services/classService";
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
+import { toast } from 'react-toastify';
 
 const ClassTable = () => {
   const { user } = useContext(UserContext);
@@ -120,6 +121,7 @@ const ClassTable = () => {
         });
 
         saveAs(file, `QuanLyLopHoc.xlsx`);
+        toast.success("Xuất Excel thành công.");
       } else {
         toast.error("Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định");
       }

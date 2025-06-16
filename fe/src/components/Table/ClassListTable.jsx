@@ -6,6 +6,10 @@ import ModalDeleteStudentFromClass from "../Modal/ModalDeleteStudentFromClass";
 import useClassListTable from "../../hooks/useClassListTable";
 import "../../styles/Table.scss";
 import ReactPaginate from "react-paginate";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { getStudentsOfClass } from '../../services/classListService';
+import { toast } from 'react-toastify';
 
 const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
   const {
@@ -24,7 +28,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
     handleSortChange,
     confirmRemoveStudent,
     // fetchStudents,
-    // classListId,
+    classListId,
     maxClassSize,
   } = useClassListTable(selectedYear, selectedClass, setStudentCount);
 
@@ -74,6 +78,65 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
     return result;
   };
 
+  // Add this to your useClassListTable.js hook
+  const exportToExcel = async () => {
+    if (!classListId) {
+      toast.warn("Vui lòng chọn một danh sách lớp để xuất Excel.");
+      return;
+    }
+
+
+    try {
+      // Get all students without pagination
+      const options = {
+        page: 1,
+        limit: 10000, // Large enough to get all students
+        search: searchTerm,
+        sortField: 'HoTen',
+        sortOrder: 'asc'
+      };
+
+      const response = await getStudentsOfClass(classListId, options);
+
+      if (response.data?.EC === 0) {
+        const students = response.data.DT?.students || [];
+
+        if (students.length === 0) {
+          toast.info("Không có học sinh nào trong danh sách để xuất Excel.");
+          return;
+        }
+
+        // Format data for Excel
+        const formattedData = students.map((student, index) => ({
+          'STT': index + 1,
+          'Họ và tên': student.HoTen || '',
+          'Giới tính': student.GioiTinh || '',
+          'Ngày sinh': student.NgaySinh || '',
+          'Địa chỉ': student.DiaChi || '',
+          'Email': student.Email || '',
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách học sinh');
+
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const file = new Blob([excelBuffer], {
+          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        });
+
+        const fileName = `DanhSachLop.xlsx`;
+        saveAs(file, fileName);
+        toast.success("Xuất Excel thành công.");
+      } else {
+        toast.error(`Xuất Excel thất bại: ${response.data?.EM || 'Lỗi không xác định'}`);
+      }
+    } catch (error) {
+      console.error("Lỗi khi export Excel:", error);
+      toast.error("Đã xảy ra lỗi khi xuất Excel.");
+    }
+  };
+
   return (
     <div className="classlist-table-wrapper">
       <TableHeaderAction
@@ -84,6 +147,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
         addLabel="Thêm học sinh"
         isButtonDisabled={isClassFull} // <-- Prop để vô hiệu hóa nút
         buttonTooltip={addButtonTooltip} // <-- Prop để hiển thị tooltip
+        onExportClick={exportToExcel}
       />
 
       <div className="table-container">
@@ -204,7 +268,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
         )}
       </div>
       {/* pagination */}
-      {pagination.totalPages > 0 && (
+      {pagination.totalPages >= 0 && (
         <div className="student-footer">
           <ReactPaginate
             onPageChange={handlePageChange}

@@ -10,6 +10,10 @@ import "../../styles/Table.scss";
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
 import ReactPaginate from "react-paginate";
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import subjectGradeService from "../../services/subjectGradeService";
+import { toast } from 'react-toastify';
 
 const SubjectGradeTable = ({ filters }) => {
   const { user } = useContext(UserContext);
@@ -111,6 +115,74 @@ const SubjectGradeTable = ({ filters }) => {
     handlePageChange(e.selected + 1);
   };
 
+  const exportToExcel = async (filters, testTypes, searchTerm, sortConfig) => {
+    try {
+      const params = {
+        tenLop: filters.class,
+        tenHocKy: filters.semester,
+        tenNamHoc: filters.year,
+        tenMonHoc: filters.subject,
+        page: 1,
+        limit: 10000, // Lấy tối đa
+        search: searchTerm,
+        sortField: sortConfig.field,
+        sortOrder: sortConfig.order,
+      };
+
+      const response = await subjectGradeService.getSubjectSummary(params);
+
+      if (
+        response?.data?.EC === 0 &&
+        response?.data?.DT?.DT?.DiemChiTiet?.rows
+      ) {
+        const rows = response.data.DT.DT.DiemChiTiet.rows;
+
+        const formattedData = rows.map((student) => {
+          const row = {
+            "Họ và tên": student.HoTen,
+          };
+
+          // Thêm từng loại kiểm tra
+          testTypes.forEach((type) => {
+            const diem = student.DiemTP?.find(
+              (d) => d.LoaiKiemTra === type.TenLoaiKiemTra
+            )?.Diem ?? "";
+            row[type.TenLoaiKiemTra] = diem;
+          });
+
+          row["Điểm trung bình"] = student.DiemTB ?? "";
+          return row;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(formattedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Bảng điểm");
+
+        const excelBuffer = XLSX.write(workbook, {
+          bookType: "xlsx",
+          type: "array",
+        });
+
+        const blob = new Blob([excelBuffer], {
+          type:
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        });
+
+        saveAs(blob, `BangDiemMonHoc.xlsx`);
+        toast.success("Xuất Excel thành công.");
+      } else {
+        toast.error(
+          "Xuất Excel thất bại: " +
+          (response?.data?.DT?.EM || response?.data?.EM || "Không xác định")
+        );
+      }
+    } catch (error) {
+      console.error("Lỗi xuất Excel:", error);
+      toast.error("Lỗi khi xuất file Excel");
+    }
+  };
+
+
   return (
     <div className="subjectgrade-table-wrapper">
       <TableHeaderAction
@@ -119,6 +191,7 @@ const SubjectGradeTable = ({ filters }) => {
         addLabel="Thêm cột điểm"
         onAddClick={openAddTestTypeModal}
         hideAdd={!canManageTestTypes}
+        onExportClick={() => exportToExcel(filters, testTypes, searchTerm, sortConfig)}
       />
       {loading && <p>Đang tải dữ liệu...</p>}
       {error && <p>{error}</p>}

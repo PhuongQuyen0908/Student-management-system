@@ -60,92 +60,95 @@ const InfoPage = () => {
     }
 
     const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-        setAvatarFile(file);
-        setAvatarPreview(URL.createObjectURL(file));
-    }
-};
-    const handleUploadAvatar = async () => {
-    if (!avatarFile) {
-        toast.error("Vui lòng chọn ảnh trước");
-        return;
-    }
-
-    const formData = new FormData();
-    formData.append("Avatar", avatarFile);
-    formData.append("TenDangNhap", user.account.username);
-
-    try {
-        const response = await uploadAvatar(formData);
-        if (response && response.data.EC === 0) {
-            toast.success("Cập nhật avatar thành công");
-        } else {
-            toast.error(response.data.EM || "Lỗi cập nhật avatar");
+        const file = e.target.files[0];
+        if (file) {
+            setAvatarFile(file);
+            setAvatarPreview(URL.createObjectURL(file));
         }
-    } catch (error) {
-        console.error("Lỗi khi cập nhật avatar:", error);
-        toast.error("Lỗi kết nối máy chủ");
-    }
-};
+    };
+    const handleUploadAvatar = async () => {
+        if (!avatarFile) {
+            toast.error("Vui lòng chọn ảnh trước");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("Avatar", avatarFile);
+        formData.append("TenDangNhap", user.account.username);
+
+        try {
+            const response = await uploadAvatar(formData);
+            if (response && response.data.EC === 0) {
+                toast.success("Cập nhật avatar thành công");
+            } else {
+                toast.error(response.data.EM || "Lỗi cập nhật avatar");
+            }
+        } catch (error) {
+            console.error("Lỗi khi cập nhật avatar:", error);
+            toast.error("Lỗi kết nối máy chủ");
+        }
+    };
 
     return (
         <div className="info-page-container">
-            <h2>Thông tin cá nhân</h2>
+            <div className='info-card'>
+                <h2>Thông tin cá nhân</h2>
 
-            <div className="info-avatar">
-                <img
-                    src={avatarPreview ? avatarPreview : `${user.account.Avatar}` }
-                    alt="Avatar"
-                    className="avatar-preview"
-                />
-                <div className="d-flex flex-column gap-3">
-                <input type="file" accept="image/*" onChange={handleAvatarChange} />
-                <button onClick={handleUploadAvatar} className="btn btn-primary ">Cập nhật avatar</button>
+                <div className="info-avatar">
+                    <img
+                        src={avatarPreview ? avatarPreview : `${user.account.Avatar}`}
+                        alt="Avatar"
+                        className="avatar-preview"
+                    />
+                    <div className="d-flex flex-column gap-3">
+                        <input type="file" accept="image/*" onChange={handleAvatarChange} />
+                        <button onClick={handleUploadAvatar} className="btn-primary ">Cập nhật avatar</button>
+                    </div>
+                </div>
+
+                <div className="info-section">
+                    <label>Email:</label>
+                    <input type="text" placeholder="student@example.com" disabled value={user.account.username} />
+                </div>
+
+                <div className="info-section">
+                    <label>Họ và tên:</label>
+                    <input type="text" placeholder="Nguyễn Văn A" disabled value={user.account.HoTen} />
                 </div>
             </div>
+            <div className='info-card'>
+                <h3>Đổi mật khẩu</h3>
 
-            <div className="info-section">
-                <label>Email:</label>
-                <input type="text" placeholder="student@example.com" disabled value={user.account.username} />
+                <div className="info-section">
+                    <label>Mật khẩu hiện tại:</label>
+                    <input
+                        type="password"
+                        placeholder="Nhập mật khẩu cũ"
+                        value={oldPassword}
+                        onChange={(e) => handleChangePassword(e, 'oldPassword')} />
+                </div>
+
+                <div className="info-section">
+                    <label>Mật khẩu mới:</label>
+                    <input
+                        type="password"
+                        placeholder="Nhập mật khẩu mới"
+                        value={newPassword}
+                        onChange={(e) => handleChangePassword(e, 'newPassword')}
+                    />
+                </div>
+
+                <div className="info-section">
+                    <label>Nhập lại mật khẩu mới:</label>
+                    <input type="password"
+                        placeholder="Nhập lại mật khẩu mới"
+                        value={confirmNewPassword}
+                        onChange={(e) => handleChangePassword(e, 'confirmNewPassword')}
+                    />
+                </div>
+
+                <button className="btn-save" onClick={UpdatePassword}>Đổi mật khẩu</button>
             </div>
-
-            <div className="info-section">
-                <label>Họ và tên:</label>
-                <input type="text" placeholder="Nguyễn Văn A" disabled value={user.account.HoTen} />
-            </div>
-
-            <h3>Đổi mật khẩu</h3>
-
-            <div className="info-section">
-                <label>Mật khẩu hiện tại:</label>
-                <input
-                    type="password"
-                    placeholder="Nhập mật khẩu cũ"
-                    value={oldPassword}
-                    onChange={(e) => handleChangePassword(e, 'oldPassword')} />
-            </div>
-
-            <div className="info-section">
-                <label>Mật khẩu mới:</label>
-                <input
-                    type="password"
-                    placeholder="Nhập mật khẩu mới"
-                    value={newPassword}
-                    onChange={(e) => handleChangePassword(e, 'newPassword')}
-                />
-            </div>
-
-            <div className="info-section">
-                <label>Nhập lại mật khẩu mới:</label>
-                <input type="password"
-                    placeholder="Nhập lại mật khẩu mới"
-                    value={confirmNewPassword}
-                    onChange={(e) => handleChangePassword(e, 'confirmNewPassword')}
-                />
-            </div>
-
-            <button className="btn-save" onClick={UpdatePassword}>Đổi mật khẩu</button>
         </div>
     );
 };

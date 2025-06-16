@@ -17,6 +17,7 @@ import { saveAs } from "file-saver";
 import { fetchAllSubject } from "../../services/subjectServices";
 import React, { useContext } from "react";
 import { UserContext } from "../../context/UserContext";
+import { toast } from 'react-toastify';
 
 const SubjectTable = () => {
   const { user } = useContext(UserContext);
@@ -135,6 +136,7 @@ const SubjectTable = () => {
         });
 
         saveAs(file, `DanhSachMonHoc.xlsx`);
+        toast.success("Xuất Excel thành công.");
       } else {
         toast.error(
           "Xuất Excel thất bại: " + response?.data?.EM || "Lỗi không xác định"
