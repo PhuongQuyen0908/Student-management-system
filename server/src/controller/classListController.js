@@ -161,17 +161,17 @@ const deleteClassList = async (req, res) => {
 
 const addStudentToClass = async (req, res) => {
   try {
-    const { MaDanhSachLop, MaHocSinh } = req.body;
-    if (!MaDanhSachLop || !MaHocSinh) {
+    const { MaDanhSachLop, MaHocSinh, TenLop, TenNamHoc } = req.body;
+    if (!MaDanhSachLop && (!TenLop || !TenNamHoc) || !MaHocSinh) {
       return res.status(400).json({ 
         EM: 'Thiếu thông tin danh sách lớp hoặc học sinh',
         EC: 1,
         DT: [] 
       });
     }
-    
-    const result = await classListAPIService.addStudentToClass(MaDanhSachLop, MaHocSinh);
-    res.status(201).json({ 
+
+    const result = await classListAPIService.addStudentToClass({MaDanhSachLop, MaHocSinh, TenLop, TenNamHoc});
+    res.status(201).json({
       EM: result.EM,
       EC: result.EC,
       DT: result.DT

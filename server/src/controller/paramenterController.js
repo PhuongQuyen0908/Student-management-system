@@ -18,6 +18,7 @@ const updateParamenter = async (req, res) => {
     try {
         const parameterKey = req.params.id;
         const data = req.body;
+        console.log(data);
         const response = await paramenterAPIService.updateParamenter(parameterKey, data);
         return res.status(200).json(response);
     } catch (error) {

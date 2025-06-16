@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getClassListByNameAndYear, removeStudentFromClass, addStudentToClass, getStudentsOfClass, createClassList} from '../services/classListService';
+import { getClassListByNameAndYear, removeStudentFromClass, addStudentToClass, getStudentsOfClass} from '../services/classListService';
 import { toast } from 'react-toastify';
 import useModal from './useModal';
 import { getAllParameters } from '../services/paramenterService';
@@ -173,41 +173,39 @@ const handleAddStudents = async (selectedStudentIds) => {
     try {
         // BƯỚC 1: LUÔN KIỂM TRA LẠI VỚI SERVER ĐỂ LẤY DỮ LIỆU MỚI NHẤT
         // Không được tin vào state `classListId` ở đây.
+        // Giá trị của classListRespone bao gồm {}
         let classListResponse = await getClassListByNameAndYear(selectedClass, selectedYear).catch(() => null);
         
         // Lấy ID và sỉ số hiện tại từ kết quả vừa gọi
         let currentClassId = classListResponse?.data?.DT[0]?.MaDanhSachLop;
         let currentSize = classListResponse?.data?.DT[0]?.SiSo || 0;
-
-        // BƯỚC 2: NẾU KIỂM TRA MÀ VẪN CHƯA CÓ, THÌ MỚI TẠO MỚI (LOGIC TẠO NGẦM)
-        if (!currentClassId) {
-            toast.info(`Đang tạo danh sách cho lớp ${selectedClass}...`);
-            const createResponse = await createClassList({ TenLop: selectedClass, TenNamHoc: selectedYear });
-            
-            if (createResponse.data && createResponse.data.EC === 0) {
-                currentClassId = createResponse.data.DT.MaDanhSachLop;
-                currentSize = 0; // Lớp vừa tạo, sỉ số là 0
-            } else {
-                // Nếu tạo thất bại, ném lỗi và dừng lại
-                throw new Error(createResponse.data?.EM || "Lỗi khi tạo danh sách lớp.");
-            }
-        }
-        
-        // BƯỚC 3: KIỂM TRA SĨ SỐ VỚI DỮ LIỆU MỚI NHẤT
-        if (maxClassSize !== null && (currentSize + selectedStudentIds.length > maxClassSize)) {
-            throw new Error(`Lớp sẽ vượt sĩ số tối đa (${maxClassSize}).`);
-        }
-
-        // BƯỚC 4: THÊM HỌC SINH
+        // Nếu chưa có danh sách lớp vẫn truyền TenLop và TenNamHoc cho BE
         const addPromises = selectedStudentIds.map(studentId =>
-            addStudentToClass({ MaDanhSachLop: currentClassId, MaHocSinh: studentId }).catch(err => ({ error: err }))
+            addStudentToClass({ 
+                MaDanhSachLop: currentClassId, 
+                MaHocSinh: studentId ,
+                TenLop: selectedClass,
+                TenNamHoc: selectedYear
+            }).catch(err => ({ error: err }))
         );
-        const results = await Promise.all(addPromises);
-        const successCount = results.filter(r => r && !r.error && r.data.EC === 0).length;
+        let results = await Promise.all(addPromises);
+        let successCount = 0;
+        let errorMessages = [];
+        results.forEach(result => {
+           if (result && !result.error && result.data?.EC === 0) {
+                successCount++;
+            } else if (result && result.data?.EM) {
+                errorMessages.push(result.data.EM);
+            }
+        });
+        if(successCount >0 ){
+            toast.success(`Đã thêm thành công ${successCount} học sinh.`);
+        }
 
-        if (successCount > 0) toast.success(`Đã thêm thành công ${successCount} học sinh.`);
-        if (results.length > successCount) toast.error(`Thêm thất bại ${results.length - successCount} học sinh (có thể đã tồn tại).`);
-
+        if (errorMessages.length > 0) {
+            // Nếu có lỗi, hiển thị thông báo lỗi
+             errorMessages.forEach(msg => toast.error(msg));            
+        } 
     } catch (error) {
         // Bắt tất cả các lỗi từ việc tạo lớp, kiểm tra sĩ số, v.v.
         toast.error(error.message || "Đã có lỗi nghiêm trọng xảy ra.");

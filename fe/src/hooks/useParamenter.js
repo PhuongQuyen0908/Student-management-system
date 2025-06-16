@@ -36,11 +36,11 @@ const useParamenterTable = () => {
             const res = await updateParameter(parameterKey, data);
             if (res?.data?.EC === 0) {
                 toast.success(res?.data?.EM || "Cập nhật tham số thành công");
-                // Fetch lại danh sách tham số để UI cập nhật
-                fetchParamenterList(); 
-            } else {
+                // Fetch lại danh sách tham số để UI cập nhật 
+            } else { 
                 toast.error(res?.data?.EM || "Cập nhật tham số thất bại");
             }
+            fetchParamenterList();
         } catch (error) {
             console.error("Error updating parameter:", error);
             toast.error("Không thể kết nối đến máy chủ");

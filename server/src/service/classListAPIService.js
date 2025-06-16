@@ -294,10 +294,77 @@ const getClassListByNameAndYear = async (tenLop, namHoc) => {
 //   }
 // };
 
-const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
+const addStudentToClass = async ({MaDanhSachLop, MaHocSinh, TenLop, TenNamHoc }) => {
   const t = await db.sequelize.transaction();
   try {
-    // 1. Lấy tất cả tham số bằng hàm `getAllParamenter` 
+    //1.  Nếu có MaDanhSachLop thì lấy MaDanhSachLop từ tham số, nếu không thì lấy từ tên lớp và năm học
+    let classList = null;
+    if (MaDanhSachLop) {
+      classList = await db.danhsachlop.findByPk(
+        MaDanhSachLop, { transaction: t });
+    }
+    //2. Nếu không có MaDanhSachLop thì lấy từ tên lớp và năm học
+    if (!classList) {
+      if(!TenLop || !TenNamHoc) {
+        await t.rollback();
+        return buildResponse('Thiếu thông tin lớp hoặc năm học', 1, null);
+      }
+      // Tìm MaLop, MaNaHoc từ tên lớp và năm học
+      const lop = await db.lop.findOne({ where: { TenLop }, transaction: t });
+      const namhoc = await db.namhoc.findOne({ where: { TenNamHoc }, transaction: t });
+      if (!lop || !namhoc) {
+        await t.rollback();
+        return buildResponse('Không tìm thấy lớp hoặc năm học', 1, null);
+      }
+      //Kiểm tra danh sách lớp đã tồn tại chưa
+      classList = await db.danhsachlop.findOne({
+        where: {
+          MaLop: lop.MaLop,
+          MaNamHoc: namhoc.MaNamHoc
+        },
+        transaction: t
+      });
+      //Nếu vẫn chưa có ==> Tạo mới
+      if (!classList) {
+        classList = await db.danhsachlop.create({
+          MaLop: lop.MaLop,
+          MaNamHoc: namhoc.MaNamHoc,
+          SiSo: 0 // Khởi tạo sĩ số là 0
+        }, { transaction: t });
+      }
+    }
+
+    //3. Kiểm tra xem học sinh đã có trong danh sách lớp nào khác trong năm học chưa
+    const studentAlreadyInClass = await db.ct_dsl.findOne({
+      where: {MaHocSinh},
+      include: [{
+        model: db.danhsachlop,
+        include: [
+          {model: db.lop, attributes: ['TenLop']},
+          {model: db.namhoc, attributes: ['TenNamHoc']}
+        ],
+        where: {
+          MaNamHoc: classList.MaNamHoc // Chỉ kiểm tra trong cùng năm học
+        }
+      }],
+      transaction: t
+    });
+
+    if (studentAlreadyInClass) {
+      const tenLop = studentAlreadyInClass.danhsachlop.lop.TenLop;
+      const tenNamHoc = studentAlreadyInClass.danhsachlop.namhoc.TenNamHoc;
+      // Nếu học sinh đã có trong danh sách lớp khác trong năm học này
+      await t.rollback();
+      return buildResponse(`Học sinh đã tồn tại trong danh sách lớp '${tenLop}' - Năm học ${tenNamHoc}. Không thể thêm`, 1, studentAlreadyInClass);
+    }
+    // 4. Kiểm tra tình trạng học sinh (thêm một cột mới vào model học sinh)
+    const hs = await db.hocsinh.findByPk(MaHocSinh, { transaction: t });
+    if (!hs || hs.TinhTrang !== 'Còn học') { 
+      await t.rollback();
+      return buildResponse('Học sinh không hợp lệ hoặc đã nghỉ học. Không thể thêm vào lớp', 1, null);
+    }
+
+    // Kiểm tra sỉ số tối đa
     const paramsResponse = await paramenterService.getAllParamenter(); 
     
     // 2. Kiểm tra kết quả trả về từ service
@@ -316,18 +383,18 @@ const addStudentToClass = async (MaDanhSachLop, MaHocSinh) => {
 
 
     // 4. Lấy thông tin lớp học hiện tại và khóa nó lại để tránh race condition
-    const classList = await db.danhsachlop.findByPk(MaDanhSachLop, {
+    const classListLock = await db.danhsachlop.findByPk(MaDanhSachLop, {
       transaction: t,
       lock: t.LOCK.UPDATE 
     });
 
-    if (!classList) {
-        await t.rollback();
-        return buildResponse('Không tìm thấy danh sách lớp.', 1, null);
+    if (!classListLock) {
+      await t.rollback();
+      return buildResponse('Không tìm thấy danh sách lớp.', 1, null);
     }
 
     // 5. So sánh sĩ số hiện tại với sĩ số tối đa đã lấy được
-    if (classList.SiSo >= siSoToiDa) {
+    if (classListLock.SiSo >= siSoToiDa) {
       await t.rollback();
       return buildResponse(`Lớp đã đạt sĩ số tối đa (${siSoToiDa}). Không thể thêm học sinh.`, 2, null);
     }
@@ -400,7 +467,6 @@ const removeStudentFromClass = async (MaCT_DSL) => {
   try {
     // Begin a transaction
     const t = await db.sequelize.transaction();
-    
     try {
       // Get the record to find MaDanhSachLop
       const record = await db.ct_dsl.findByPk(MaCT_DSL);
