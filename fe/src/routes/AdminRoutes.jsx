@@ -7,10 +7,24 @@ import SubjectGradesPage from '../pages/Admin/SubjectGradesPage';
 import StudentsListPage from '../pages/Admin/StudentsListPage';
 import SubjectReportPage from '../pages/Admin/SubjectReportPage';
 import SemesterReportPage from '../pages/Admin/SemesterReportPage';
+import RulesChangePage from '../pages/Admin/RulesChangePage';
+import HomePage from '../pages/Admin/HomePage';
+import InfoPage from '../pages/Admin/InfoPage';
+import AccountsPage from '../pages/Admin/AccountsPage';
+import DecentralizationPage from '../pages/Admin/DecentralizationPage';
+//import 04/06/2025
+import PrivateRoutes from './PrivateRoutes';
 const AdminRoutes = {
     path: '/admin',
-    element: <AdminPage />,
+    element: (
+        <PrivateRoutes element={<AdminPage />} />
+    ),
     children: [
+        {
+            path: 'home',
+            element: <HomePage />,
+        },
+
         {
             path: 'studentadmission',
             element: <StudentsPage />,
@@ -42,6 +56,23 @@ const AdminRoutes = {
         {
             path: 'semesterreport',
             element: <SemesterReportPage />,
+        },
+        {
+            path: 'ruleschange',
+            element: <RulesChangePage />,
+        },
+        {
+            path: 'info',
+            element: <InfoPage />,
+        },
+        {
+            path: 'accountmanagement',
+            element: <AccountsPage />,
+        },
+
+        {
+            path: 'decentralization',
+            element: <DecentralizationPage />,
         },
     ],
 };

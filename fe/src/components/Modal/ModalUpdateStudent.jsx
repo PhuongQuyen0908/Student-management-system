@@ -77,6 +77,7 @@ const ModalUpdateStudent = ({ show, handleClose, dataModalStudent ,fetchStudents
         toast.error("Email không hợp lệ");
         setValidInputs({ ...defaultValidInputs, studentEmail: false });
         isValid = false;
+        break;
       }
     }
 

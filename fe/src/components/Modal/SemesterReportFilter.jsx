@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import reportService from '../../services/reportService';
+import '../../styles/FilterGroup.scss';
+import '../../styles/Button.scss';
 
 const SemesterReportFilter = ({ onSubmit }) => {
   const [yearOptions, setYearOptions] = useState([]);
@@ -9,19 +11,20 @@ const SemesterReportFilter = ({ onSubmit }) => {
   const [selectedSemester, setSelectedSemester] = useState('');
 
   useEffect(() => {
-  reportService.getOptions()
-    .then((res) => {
-      const { namHoc, hocKy } = res.data.DT;
+    reportService.getOptions()
+      .then((res) => {
+        const { namHoc, hocKy } = res.data.DT;
 
-      setYearOptions(namHoc);
-      setSemesterOptions(hocKy);
+        setYearOptions(namHoc);
+        setSemesterOptions(hocKy);
 
-      const defaultYear = namHoc[0]?.value || '';
-      const defaultSemester = hocKy[0]?.value || '';
+        const defaultYear = namHoc[0]?.value || '';
+        const defaultSemester = hocKy[0]?.value || '';
 
-      setSelectedYear(defaultYear);
-      setSelectedSemester(defaultSemester);
+        setSelectedYear(defaultYear);
+        setSelectedSemester(defaultSemester);
 
+<<<<<<< BeTL
     })
     .catch((err) => {
       console.error(err);
@@ -29,6 +32,22 @@ const SemesterReportFilter = ({ onSubmit }) => {
       setSemesterOptions([]);
     });
 }, []);
+=======
+        // 👇 Gọi báo cáo ban đầu luôn
+        if (defaultYear && defaultSemester) {
+          onSubmit({
+            tenHocKy: defaultSemester,
+            tenNamHoc: defaultYear,
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setYearOptions([]);
+        setSemesterOptions([]);
+      });
+  }, []);
+>>>>>>> main
 
   const handleClick = () => {
     onSubmit({
@@ -38,9 +57,8 @@ const SemesterReportFilter = ({ onSubmit }) => {
   };
 
   return (
-    <div className="filters">
+    <div className="filter-group">
       <label>
-        Năm học:
         <select
           value={selectedYear}
           onChange={(e) => setSelectedYear(e.target.value)}
@@ -53,7 +71,6 @@ const SemesterReportFilter = ({ onSubmit }) => {
       </label>
 
       <label>
-        Học kỳ:
         <select
           value={selectedSemester}
           onChange={(e) => setSelectedSemester(e.target.value)}
@@ -65,7 +82,7 @@ const SemesterReportFilter = ({ onSubmit }) => {
         </select>
       </label>
 
-      <button onClick={handleClick}>Lấy báo cáo</button>
+      <button className='report-button' onClick={handleClick}>Lấy báo cáo</button>
     </div>
   );
 };

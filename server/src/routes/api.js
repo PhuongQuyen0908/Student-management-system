@@ -1,9 +1,11 @@
 import express from "express";
 import apiController from "../controller/apiController.js";
 import studentController from "../controller/studentController.js";
-import classListController from "..//controller/classListController";
+import classListController from "../controller/classListController";
 import semesterController from "../controller/semesterController";
 // import gradeController from "../controller/gradeController" //fix sau
+//Fix lại đổi gradeController thành classController
+import classGradeController from "../controller/classGradeController";
 import testController from "../controller/testController";
 
 import classController from "../controller/classController";
@@ -13,9 +15,19 @@ import getGradesController from '../controller/getGradesController.js';
 import reportController from '../controller/reportController.js';
 import gradesController from '../controller/gradesController.js';
 import semesterReportController from '../controller/semesterReportController.js';
-import subjectreportController from '../controller/subjectreportController.js'
-import sortSubjectController from '../controller/sortSubjectController';
 
+import sortSubjectController from '../controller/sortSubjectController';
+import subjectreportController from '../controller/subjectreportController.js';
+import paramenterController from "../controller/paramenterController.js"
+
+// 3/6/2025
+import groupController from "../controller/groupController.js";
+import permissionController from "../controller/permissionController.js";
+import userController from "../controller/userController.js";
+import { checkUserJWT, checkUserPermission } from "../middleware/JWTAction.js";
+
+//avatar
+import upload from "../middleware/upload.js";
 const router = express.Router();
 
 /**
@@ -27,7 +39,31 @@ const initApiRoutes = (app) => {
   //rest api CRUD
   //GET -- read , POST -- create , PUT - update , Delete - Delete
   router.get("/test-api", apiController.testApi);
-  // router.post("/login", apiController.handleLogin);
+   //middleware
+  router.all('*' , checkUserJWT,checkUserPermission)
+
+  //phân quyền
+  router.get("/test-api", apiController.testApi);
+  router.post("/login", apiController.handleLogin); // login user
+  router.post("/logout", apiController.handleLogout); // logout user
+  router.get("/account", userController.getUserAccount); // get user account
+
+  //Create group and assign permission to group
+  router.post("/group/create", groupController.createFunc);
+  router.get("/group/read", groupController.readFunc);
+  router.get("/permission/by-group/:groupId", permissionController.getPermissionBygroup); // lấy các quyền của 1 nhóm
+  router.get("/permission/read", permissionController.getAllPermissions); // lấy tất cả quyền
+  router.post("/permission/assign", permissionController.assignPermissionToGroup); // gán quyền cho nhóm người dùng
+  router.get("/group/read-for-admin", groupController.getGroupsForAdmin); // lấy danh sách nhóm cho admin
+
+
+  //CRUD user
+  router.get("/user/read", userController.readFunc);
+  router.post("/user/create", userController.createFunc);
+  router.put("/user/update", userController.updateFunc);
+  router.delete("/user/delete", userController.deleteFunc);
+  router.post("/user/change-password", userController.changePassword); // đổi mật khẩu
+  router.post("/user/upload-avatar", upload.single("Avatar"),userController.uploadAvatar); // đổi avatar
 
   //CRUD student
   router.get("/student/read", studentController.readFunc);
@@ -38,9 +74,13 @@ const initApiRoutes = (app) => {
   //Danh sách lớp
   router.get("/classList/read/", classListController.readClassList);
   router.get("/classList/getById/:id", classListController.getClassListById);
+  router.get("/classList/filter", classListController.getClassListByNameAndYear);
   router.post("/classList/create", classListController.createClassList);
   router.put("/classList/update/:id", classListController.updateClassList);
   router.delete("/classList/delete/:id", classListController.deleteClassList);
+  router.post("/classList/addStudent", classListController.addStudentToClass);
+  router.delete("/classList/removeStudent/:id", classListController.removeStudentFromClass);
+  router.get("/classList/getStudentInClass/:id", classListController.readStudentsOfClass);
 
   //grades
   router.get('/grades/subject-summary', gradesController.getSubjectSummary);
@@ -52,11 +92,11 @@ const initApiRoutes = (app) => {
   router.delete("/semester/delete/:id", semesterController.deleteSemester);
 
   // khối
-  // router.get('/read', gradeController.readGrade);
-  // router.get('/getByID/:id', gradeController.getGradeById);
-  // router.post('/create', gradeController.createGrade);
-  // router.put('/update/:id', gradeController.updateGrade);
-  // router.delete('/delete/:id', gradeController.deleteGrade);
+  router.get("/classGrade/read", classGradeController.readClassGrade);
+  router.get("/classGrade/getByID/:id", classGradeController.getClassGradeByName);  
+  router.post("/classGrade/create", classGradeController.createClassGrade);
+  router.put("/classGrade/update/:id", classGradeController.updateClassGrade);
+  router.delete("/classGrade/delete/:id", classGradeController.deleteClassGrade);
 
   //bài kiểm tra
   router.get("/test/read", testController.readTest);
@@ -72,11 +112,15 @@ const initApiRoutes = (app) => {
   router.put("/class/update/:id", classController.updateClass);
   router.delete("/class/delete/:id", classController.deleteClass);
 
+  // Tham số
+  router.get("/paramenter/read", paramenterController.getAllParamenters); 
+  router.put("/paramenter/update/:id", paramenterController.updateParamenter);
+
   // môn học
   router.get("/subject/read", subjectController.readSubject);
   router.get("/subject/getByID/:id", subjectController.getSubjectById);
   router.post("/subject/create", subjectController.createSubject);
-  router.put("/subject/yearupdate/:id", subjectController.updateSubject);
+  router.put("/subject/update/:id", subjectController.updateSubject);
   router.delete("/subject/delete/:id", subjectController.deleteSubject);
 
   //năm học

@@ -1,123 +1,129 @@
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
-import { useState } from 'react';
-import { toast } from 'react-toastify';
+import Button from "react-bootstrap/Button";
+import Modal from "react-bootstrap/Modal";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import _ from "lodash";
+import { useEffect } from "react";
 
-const ModalAddSubject = ({ show, handleClose }) => {
-    const [subjectCode, setSubjectCode] = useState('');
-    const [subjectName, setSubjectName] = useState('');
-    const [passingScore, setPassingScore] = useState('');
-    const [coefficient, setCoefficient] = useState('');
+const ModalAddSubject = ({ show, handleClose, fetchSubjects, onSubmit }) => {
+  const defaultSubjectData = {
+    subjectName: "",
+    coefficient: "",
+  };
 
-    const defaultValidInput = {
-        isValidSubjectCode: true,
-        isValidSubjectName: true,
-        isValidPassingScore: true,
-        isValidCoefficient: true,
-    };
+  const defaultValidInputs = {
+    subjectName: true,
+    coefficient: true,
+  };
 
-    const [objValidInput, setObjValidInput] = useState(defaultValidInput);
+  const [subjectData, setSubjectData] = useState(defaultSubjectData);
+  const [validInputs, setValidInputs] = useState(defaultValidInputs);
 
-    const isValidInputs = () => {
-        setObjValidInput(defaultValidInput);
+  const handleOnChangeInput = (value, name) => {
+    let _subjectData = _.cloneDeep(subjectData);
+    _subjectData[name] = value;
+    setSubjectData(_subjectData);
+  };
 
-        if (!subjectCode) {
-            toast.error("Mã môn học là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidSubjectCode: false });
-            return false;
-        }
+  const isValidInputs = () => {
+    setValidInputs(defaultValidInputs);
 
-        if (!subjectName) {
-            toast.error("Tên môn học là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidSubjectName: false });
-            return false;
-        }
+    let isValid = true;
+    const requiredFields = ["subjectName", "coefficient"];
 
-        if (!passingScore) {
-            toast.error("Số điểm đạt là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidPassingScore: false });
-            return false;
-        }
+    for (let field of requiredFields) {
+      if (!subjectData[field]) {
+        toast.error(
+          `${field === "subjectName" ? "Tên môn học" : "Hệ số"} là bắt buộc`
+        );
+        setValidInputs({ ...defaultValidInputs, [field]: false });
+        isValid = false;
+        break;
+      }
+    }
 
-        if (!coefficient) {
-            toast.error("Hệ số là bắt buộc");
-            setObjValidInput({ ...defaultValidInput, isValidCoefficient: false });
-            return false;
-        }
+    return isValid;
+  };
 
-        return true;
-    };
+  const confirmAddSubject = async () => {
+    let isValid = isValidInputs();
+    if (!isValid) return;
+    try {
+      let response = await onSubmit({
+        TenMonHoc: subjectData.subjectName,
+        HeSo: subjectData.coefficient,
+      });
+      if (response && +response.data.EC === 0) {
+        await fetchSubjects();
+        handleClose();
+        setSubjectData(defaultSubjectData);
+        setValidInputs(defaultValidInputs);
+      } else if (response && +response.data.EC === 1) {
+        setValidInputs({ ...defaultValidInputs, isValidSubjectName: false });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-    const confirmAddSubject = () => {
-        const isValid = isValidInputs();
-        if (isValid) {
-            toast.success("Thêm môn học thành công");
-            handleClose();
+  // Reset form when modal is closed
+  useEffect(() => {
+    if (!show) {
+      setSubjectData(defaultSubjectData);
+      setValidInputs(defaultValidInputs);
+    }
+  }, [show]);
 
-            // Reset form
-            setSubjectCode('');
-            setSubjectName('');
-            setPassingScore('');
-            setCoefficient('');
-        }
-    };
+  return (
+    <Modal show={show} onHide={handleClose} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Thêm môn học</Modal.Title>
+      </Modal.Header>
+      <Modal.Body>
+        <div className="mb-3">
+          <label htmlFor="subjectName" className="form-label">
+            Tên môn học
+          </label>
+          <input
+            type="text"
+            className={
+              validInputs.subjectName
+                ? "form-control"
+                : "form-control is-invalid"
+            }
+            id="subjectName"
+            value={subjectData.subjectName}
+            onChange={(e) => handleOnChangeInput(e.target.value, "subjectName")}
+          />
+        </div>
 
-    return (
-        <Modal show={show} onHide={handleClose} centered>
-            <Modal.Header closeButton>
-                <Modal.Title>Thêm môn học</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-                <div className="mb-3">
-                    <label htmlFor="subjectCode" className="form-label">Mã môn học</label>
-                    <input
-                        type="text"
-                        className={objValidInput.isValidSubjectCode ? "form-control" : "form-control is-invalid"}
-                        id="subjectCode"
-                        value={subjectCode}
-                        onChange={(e) => setSubjectCode(e.target.value)}
-                    />
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="subjectName" className="form-label">Tên môn học</label>
-                    <input
-                        type="text"
-                        className={objValidInput.isValidSubjectName ? "form-control" : "form-control is-invalid"}
-                        id="subjectName"
-                        value={subjectName}
-                        onChange={(e) => setSubjectName(e.target.value)}
-                    />
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="passingScore" className="form-label">Số điểm đạt</label>
-                    <input
-                        type="number"
-                        className={objValidInput.isValidPassingScore ? "form-control" : "form-control is-invalid"}
-                        id="passingScore"
-                        value={passingScore}
-                        onChange={(e) => setPassingScore(e.target.value)}
-                    />
-                </div>
-
-                <div className="mb-3">
-                    <label htmlFor="coefficient" className="form-label">Hệ số</label>
-                    <input
-                        type="number"
-                        className={objValidInput.isValidCoefficient ? "form-control" : "form-control is-invalid"}
-                        id="coefficient"
-                        value={coefficient}
-                        onChange={(e) => setCoefficient(e.target.value)}
-                    />
-                </div>
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={handleClose}>Hủy</Button>
-                <Button variant="primary" onClick={confirmAddSubject}>Thêm</Button>
-            </Modal.Footer>
-        </Modal>
-    );
+        <div className="mb-3">
+          <label htmlFor="coefficient" className="form-label">
+            Hệ số
+          </label>
+          <input
+            type="number"
+            className={
+              validInputs.coefficient
+                ? "form-control"
+                : "form-control is-invalid"
+            }
+            id="coefficient"
+            value={subjectData.coefficient}
+            onChange={(e) => handleOnChangeInput(e.target.value, "coefficient")}
+          />
+        </div>
+      </Modal.Body>
+      <Modal.Footer>
+        <Button variant="secondary" onClick={handleClose}>
+          Hủy
+        </Button>
+        <Button variant="primary" onClick={confirmAddSubject}>
+          Thêm
+        </Button>
+      </Modal.Footer>
+    </Modal>
+  );
 };
 
 export default ModalAddSubject;

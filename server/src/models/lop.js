@@ -1,6 +1,6 @@
 const Sequelize = require('sequelize');
 module.exports = function(sequelize, DataTypes) {
-  return sequelize.define('lop', {
+  const Lop = sequelize.define('lop', {
     MaLop: {
       autoIncrement: true,
       type: DataTypes.INTEGER,
@@ -41,4 +41,8 @@ module.exports = function(sequelize, DataTypes) {
       },
     ]
   });
+  Lop.associate = function(models) {
+    Lop.belongsTo(models.khoi, { foreignKey: 'MaKhoi', as: 'khoi' });
+  };
+  return Lop;
 };

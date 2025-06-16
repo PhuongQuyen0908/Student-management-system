@@ -4,44 +4,45 @@ import { useState } from 'react';
 import axios from 'axios';
 import SubjectReportFilters from '../../components/Modal/SubjectReportFilter';
 import SubjectReportTable from '../../components/Table/SubjectReportTable';
+import '../../styles/FilterGroup.scss';
 import TableHeaderAction from '../../components/TableHeaderAction';
-import '../../styles/Table/SubjectReportTable.scss';
+import '../../styles/Table.scss';
 import reportService from '../../services/reportService';
 
 const SubjectReportPage = () => {
-    const [rawData, setRawData] = useState([]);
-    const [reportData, setReportData] = useState([]);
-    const [reportMeta, setReportMeta] = useState({
-        monHoc: '',
-        hocKy: '',
-        namHoc: '',
-    });
+  const [rawData, setRawData] = useState([]);
+  const [reportData, setReportData] = useState([]);
+  const [reportMeta, setReportMeta] = useState({
+    monHoc: '',
+    hocKy: '',
+    namHoc: '',
+  });
 
-    const [sortConfig, setSortConfig] = useState({
+  const [sortConfig, setSortConfig] = useState({
     sortBy: null,
     order: 'asc',
   });
 
-    const handleFilterSubmit = async (filters) => {
-        try {
-            const res = await reportService.getSubjectReport(filters);
-            if (res.status === 200) {
-                const { ketQua, monHoc, hocKy, namHoc } = res.data.DT;
-                setRawData(ketQua || []);           // lưu lại dữ liệu gốc
-                setReportMeta({ monHoc, hocKy, namHoc });
-                setReportData(ketQua || []);        // hiển thị như cũ, chưa sort
-                setSortConfig({ sortBy: null, order: 'asc' }); // reset sort
-                }
-            else {
-                alert('Không thể lấy báo cáo.');
-            }
-        } catch (err) {
-            console.error(err);
-            alert('Lỗi kết nối đến server.');
-        }
-    };
+  const handleFilterSubmit = async (filters) => {
+    try {
+      const res = await reportService.getSubjectReport(filters);
+      if (res.status === 200) {
+        const { ketQua, monHoc, hocKy, namHoc } = res.data.DT;
+        setRawData(ketQua || []);           // lưu lại dữ liệu gốc
+        setReportMeta({ monHoc, hocKy, namHoc });
+        setReportData(ketQua || []);        // hiển thị như cũ, chưa sort
+        setSortConfig({ sortBy: null, order: 'asc' }); // reset sort
+      }
+      else {
+        alert('Không thể lấy báo cáo.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi kết nối đến server.');
+    }
+  };
 
-    const handleSort = async (key) => {
+  const handleSort = async (key) => {
     const newOrder =
       sortConfig.sortBy === key && sortConfig.order === 'asc' ? 'desc' : 'asc';
 
@@ -64,26 +65,27 @@ const SubjectReportPage = () => {
   };
 
 
-    return (
-        <div className="subjectreport-page-container">
-        <div className="subjectreport-table-wrapper">
-            <SubjectReportFilters onSubmit={handleFilterSubmit} />
+  return (
+    <div className="subjectreport-page-container">
+      <div className='subjectreport-header'>
+        <h2 className="studentslist-title">Báo cáo tổng kết môn</h2>
+        <SubjectReportFilters onSubmit={handleFilterSubmit} />
+      </div>
 
-            <TableHeaderAction
-                onSearchChange={(value) => console.log('Tìm kiếm:', value)}
-                placeholder="Tìm kiếm lớp..."
-                hideAdd={true}
-            />
+      <TableHeaderAction
+        onSearchChange={(value) => console.log('Tìm kiếm:', value)}
+        placeholder="Tìm kiếm lớp..."
+        hideAdd={true}
+      />
 
-            <SubjectReportTable
-                data={reportData}
-                meta={reportMeta}
-                onSort={handleSort}
-                sortConfig={sortConfig}
-            />
-        </div>
-        </div>
-    );
+      <SubjectReportTable
+        data={reportData}
+        meta={reportMeta}
+        onSort={handleSort}
+        sortConfig={sortConfig}
+      />
+    </div>
+  );
 };
 
 export default SubjectReportPage;

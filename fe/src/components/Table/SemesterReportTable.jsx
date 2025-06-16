@@ -1,7 +1,6 @@
-// src/components/Table/SemesterReportTable.jsx
 import React from 'react';
 import TableHeaderAction from '../TableHeaderAction';
-import '../../styles/Table/SemesterReportTable.scss';
+import '../../styles/Table.scss';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell
@@ -31,9 +30,9 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig, onSearchChange })
 
   return (
     <div className="semesterreport-table-wrapper">
-      <h3 className="semesterreport-title">
+      <h2 className="semesterreport-title">
         Báo cáo học kỳ: {meta.hocKy} - Năm học: {meta.namHoc} (Điểm đạt: {meta.diemDat})
-      </h3>
+      </h2>
 
       <TableHeaderAction
         onSearchChange={(e) => onSearchChange(e.target.value)}
@@ -41,8 +40,8 @@ const SemesterReportTable = ({ data, meta, onSort, sortConfig, onSearchChange })
         hideAdd={true}
       />
 
-      <div className="semesterreport-table-container">
-        <table className="semesterreport-table">
+      <div className="table-container">
+        <table className="table">
           <thead>
             <tr>
               <th>STT</th>
