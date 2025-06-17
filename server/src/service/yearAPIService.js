@@ -84,12 +84,30 @@ const updateSchoolYear = async (id, data) => {
   try {
     const SchoolYearToUpdate = await db.namhoc.findByPk(id);
     if (!SchoolYearToUpdate) {
-      throw new Error('Năm học không tồn tại');
+      return buildRepsponse('Năm học không tồn tại', 1, null);
     }
-    await SchoolYearToUpdate.update(data);
-    return SchoolYearToUpdate;
+    // Kiểm tra tên năm học đã tồn tại ở bản ghi khác chưa
+    if (data.TenNamHoc) {
+      const isYearNameExist = await db.namhoc.findOne({
+        where: {
+          TenNamHoc: data.TenNamHoc,
+          MaNamHoc: { [Op.ne]: id } // khác id hiện tại
+        }
+      });
+      if (isYearNameExist) {
+        return buildRepsponse(`Tên năm học ${data.TenNamHoc} đã tồn tại. Vui lòng nhập năm học khác`, 2, null);
+      }
+    }
+    // Nếu có đổi tên, cập nhật lại Nam1, Nam2
+    if (data.TenNamHoc && /^\d{4}-\d{4}$/.test(data.TenNamHoc)) {
+      const [nam1, nam2] = data.TenNamHoc.split('-');
+      data.Nam1 = nam1;
+      data.Nam2 = nam2;
+    }
+    const result = await SchoolYearToUpdate.update(data);
+    return buildRepsponse('Cập nhật năm học thành công', 0, result);
   } catch (error) {
-    throw new Error('Lỗi khi cập nhật năm học: ' + error.message);
+    return buildRepsponse('Lỗi khi cập nhật năm học: ' + error.message, -1, null);
   }
 };
 
