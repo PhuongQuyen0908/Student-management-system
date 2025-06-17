@@ -195,13 +195,28 @@ const removeStudentFromClass = async (req, res) => {
         DT: [] 
       });
     }
-    
-    await classListAPIService.removeStudentFromClass(id);
-    res.status(200).json({ 
-      EM: 'Xóa học sinh khỏi lớp thành công',
-      EC: 0,
-      DT: [] 
-    });
+    const result = await classListAPIService.removeStudentFromClass(id);
+    if (result.EC === 0) {
+      res.status(200).json({ 
+        EM: result.EM,
+        EC: result.EC,
+        DT: result.DT
+      });
+    }else if (result.EC === 1 && result.DT === 0) {
+      //Trường hợp không tìm thấy
+      res.status(404).json({
+        EM: result.EM,
+        EC: result.EC,
+        DT: result.DT
+      }) 
+      //Trường hợp vi phạm khoa chính - khóa ngoại
+    }else {
+      res.status(500).json({ 
+        EM: result.EM,
+        EC: result.EC,
+        DT: result.DT
+      });
+    }
   } catch (error) {
     res.status(500).json({ 
       EM: error.message,

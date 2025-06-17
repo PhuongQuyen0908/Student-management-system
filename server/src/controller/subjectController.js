@@ -167,9 +167,9 @@ const deleteSubject = async (req, res) => {
     const deleted = await subjectAPIService.deleteSubject(id); // Sử dụng đúng service
     if (deleted) {
       return res.status(200).json({
-        EM: 'Xóa môn học thành công',
-        EC: 0,
-        DT: {}
+        EM: deleted.EM,
+        EC: deleted.EC,
+        DT: deleted.DT
       });
     } 
   } catch (error) {

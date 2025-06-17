@@ -26,6 +26,11 @@ module.exports = function(sequelize, DataTypes) {
     Email: {
       type: DataTypes.STRING(50),
       allowNull: false
+    },
+    TrangThaiHoc: {
+      type: DataTypes.STRING(50),
+      allowNull: true,
+      defaultValue: "Đang học"
     }
   }, {
     sequelize,

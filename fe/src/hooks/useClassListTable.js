@@ -153,8 +153,13 @@ const handleRemoveStudent = (maCT_DSL) => {
             fetchClassListData();
         } catch (error) {
             console.log(error);
-            console.error('Error removing student:', error);
-            toast.error('Lỗi kết nối máy chủ');
+            // Nếu lỗi không thể xóa học sinh do còn tồn tại điểm
+            if (error?.response?.data?.EC === 1 && error?.response?.data?.DT > 0) {
+                toast.error(error?.response?.data?.EM || 'Không thể xóa học sinh do còn tồn tại điểm');
+            }else{
+                console.error('Error removing student:', error);
+                toast.error('Lỗi kết nối máy chủ');
+            }
         } finally {
             deleteModal.close();
         }

@@ -97,6 +97,10 @@ const useSubjectTable = () => {
                 deleteModal.close(); // đóng modal
             }
             else if(response?.data?.EC === 1) {
+                //Nếu lỗi do ràng buộc khóa ngoại
+                if (response?.data?.EM && response?.data?.EM.toLowerCase().includes("ràng buộc")) {
+                    toast.error("Vui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa môn học này.");
+                }
                 toast.error(response?.data?.EM || "Môn học không tồn tại");
             }else {
                 toast.error(response?.data?.EM || "Lỗi khi xóa môn học");

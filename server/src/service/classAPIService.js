@@ -162,28 +162,36 @@ const updateClass = async (id, data) => {
 
 const deleteClass = async (id) => {
   try {
-    const count = await db.danhsachlop.count({ 
-      where: {
-        MaLop: id,
-        siso: {
-          [Op.ne]: 0
-        }
-      }
-    });
-    if(count > 0){
-      return buildResponse("Không thể xóa lớp do đang tồn tại danh sách lớp", 1, []);
-    }
-      // Xóa các danh sách lớp liên quan (sĩ số = 0 thì mới tới đây)
-    await db.danhsachlop.destroy({
-      where: { MaLop: id }
-    });
+    // const count = await db.danhsachlop.count({ 
+    //   where: {
+    //     MaLop: id,
+    //     siso: {
+    //       [Op.ne]: 0
+    //     }
+    //   }
+    // });
+    // if(count > 0){
+    //   return buildResponse("Không thể xóa lớp do đang tồn tại danh sách lớp", 1, []);
+    // }
+    //   // Xóa các danh sách lớp liên quan (sĩ số = 0 thì mới tới đây)
+    // await db.danhsachlop.destroy({
+    //   where: { MaLop: id }
+    // });
+    // Thực hiện xóa lớp học
     const deleted = await db.lop.destroy({ where: { MaLop: id } });
-    if (!deleted) {
-      return buildResponse("Lớp không tồn tại để xóa", 1, []);
+    if (deleted === 1){
+      return buildResponse("Xóa lớp thành công", 0, { id });
+    }else {
+      return buildResponse("Không tìm thấy lớp với ID: " + id, 1, []);
     }
-    return buildResponse("Xóa lớp thành công", 0, { id });
   } catch (error) {
-    console.error(error);
+    //Kiểm tra lỗi ràng buộc khóa chính khóa ngoại
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+      const constraint = error.index || error.parent.constraint || 'unknown';
+      const table = error.table || 'unknown';
+      return buildResponse(`Không thể xóa lớp học vì có ràng buộc với bảng ${table} (constraint: ${constraint})`, 1, []);
+    }
+    // Lỗi khác
     return buildResponse("Lỗi phía server", -1, []);
   }
 };

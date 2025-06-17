@@ -479,7 +479,6 @@ const deleteScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, Di
     }
 
     await calculateAndUpdateDiemTB(bd.MaBDMonHoc);
-
     return {
       EM: 'Xóa điểm thành công',
       EC: 0,

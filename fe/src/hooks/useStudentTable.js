@@ -55,8 +55,15 @@ const useStudentTable = () => {
       toast.success(response.data.EM);
       await fetchStudents();
       deleteModal.close();
-    } else {
-      toast.error(response.data.EM);
+    } else if (
+      response?.data.EC === 1 && 
+      response?.data?.DT?.foreignTable) 
+    {
+      toast.error(`${response.data.EM}.\nVui lòng xóa hoặc cập nhật các dữ liệu liên quan ở bảng "${response.data.DT.foreignTable}" trước khi xóa học sinh này.`);
+      deleteModal.close();
+    }  else {
+      toast.error(response.data.EM || "Xóa học sinh thất bại");
+      deleteModal.close();
     }
   };
 
