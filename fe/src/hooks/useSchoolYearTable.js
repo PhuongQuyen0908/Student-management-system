@@ -100,7 +100,7 @@ const useSchoolYearTable = () => {
       
       if (errorMsg.includes("foreign key constraint fails")) {
         // Extract the table name from the error message
-        const tableMatch = errorMsg.match(/`([^`]+)`\.\`([^`]+)`/);
+        const tableMatch = errorMsg.match(/`([^`]+)`\.`([^`]+)`/);
         const constraintMatch = errorMsg.match(/CONSTRAINT `([^`]+)`/);
         
         const tableName = tableMatch ? tableMatch[2] : "unknown";
@@ -143,34 +143,30 @@ const useSchoolYearTable = () => {
   const confirmUpdateSchoolYear = async (schoolYearData) => {
     try {
       const response = await updateSchoolYear(schoolYearData.MaNamHoc, schoolYearData);
-      
-      // Handle the non-standard response format from the backend
-      if (response && response.data && (response.data.EC === 0 || response.data.message)) {
-        // Show success message from either standard or non-standard response
-        toast.success(response.data.EM || response.data.message || "Cập nhật năm học thành công");
-        
-        // Fetch the updated list
+      if (response?.data?.EC ===0){
+        toast.success(response.data.EM || "Cập nhật năm học thành công");
         await fetchSchoolYears();
-        
-        // Close modal and reset data
         updateModal.close();
         setDataModalSchoolYear({});
-        return true;
-      } else {
-        toast.error(response.data?.EM || response.data?.message || "Lỗi khi cập nhật năm học");
-        return false;
+      }else {
+        toast.error(response.data.EM || "Lỗi khi cập nhật năm học");
+        updateModal.close();
+        setDataModalSchoolYear({});
       }
     } catch (error) {
-      console.error("Error updating school year:", error);
-      if (error.response && error.response.data) {
-        toast.error(error.response.data.EM || error.response.data.message || "Lỗi khi cập nhật năm học");
-      } else {
+      const ec = error?.response?.data?.EC;
+      const em = error?.response?.data?.EM;
+      if (ec ===1){
+        toast.error(em || "Lỗi khi cập nhật năm học");
+      }
+      else if (ec===2){
+        toast.error(em || "Lỗi khi cập nhật năm học");
+      }
+      else{
         toast.error("Không thể kết nối đến máy chủ");
       }
-      return false;
     }
   };
-
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
     setCurrentPage(1);

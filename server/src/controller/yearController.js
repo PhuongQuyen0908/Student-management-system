@@ -44,16 +44,26 @@ const createSchoolYear = async (req, res) => {
 const updateSchoolYear = async (req, res) => {
   try {
     const id = req.params.id;
-    const updatedSchoolYear = await yearAPIService.updateSchoolYear(id, req.body);
-    if (!updatedSchoolYear) {
-      return res.status(404).json({ message: 'Năm học không tồn tại' });
+    const data = req.body;
+    const result = await yearAPIService.updateSchoolYear(id, data);
+    if (result.EC === 0) {
+      return res.status(200).json(result);
+    } else if (result.EC === 1) {
+      return res.status(404).json(result);
+    } else if (result.EC === 2) {
+      // Lỗi trùng tên hoặc ràng buộc khóa ngoại
+      return res.status(409).json(result);
+    } else {
+      return res.status(400).json(result);
     }
-    res.json({ message: 'Cập nhật năm học thành công', data: updatedSchoolYear });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      EM: error.message,
+      EC: -1,
+      DT: "",
+    });
   }
 };
-
 // Hàm xử lý xóa năm học học
 const deleteSchoolYear = async (req, res) => {
   try {
