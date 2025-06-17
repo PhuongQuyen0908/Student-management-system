@@ -124,7 +124,8 @@ const StudentTable = () => {
                     'Ngày sinh': formatDate(student.NgaySinh),
                     'Giới tính': student.GioiTinh,
                     'Địa chỉ': student.DiaChi,
-                    'Email': student.Email
+                    'Email': student.Email,
+                    'Trạng thái học': student.TrangThaiHoc
                 }));
 
                 const worksheet = XLSX.utils.json_to_sheet(data);
@@ -204,7 +205,13 @@ const StudentTable = () => {
                                     <FaSort />
                                 </button>
                             </th>
-                            <th></th>
+                            <th>Trạng thái học
+                                <button className="sort-button" title="Sắp xếp" value="TrangThaiHoc"
+                                    onClick={() => handleSort('TrangThaiHoc')}
+                                >
+                                    <FaSort />
+                                </button>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -219,6 +226,7 @@ const StudentTable = () => {
                                         <td>{highlightText(student.GioiTinh, searchTerm)}</td>
                                         <td>{highlightText(student.DiaChi, searchTerm)}</td>
                                         <td>{highlightText(student.Email, searchTerm)}</td>
+                                        <td>{highlightText(student.TrangThaiHoc, searchTerm)}</td>
                                         <td>
 
                                             <div className="action-buttons">
@@ -237,11 +245,17 @@ const StudentTable = () => {
                                     </tr>
                                 ))}
                             </>
+                            : userPermissions.some(p => p.TenManHinhDuocLoad === "/student/read") ? (
+                                <tr>
+                                    <td colSpan="5">Không có học sinh thỏa điều kiện</td>
+                                </tr>
+                            )
                             : (
                                 <tr>
                                     <td colSpan="5">Không tìm thấy học sinh</td>
                                 </tr>
-                            )}
+                            )
+                            }
                     </tbody>
                 </table>
             </div>

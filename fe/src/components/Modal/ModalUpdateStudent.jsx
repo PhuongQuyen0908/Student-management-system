@@ -20,7 +20,8 @@ const ModalUpdateStudent = ({ show, handleClose, dataModalStudent ,fetchStudents
     studentBirth: "",
     studentAddress: "",
     studentEmail: "",
-    studentGender: "Nam"
+    studentGender: "Nam",
+    studentStatus :"Đang học"
   }
 
   const defaultValidInputs = {
@@ -42,7 +43,8 @@ const ModalUpdateStudent = ({ show, handleClose, dataModalStudent ,fetchStudents
       studentBirth: dataModalStudent.NgaySinh,
       studentAddress: dataModalStudent.DiaChi,
       studentEmail: dataModalStudent.Email,
-      studentGender: dataModalStudent.GioiTinh
+      studentGender: dataModalStudent.GioiTinh,
+      studentStatus: dataModalStudent.TrangThaiHoc
     });
   }, [dataModalStudent])
 
@@ -195,8 +197,8 @@ const ModalUpdateStudent = ({ show, handleClose, dataModalStudent ,fetchStudents
             onChange={(event) => handleOnChangeInput(event.target.value, "studentAddress")}
           />
         </div>
-
-        <div className="mb-3">
+        <div className ="row">
+        <div className="mb-3 col-6">
           <label htmlFor="studentEmail" className="form-label">Email</label>
           <input
             type="email"
@@ -205,6 +207,22 @@ const ModalUpdateStudent = ({ show, handleClose, dataModalStudent ,fetchStudents
             value={studentData.studentEmail}
             onChange={(event) => handleOnChangeInput(event.target.value, "studentEmail")}
           />
+        </div>
+
+        <div className="mb-3 col-6">
+          <label htmlFor="studentStatus" className="form-label">Trạng thái học</label>
+          <select
+            className="form-select"
+            id="studentStatus"
+            value={studentData.studentStatus}
+            onChange={(event) => handleOnChangeInput(event.target.value, "studentStatus")}
+            defaultChecked = {studentData.studentStatus ? studentData.studentStatus : "Đang học"} 
+          >
+            <option value="Đang học">Đang học</option>
+            <option value="Nghỉ học">Nghỉ học</option>
+            <option value="Đã tốt nghiệp">Đã tốt nghiệp</option>
+          </select>
+        </div>
         </div>
       </Modal.Body>
       <Modal.Footer>

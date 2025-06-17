@@ -91,7 +91,9 @@ const ModalStudentGrade = ({
     };
 
     fetchGradesBySemester();
-}, [filters.semester, student?.MaHocSinh, yearName, options]);
+
+
+}, [filters.semester, student?.MaHocSinh, yearName]);
 
     const handleFilterChange = (key, value) => {
         setFilters({ ...filters, [key]: value });
@@ -100,11 +102,12 @@ const ModalStudentGrade = ({
     return (
         <Modal show={show} onHide={onHide}>
             <Modal.Header closeButton>
-                <Modal.Title>Chi tiết điểm {student?.HoTen}</Modal.Title>
+                <Modal.Title>Chi tiết điểm {student?.HoTen} năm {yearName}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form.Group>
                     <Form.Label>Chọn học kỳ</Form.Label>
+                   
                     <Form.Select
                         value={filters.semester}
                         onChange={e => handleFilterChange('semester', e.target.value)}

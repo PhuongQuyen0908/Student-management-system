@@ -33,6 +33,7 @@ const getAllStudentWithSearch = async (
             { GioiTinh: { [Op.like]: `%${search}%` } },
             { DiaChi: { [Op.like]: `%${search}%` } },
             { Email: { [Op.like]: `%${search}%` } },
+            { TrangThaiHoc: { [Op.like]: `%${search}%` } },
           ],
         }
       : {};
@@ -48,6 +49,7 @@ const getAllStudentWithSearch = async (
         "GioiTinh",
         "DiaChi",
         "NgaySinh",
+        "TrangThaiHoc"
       ],
       order: [[sortField, sortOrder.toUpperCase()]],
     });
@@ -219,6 +221,7 @@ const getAllStudent = async () => {
         "GioiTinh",
         "DiaChi",
         "NgaySinh",
+        "TrangThaiHoc"
       ],
     });
     if (students) {
@@ -258,6 +261,7 @@ const getStudentWithPagination = async (page, limit, sortField, sortOrder) => {
         "GioiTinh",
         "DiaChi",
         "NgaySinh",
+        "TrangThaiHoc"
       ],
       order: [[sortField, sortOrder.toUpperCase()]],
     });
@@ -320,6 +324,7 @@ const updateStudent = async (data) => {
         Email: data.studentEmail,
         NgaySinh: data.studentBirth,
         GioiTinh: data.studentGender,
+        TrangThaiHoc: data.studentStatus,
       });
       return {
         EM: "Cập nhập học sinh thành công",
