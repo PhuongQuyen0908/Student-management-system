@@ -141,25 +141,17 @@ const updateFunc = async (req, res) => {
 const deleteFunc = async (req, res) => {
   try {
     let data = await studentApiService.deleteStudent(req.body.MaHocSinh);
-    if (data.EC === 0) {
-      return res.status(200).json({
-        EM: data.EM,
-        EC: data.EC, //error code
-        DT: data.DT, //data
-      });
-    }else if (EC === 1){
-      return res.status(200).json({
-        EM: data.EM,
-        EC: data.EC, //error code
-        DT: data.DT, //data
-      });
-    }
+    return res.status(200).json({
+      EM: data.EM,
+      EC: data.EC,
+      DT: data.DT,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
-      EM: "error from server", //error message
-      EC: "-1", //error code
-      DT: "", //data
+      EM: "error from server",
+      EC: "-1",
+      DT: "",
     });
   }
 };

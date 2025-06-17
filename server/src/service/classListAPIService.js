@@ -360,9 +360,10 @@ const addStudentToClass = async ({MaDanhSachLop, MaHocSinh, TenLop, TenNamHoc })
     }
     // 4. Kiểm tra tình trạng học sinh (thêm một cột mới vào model học sinh)
     const hs = await db.hocsinh.findByPk(MaHocSinh, { transaction: t });
-    if (!hs || hs.TrangThaiHoc !== 'Đang học') { 
+    if (!hs || ( hs.TrangThaiHoc !== 'Đang học' && hs.TrangThaiHoc !== null)) { 
       await t.rollback();
-      return buildResponse('Học sinh không hợp lệ hoặc đã nghỉ học. Không thể thêm vào lớp', 1, null);
+      const trangThaiHoc = hs ? hs.TrangThaiHoc : null;
+      return buildResponse(`Học sinh có tình trạng học: ${trangThaiHoc}. Không thể thêm`, 1, null);
     }
 
     // Kiểm tra sỉ số tối đa
