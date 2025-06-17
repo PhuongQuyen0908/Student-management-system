@@ -188,7 +188,11 @@ const deleteSubject = async (id) => {
     }
     return buildResponse('Xóa môn học thành công', 0, null);
   } catch (error) {
-    console.error('Lỗi khi xóa môn học:', error);
+    if (error.name === 'SequelizeForeignKeyConstraintError') {
+      const constraint = error.index || error.parent.constraint || 'unknown';
+      const table = error.table || 'unknown';
+      return buildResponse(`Không thể xóa môn học vì có ràng buộc với bảng ${table} (constraint: ${constraint})`, 1, null);
+    }
     return buildResponse('Lỗi phía server. Xóa môn học thất bại', -1, null);
   }
 };

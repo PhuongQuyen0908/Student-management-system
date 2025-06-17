@@ -4,6 +4,7 @@ import schoolYearService from "./yearAPIService.js"
 import paramenterService from "./paramenterAPIService.js";
 
 
+
 db.danhsachlop.belongsTo(db.namhoc, { foreignKey: 'MaNamHoc' });
 db.danhsachlop.belongsTo(db.lop, { foreignKey: 'MaLop' });
 db.danhsachlop.hasMany(db.ct_dsl, { foreignKey: 'MaDanhSachLop' });
@@ -359,7 +360,7 @@ const addStudentToClass = async ({MaDanhSachLop, MaHocSinh, TenLop, TenNamHoc })
     }
     // 4. Kiểm tra tình trạng học sinh (thêm một cột mới vào model học sinh)
     const hs = await db.hocsinh.findByPk(MaHocSinh, { transaction: t });
-    if (!hs || hs.TinhTrang !== 'Còn học') { 
+    if (!hs || hs.TrangThaiHoc !== 'Đang học') { 
       await t.rollback();
       return buildResponse('Học sinh không hợp lệ hoặc đã nghỉ học. Không thể thêm vào lớp', 1, null);
     }
@@ -468,71 +469,85 @@ const removeStudentFromClass = async (MaCT_DSL) => {
     // Begin a transaction
     const t = await db.sequelize.transaction();
     try {
-      // Get the record to find MaDanhSachLop
-      const record = await db.ct_dsl.findByPk(MaCT_DSL);
-      if (!record) {
-        return;
+      // 1. Kiểm tra tồn tại
+      const ct = await db.ct_dsl.findByPk(MaCT_DSL, { transaction: t });
+      if (!ct) {
+        await t.rollback();
+        return buildResponse('Không tìm thấy học sinh trong danh sách lớp', 1, null);
       }
-      
-      const MaDanhSachLop = record.MaDanhSachLop;
-      
-      // Find all quatrinhhoc records for this CT_DSL
+      // 2. Lấy tất cả các quá trình học liên quan đến học sinh này
       const quaTrinhHocList = await db.quatrinhhoc.findAll({
         where: { MaCT_DSL },
         transaction: t
       });
+      const maQTHs = quaTrinhHocList.map(qth => qth.MaQuaTrinhHoc);
+      // 3. Lấy tất cả bảng điểm môn học liên quan đến quá trình học này
+      const bdmonhocList = await db.bdmonhoc.findAll({
+        where: { MaQuaTrinhHoc: { [Op.in]: maQTHs }},
+        transaction: t
+      });
+      const maBDs = bdmonhocList.map(bdmh => bdmh.MaBDMonHoc);
       
-      // For each quaTrinhHoc, delete related bdmonhoc records
-      for (const qth of quaTrinhHocList) {
-        // Find all bdmonhoc records for this quaTrinhHoc
-        const bdMonHocList = await db.bdmonhoc.findAll({
-          where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc },
-          transaction: t
-        });
-        
-        // For each bdmonhoc, delete related bdchitietmonhoc records
-        for (const bdmh of bdMonHocList) {
-          await db.bdchitietmonhoc.destroy({
-            where: { MaBDMonHoc: bdmh.MaBDMonHoc },
-            transaction: t
-          });
-        }
-        
-        // Now delete the bdmonhoc records
-        await db.bdmonhoc.destroy({
-          where: { MaQuaTrinhHoc: qth.MaQuaTrinhHoc },
-          transaction: t
-        });
-      }
-      
-      // Now it's safe to delete the quatrinhhoc records
+         // 4. Kiểm tra còn điểm thành phần nào khác null không
+    let countDiemTP = 0;
+    if (maBDs.length > 0) {
+      countDiemTP = await db.bdchitietmonhoc.count({
+        where: {
+          MaBDMonHoc: { [db.Sequelize.Op.in]: maBDs },
+          DiemTPMonHoc: { [db.Sequelize.Op.not]: null } // Đổi tên trường nếu cần
+        },
+        transaction: t
+      });
+    }
+
+    if (countDiemTP > 0) {
+      console.log('>>>>>>>>>> countDiemTP', countDiemTP);
+      await t.rollback();
+      return {
+        EM: 'Không thể xóa học sinh khỏi lớp vì vẫn còn điểm thành phần môn học. Vui lòng xóa toàn bộ điểm trước.',
+        EC: 1,
+        DT: countDiemTP
+      };
+    }
+      //5. Nếu không còn điểm thành phần thì xóa các bản ghi liên quan
+      //5.1. Xóa các bản ghi trong bảng chi tiết điểm môn học
+      await db.bdchitietmonhoc.destroy({
+        where: { MaBDMonHoc: { [Op.in]: maBDs }},
+        transaction: t
+      });
+      //5.2. Xóa các bản ghi trong bảng điểm môn học
+      await db.bdmonhoc.destroy({
+        where: { MaQuaTrinhHoc: { [Op.in]: maQTHs }},
+        transaction: t
+      });
+      //5.3. Xóa các bản ghi trong bảng quá trình học
       await db.quatrinhhoc.destroy({
         where: { MaCT_DSL },
         transaction: t
       });
-      
-      // Then remove student from class
-      await record.destroy({ transaction: t });
-      
-      // Update class size
-      const classList = await db.danhsachlop.findByPk(MaDanhSachLop);
-      if (classList && classList.SiSo > 0) {
-        await classList.update({
-          SiSo: classList.SiSo - 1
-        }, { transaction: t });
+      //5.4. Xóa bản ghi trong bảng chi tiết danh sách lớp
+      await db.ct_dsl.destroy({
+        where: { MaCT_DSL },
+        transaction: t
+      });
+      //6. Cập nhật sĩ số của lớp
+      const classList = await db.danhsachlop.findByPk(ct.MaDanhSachLop, { transaction: t });
+      if (classList) {
+        await classList.decrement('SiSo', { by: 1, transaction: t });
       }
-      
       // Commit the transaction
       await t.commit();
-      
-      return true;
+      // Return success response
+      return buildResponse('Xóa học sinh khỏi lớp thành công', 0, null);
     } catch (error) {
-      // Rollback the transaction if there's an error
+      // Rollback the transaction in case of error
       await t.rollback();
-      throw error;
+      console.error("Lỗi khi xóa học sinh khỏi lớp:", error);
+      return buildResponse('Lỗi phía server: ' + error.message, -1, null);
     }
   } catch (error) {
-    throw new Error('Lỗi xóa học sinh khỏi lớp: ' + error.message);
+    console.error("Lỗi khi bắt đầu transaction:", error);
+    return buildResponse('Lỗi phía server: ' + error.message, -1, null);
   }
 };
 

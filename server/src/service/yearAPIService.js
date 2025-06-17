@@ -57,9 +57,6 @@ const createSchoolYear = async (data) => {
 
     //Kiểm tra năm bắt đầu phải nhỏ hơn năm kết thúc
     if (parseInt(nam1) >= parseInt(nam2)) {
-
-    if(nam1 >= nam2){
-
       return buildRepsponse('Năm bắt đầu phải nhỏ hơn năm kết thúc', 1, null);
     }
     // 3. Create the complete data object to be saved
@@ -75,7 +72,9 @@ const createSchoolYear = async (data) => {
 
   } catch (error) {
     // The original error message from the DB will be caught and re-thrown
-    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);}
+    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);
+  }
+
 };
 
 // Hàm cập nhật năm học học

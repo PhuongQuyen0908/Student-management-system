@@ -1,38 +1,30 @@
-import { useEffect, useState } from 'react';
-import reportService from '../../services/reportService';
-import '../../styles/FilterGroup.scss';
-import '../../styles/Button.scss';
+import { useEffect, useState } from "react";
+import reportService from "../../services/reportService";
+import "../../styles/FilterGroup.scss";
+import "../../styles/Button.scss";
 
 const SemesterReportFilter = ({ onSubmit }) => {
   const [yearOptions, setYearOptions] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
 
-  const [selectedYear, setSelectedYear] = useState('');
-  const [selectedSemester, setSelectedSemester] = useState('');
+  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedSemester, setSelectedSemester] = useState("");
 
   useEffect(() => {
-    reportService.getOptions()
+    reportService
+      .getOptions()
       .then((res) => {
         const { namHoc, hocKy } = res.data.DT;
 
         setYearOptions(namHoc);
         setSemesterOptions(hocKy);
 
-        const defaultYear = namHoc[0]?.value || '';
-        const defaultSemester = hocKy[0]?.value || '';
+        const defaultYear = namHoc[0]?.value || "";
+        const defaultSemester = hocKy[0]?.value || "";
 
         setSelectedYear(defaultYear);
         setSelectedSemester(defaultSemester);
 
-<<<<<<< BeTL
-    })
-    .catch((err) => {
-      console.error(err);
-      setYearOptions([]);
-      setSemesterOptions([]);
-    });
-}, []);
-=======
         // 👇 Gọi báo cáo ban đầu luôn
         if (defaultYear && defaultSemester) {
           onSubmit({
@@ -47,7 +39,6 @@ const SemesterReportFilter = ({ onSubmit }) => {
         setSemesterOptions([]);
       });
   }, []);
->>>>>>> main
 
   const handleClick = () => {
     onSubmit({
@@ -65,7 +56,9 @@ const SemesterReportFilter = ({ onSubmit }) => {
           disabled={yearOptions.length === 0}
         >
           {yearOptions.map((item, idx) => (
-            <option key={idx} value={item.value}>{item.label}</option>
+            <option key={idx} value={item.value}>
+              {item.label}
+            </option>
           ))}
         </select>
       </label>
@@ -77,12 +70,16 @@ const SemesterReportFilter = ({ onSubmit }) => {
           disabled={semesterOptions.length === 0}
         >
           {semesterOptions.map((item, idx) => (
-            <option key={idx} value={item.value}>{item.label}</option>
+            <option key={idx} value={item.value}>
+              {item.label}
+            </option>
           ))}
         </select>
       </label>
 
-      <button className='report-button' onClick={handleClick}>Lấy báo cáo</button>
+      <button className="report-button" onClick={handleClick}>
+        Lấy báo cáo
+      </button>
     </div>
   );
 };

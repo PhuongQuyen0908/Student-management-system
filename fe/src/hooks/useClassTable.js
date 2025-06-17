@@ -167,7 +167,6 @@ const useClassTable = () => {
   // Delete class
   const handleDeleteClass = async (id) => {
     if (!id) return;
-    console.log("Check id", id)
     try {
       const res = await deleteClass(id);
       if (res?.data.EC === 0) {
@@ -175,8 +174,12 @@ const useClassTable = () => {
         await fetchClasses(false);
         deleteModal.close();
         setSelectedClass(null);
-      } else {
-        toast.error(res.data.EM);
+      } else if (res?.data.EC === 1) {
+        if (res?.data.EM && res?.data.EM.toLowerCase().includes("ràng buộc")) {
+          toast.error(res.data.EM + ".\nVui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa lớp học này.");
+        } else {
+          toast.error(res?.data.EM || "Lỗi khi xóa lớp học");
+        }
       }
       return res;
     } catch (error) {
