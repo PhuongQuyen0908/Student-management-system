@@ -79,7 +79,7 @@ const Taskbar = () => {
           </>
         )}
 
-        {(isAvailable.DanhSachMonHoc || isAvailable.BangDiemMonHoc) && (
+        {(isAvailable.DanhSachMonHoc || isAvailable.BangDiemMonHoc || isAvailable.LoaiKiemTra) && (
           <>
             <NavLink className="taskbar-item" onClick={() => toggleMenu('subjectManagement')}>
               <FontAwesomeIcon icon={faBookOpen} /> Môn học
@@ -106,12 +106,14 @@ const Taskbar = () => {
                     Bảng điểm môn học
                   </NavLink>
                 }
-                <NavLink
-                  to="/admin/testtype"
-                  className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
-                >
-                  Loại kiểm tra
-                </NavLink>
+                {isAvailable.LoaiKiemTra &&
+                  <NavLink
+                    to="/admin/testtype"
+                    className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+                  >
+                    Loại kiểm tra
+                  </NavLink>
+                }
               </div>
             )}
           </>
@@ -135,24 +137,28 @@ const Taskbar = () => {
                     Quản lý lớp học
                   </NavLink>
                 }
-                {/*thiếu phần này */}
-                <NavLink
-                  to="/admin/classlist"
-                  className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
-                >
-                  Danh sách lớp
-                </NavLink>
+                {isAvailable.DanhSachLop &&
+                  <NavLink
+                    to="/admin/classlist"
+                    className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+                  >
+                    Danh sách lớp
+                  </NavLink>
+                }
               </div>
             )}
           </>
         )}
 
-        <NavLink
-          to="/admin/grademanagement"
-          className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
-        >
-          <FontAwesomeIcon icon={faSchoolFlag} /> Quản lý khối lớp
-        </NavLink>
+        {isAvailable.QuanLyKhoiLop &&
+          <NavLink
+            to="/admin/grademanagement"
+            className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
+          >
+            <FontAwesomeIcon icon={faSchoolFlag} /> Quản lý khối lớp
+          </NavLink>
+        }
+
         {isAvailable.QuanLyNamHoc &&
           <NavLink
             to="/admin/schoolyears"
@@ -161,6 +167,7 @@ const Taskbar = () => {
             <FontAwesomeIcon icon={faCalendarAlt} /> Quản lý năm học
           </NavLink>
         }
+        
         {(isAvailable.BaoCaoMonHoc || isAvailable.BaoCaoHocKy) && (
           <>
             <NavLink className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>
@@ -250,7 +257,7 @@ const Taskbar = () => {
           <FontAwesomeIcon icon={faSignOutAlt} /> Đăng xuất
         </div>
       </div>
-    </nav>
+    </nav >
   );
 };
 

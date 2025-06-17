@@ -80,7 +80,10 @@ const useGradeTable = () => {
 
     const handleAddGrade = async (data) => {
         try {
-            const res = await createGrade(data);
+            const res = await createGrade({
+                GradeName: data.GradeName,
+            });
+
             if (res?.data?.EC === 0) {
                 toast.success("Thêm khối lớp thành công");
                 await fetchGrades();
@@ -94,6 +97,7 @@ const useGradeTable = () => {
             return { data: { EC: -1, EM: "Không thể kết nối đến máy chủ" } };
         }
     };
+
 
     const handleOpenUpdateModal = (gradeItem) => {
         setSelectedGrade(gradeItem);

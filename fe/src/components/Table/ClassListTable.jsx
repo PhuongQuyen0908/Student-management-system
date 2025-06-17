@@ -10,8 +10,15 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { getStudentsOfClass } from '../../services/classListService';
 import { toast } from 'react-toastify';
+import { UserContext } from "../../context/UserContext";
+import { useEffect, useContext } from "react";
 
 const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
+  const { user } = useContext(UserContext);
+  const userPermissions = user?.account?.groupWithPermissions?.chucnangs || []
+
+  const canAdd = userPermissions.some(p => p.TenManHinhDuocLoad === "/classList/addStudent");
+  const canRemove = userPermissions.some(p => p.TenManHinhDuocLoad === "/classList/removeStudent");
   const {
     students,
     loading,
@@ -148,6 +155,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
         isButtonDisabled={isClassFull} // <-- Prop để vô hiệu hóa nút
         buttonTooltip={addButtonTooltip} // <-- Prop để hiển thị tooltip
         onExportClick={exportToExcel}
+        hideAdd={!canAdd}
       />
 
       <div className="table-container">
@@ -238,16 +246,18 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
                     <td>{highlightText(student.Email, searchTerm)}</td>
                     <td>
                       <div className="action-buttons">
-                        <button
-                          className="icon-button delete"
-                          title="Xoá"
-                          onClick={() => {
-                            console.log(student.MaCT_DSL);
-                            handleRemoveStudent(student.MaCT_DSL);
-                          }}
-                        >
-                          <FaTrash />
-                        </button>
+                        {canRemove && (
+                          <button
+                            className="icon-button delete"
+                            title="Xoá"
+                            onClick={() => {
+                              console.log(student.MaCT_DSL);
+                              handleRemoveStudent(student.MaCT_DSL);
+                            }}
+                          >
+                            <FaTrash />
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
