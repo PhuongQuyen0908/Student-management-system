@@ -216,7 +216,7 @@ const ModalUpdateStudent = ({ show, handleClose, dataModalStudent ,fetchStudents
             id="studentStatus"
             value={studentData.studentStatus}
             onChange={(event) => handleOnChangeInput(event.target.value, "studentStatus")}
-            defaultChecked = {studentData.studentStatus}
+            defaultChecked = {studentData.studentStatus ? studentData.studentStatus : "Đang học"} 
           >
             <option value="Đang học">Đang học</option>
             <option value="Nghỉ học">Nghỉ học</option>
