@@ -47,6 +47,18 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
     ? `Lớp đã đạt sĩ số tối đa (${maxClassSize})`
     : "Thêm học sinh mới vào lớp";
 
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date)) return "";
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+  };
+
   const removeAccents = (str) => {
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   };
@@ -118,7 +130,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
           'Mã học sinh': student.MaHocSinh || '',
           'Họ và tên': student.HoTen || '',
           'Giới tính': student.GioiTinh || '',
-          'Ngày sinh': student.NgaySinh || '',
+          'Ngày sinh': formatDate(student.NgaySinh) || '',
           'Địa chỉ': student.DiaChi || '',
           'Email': student.Email || '',
         }));
@@ -241,7 +253,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
                     <td>{highlightText(student.MaHocSinh, searchTerm)}</td>
                     <td>{highlightText(student.HoTen, searchTerm)}</td>
                     <td>{highlightText(student.GioiTinh, searchTerm)}</td>
-                    <td>{highlightText(student.NgaySinh, searchTerm)}</td>
+                    <td>{highlightText(formatDate(student.NgaySinh), searchTerm)}</td>
                     <td>{highlightText(student.DiaChi, searchTerm)}</td>
                     <td>{highlightText(student.Email, searchTerm)}</td>
                     <td>
