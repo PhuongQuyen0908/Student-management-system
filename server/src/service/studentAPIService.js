@@ -374,62 +374,60 @@ const isStudentGraduated = async (MaHocSinh) => {
 }
 const deleteStudent = async (MaHocSinh) => {
   try {
-    //1. Kiểm tra học sinh có tồn tại không
+    // 1. Kiểm tra học sinh có tồn tại không
     const student = await db.hocsinh.findByPk(MaHocSinh);
     if (!student) {
       return buildResponse("Không tìm thấy học sinh", 1, []);
     }
-    //2. Kiểm tra học sinh có trong bất kỳ danh sách lớp nào chưa
-    const inAnyClass = await isStudentInAnyClass(MaHocSinh);
-    if (!inAnyClass) {
-      await db.hocsinh.destroy({
-        where: { MaHocSinh: MaHocSinh },
-      });
-      return buildResponse("Xóa học sinh thành công", 0, []);
-    }
-    //3. Nếu thuộc danh sách lớp, kiểm tra đã tốt nghiệp chưa
-    const graduated = await isStudentGraduated(MaHocSinh);
-    if (graduated) {
-      return buildResponse("Học sinh đã tốt nghiệp, không thể xóa để lưu trữ dữ liệu về điểm");
-    }
-    
-    //4. Xóa học sinh
-    const deleteCount = await db.hocsinh.destroy({
-      where: { MaHocSinh: MaHocSinh },
+    // 2. Lấy tất cả các lớp và năm học mà học sinh này từng thuộc
+    const ctDSLs = await db.ct_dsl.findAll({
+      where: { MaHocSinh },
+      include: [
+        {
+          model: db.danhsachlop,
+          include: [
+            { model: db.lop, attributes: ["TenLop"] },
+            { model: db.namhoc, attributes: ["TenNamHoc"] }
+          ]
+        }
+      ]
     });
-    if (deleteCount ) {
-      return {
-        EM: "Xóa học sinh thành công",
-        EC: 0,
-        DT: [],
-      };
-    } else {
-      return {
-        EM: "Học sinh không tồn tại",
-        EC: 0,
-        DT: [],
-      };
+
+    if (ctDSLs.length > 0) {
+      // Lấy ra danh sách lớp và năm học mà học sinh này từng thuộc
+      const info = ctDSLs.map(item => {
+        const tenLop = item.danhsachlop?.lop?.TenLop || "Không xác định";
+        const tenNamHoc = item.danhsachlop?.namhoc?.TenNamHoc || "Không xác định";
+        return `${tenLop} (${tenNamHoc})`;
+      }).join(", ");
+      return buildResponse(
+        `Không thể xóa học sinh vì đã hoặc đang thuộc các lớp: ${info}`,
+        1,
+        []
+      );
     }
+
+    // 3. Nếu chưa từng thuộc lớp nào, cho phép xóa
+    await db.hocsinh.destroy({ where: { MaHocSinh } });
+    return buildResponse("Xóa học sinh thành công", 0, []);
   } catch (error) {
-    // Kiểm tra lỗi ràng buộc khóa chính khóa ngoại
-    if (error.name === "SequelizeForeignKeyConstraintError" || (error.parent && error.parent.code === "ER_ROW_IS_REFERENCED_2")) {
-      console.error("Foreign key constraint error:", error);
+    // Kiểm tra lỗi ràng buộc khóa ngoại
+    if (
+      error.name === "SequelizeForeignKeyConstraintError" ||
+      (error.parent && error.parent.code === "ER_ROW_IS_REFERENCED_2")
+    ) {
       const msg = error.parent?.sqlMessage || error.message || "";
-      const [, foreignTable = "unknown", constraintName = "unknown"] = msg.match(/a foreign key constraint fails \(`[^`]+`\.`([^`]+)`, CONSTRAINT `([^`]+)`/) || [];
+      const [, foreignTable = "unknown", constraintName = "unknown"] =
+        msg.match(/a foreign key constraint fails \(`[^`]+`\.`([^`]+)`, CONSTRAINT `([^`]+)`/) || [];
       return {
         EM: `Không thể xóa học sinh vì có ràng buộc với bảng ${foreignTable} (constraint: ${constraintName})`,
         EC: 1,
         DT: { foreignTable, constraintName },
       };
     }
-    return {
-      EM: "Lỗi từ service",
-      EC: 1,
-      DT: [],
-    };
+    return buildResponse("Lỗi từ service", 1, []);
   }
 };
-
 const getAgeLimit = async () => {
   try {
     let age = await db.thamso.findAll({
