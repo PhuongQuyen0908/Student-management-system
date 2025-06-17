@@ -20,6 +20,26 @@ const getOptions = async (req, res) => {
   }
 };
 
+const getOptionsReport = async (req, res) => {
+  try {
+    const result = await reportAPIService.getOptionsReport();
+
+    // Trả về JSON đúng chuẩn
+    return res.status(200).json({
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT
+    });
+  } catch (error) {
+    console.error('Error in getOptions controller:', error);
+    return res.status(500).json({
+      EM: 'Internal server error',
+      EC: -1,
+      DT: {}
+    });
+  }
+};
+
 // const getSubjectSummary = async (req, res) => {
 //   try {
 //      const { tenLop, tenHocKy, tenNamHoc, tenMonHoc } = req.query;
@@ -134,4 +154,5 @@ module.exports = {
   deleteScore,
   editScore,
   getOptions,
+  getOptionsReport,
 };

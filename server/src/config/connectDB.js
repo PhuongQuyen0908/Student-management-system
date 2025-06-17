@@ -1,7 +1,7 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-const sequelize = new Sequelize('qlyhocsinh', 'root', null, {
+const sequelize = new Sequelize('qlhs1', 'root', null, {
   host: 'localhost',
   dialect: 'mysql',
   port: 3306

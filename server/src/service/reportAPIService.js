@@ -1,6 +1,7 @@
 import db from "../models/index.js";
 const { Op, Sequelize } = db.Sequelize;
 const { hocsinh, ct_dsl, bdchitietmonhoc, loaikiemtra, danhsachlop, lop, bdmonhoc, monhoc } = db;
+import { applySort } from './sortHelper';
 
 db.ct_dsl.belongsTo(db.hocsinh, { foreignKey: 'MaHocSinh' });
 db.bdchitietmonhoc.belongsTo(db.loaikiemtra, { foreignKey: 'MaLoaiKiemTra' });
@@ -25,6 +26,42 @@ const getOptions = async () => {
     const namHoc = namHocRaw.map(obj => obj.get({ plain: true }));
     //Sắp xếp năm học mới nhất lên trước 
     namHoc.sort((a, b) => b.TenNamHoc.localeCompare(a.TenNamHoc));
+    const hocKy = hocKyRaw.map(obj => obj.get({ plain: true }));
+    const monHoc = monHocRaw.map(obj => obj.get({ plain: true }));
+
+    const data = {
+      lop: lop.map(item => ({ value: item.TenLop, label: item.TenLop })),
+      hocKy: hocKy.map(item => ({ value: item.TenHocKy, label: item.TenHocKy })),
+      namHoc: namHoc.map(item => ({ value: item.TenNamHoc, label: item.TenNamHoc })),
+      monHoc: monHoc.map(item => ({ value: item.TenMonHoc, label: item.TenMonHoc })),
+    };
+
+    return {
+      EM: 'getOptions OK',
+      EC: 0,
+      DT: JSON.parse(JSON.stringify(data))
+    };
+  } catch (error) {
+    console.error('Error in getOptions service:', error);
+    return {
+      EM: 'Error from service',
+      EC: -1,
+      DT: {}
+    };
+  }
+};
+
+const getOptionsReport = async () => {
+  try {
+    const [lopRaw, namHocRaw, hocKyRaw, monHocRaw] = await Promise.all([
+      db.lop.findAll(),
+      db.namhoc.findAll(),
+      db.hocky.findAll(),
+      db.monhoc.findAll(),
+    ]);
+
+    const lop = lopRaw.map(obj => obj.get({ plain: true }));
+    const namHoc = namHocRaw.map(obj => obj.get({ plain: true }));
     const hocKy = hocKyRaw.map(obj => obj.get({ plain: true }));
     const monHoc = monHocRaw.map(obj => obj.get({ plain: true }));
 
@@ -608,6 +645,39 @@ const editScore = async (MaHocSinh, TenLop, TenMonHoc, TenHocKy, TenNamHoc, Diem
   }
 };
 
+function filterBySearchField(data, searchTerm, field) {
+  if (!searchTerm || !Array.isArray(data)) return data;
+
+  const lowerTerm = searchTerm.toLowerCase();
+
+  return data.filter((item) => {
+    switch (field) {
+      case 'lop':
+        return (item.lop || '').toLowerCase().includes(lowerTerm);
+
+      case 'siSo':
+        return String(item.siSo).toLowerCase().includes(lowerTerm);
+
+      case 'soLuongDat':
+        return String(item.soLuongDat).toLowerCase().includes(lowerTerm);
+
+      case 'tiLe':
+        return String(item.tiLe).toLowerCase().includes(lowerTerm);
+
+      case 'all':
+        return (
+          (item.lop || '').toLowerCase().includes(lowerTerm) ||
+          String(item.siSo).toLowerCase().includes(lowerTerm) ||
+          String(item.soLuongDat).toLowerCase().includes(lowerTerm) ||
+          String(item.tiLe).toLowerCase().includes(lowerTerm)
+        );
+
+      default:
+        return true;
+    }
+  });
+}
+
 const tinhDiemTBHocKy = async (maQuaTrinhHoc) => {
   try {
     const dsBDMon = await db.bdmonhoc.findAll({
@@ -645,7 +715,14 @@ const tinhDiemTBHocKy = async (maQuaTrinhHoc) => {
 };
 
 
-const tinhBaoCaoTongKetHocKy = async (tenHocKy, tenNamHoc) => {
+const tinhBaoCaoTongKetHocKy = async ({
+  tenHocKy,
+  tenNamHoc,
+  searchTerm = '',
+  searchField = 'all',
+  sortBy = null,
+  order = 'asc'
+}) => {
   try {
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc: tenNamHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy: tenHocKy } });
@@ -678,20 +755,10 @@ const tinhBaoCaoTongKetHocKy = async (tenHocKy, tenNamHoc) => {
             MaHocKy: hocKy.MaHocKy
           }
         });
-
         if (!qt) continue;
 
-        // ✅ Tính và cập nhật điểm trung bình từng môn học trước
-        const bdMonList = await db.bdmonhoc.findAll({
-          where: { MaQuaTrinhHoc: qt.MaQuaTrinhHoc }
-        });
-
-        for (const bd of bdMonList) {
-          await calculateAndUpdateDiemTB(bd.MaBDMonHoc);
-        }
-
         const diemTBHK = await tinhDiemTBHocKy(qt.MaQuaTrinhHoc);
-        if (diemTBHK !== null && diemTBHK !== undefined && diemTBHK >= diemDat) {
+        if (diemTBHK !== null && diemTBHK >= diemDat) {
           soLuongDat++;
         }
       }
@@ -708,25 +775,31 @@ const tinhBaoCaoTongKetHocKy = async (tenHocKy, tenNamHoc) => {
       });
     }
 
+    // Lọc, sắp xếp, chuẩn hóa
+    const ketQuaFiltered = filterBySearchField(ketQua, searchTerm, searchField);
+    const ketQuaSorted = applySort(ketQuaFiltered, sortBy, order);
+    const ketQuaFinal = normalizeKetQua(ketQuaSorted);
+
     return {
-      EM: 'Tính báo cáo thành công',
+      EM: 'Tính báo cáo tổng kết học kỳ thành công',
       EC: 0,
       DT: {
         hocKy: tenHocKy,
         namHoc: tenNamHoc,
-        diemDat,
-        ketQua
+        ketQua: ketQuaFinal
       }
     };
   } catch (error) {
-    console.error('Service Error:', error);
+    console.error('❌ Service Error:', error);
     return {
-      EM: 'Lỗi khi tính toán báo cáo',
+      EM: 'Lỗi khi tính toán báo cáo học kỳ',
       EC: -1,
       DT: {},
+      error: error.message
     };
   }
 };
+
 
 const tinhDiemTBMonHoc = async (maBDMonHoc) => {
   try {
@@ -765,7 +838,30 @@ const tinhDiemTBMonHoc = async (maBDMonHoc) => {
   }
 };
 
-const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
+function normalizeKetQua(ketQuaRaw) {
+  return ketQuaRaw.map((item, idx) => {
+    const tiLeStr = typeof item.tiLe === 'string' ? item.tiLe.replace('%', '') : item.tiLe;
+    const tiLeNum = parseFloat(tiLeStr);
+
+    return {
+      stt: Number(item.stt || idx + 1),
+      lop: String(item.lop || '[Không xác định]'),
+      siSo: Number(item.siSo || 0),
+      soLuongDat: Number(item.soLuongDat || 0),
+      tiLe: tiLeNum.toFixed(2) + '%' // luôn ở dạng 'xx.xx%'
+    };
+  });
+}
+
+const tinhBaoCaoTongKetMon = async (
+  tenMonHoc,
+  tenHocKy,
+  tenNamHoc,
+  searchTerm = '',
+  searchField = 'all', // 👈 thêm searchField
+  sortBy = null,
+  order = 'asc'
+) => {
   try {
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc: tenNamHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy: tenHocKy } });
@@ -790,10 +886,8 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
       MaMonHoc: monHoc.MaMonHoc
     });
 
-    const thamSo = await db.thamso.findOne();
-    const diemDat = parseFloat(thamSo?.DiemDat) || 5;
-
-    console.log(diemDat);
+    const diemDatRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDat' } });
+    const diemDat = parseFloat(diemDatRecord?.GiaTri) || 5;
 
     const ketQua = [];
 
@@ -809,7 +903,6 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
         if (!qtHoc) continue;
 
         const diemTBMonHoc = await calculateAndUpdateDiemTB(qtHoc.MaQuaTrinhHoc);
-        console.log(diemTBMonHoc)
         const bdMon = await db.bdmonhoc.findOne({
           where: { MaQuaTrinhHoc: qtHoc.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc }
         });
@@ -829,7 +922,6 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
       const siSo = dsCT.length;
       const tiLe = siSo > 0 ? ((soLuongDat / siSo) * 100).toFixed(2) : '0.00';
 
-
       ketQua.push({
         stt: ketQua.length + 1,
         lop: dsl.lop?.TenLop || '[Không xác định]',
@@ -838,6 +930,7 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
         tiLe: tiLe + '%'
       });
 
+      console.log(ketQua);
       await db.ctbctk_mon.create({
         MaBCTKMonHoc: baoCao.MaBCTKMonHoc,
         MaDanhSachLop: dsl.MaDanhSachLop,
@@ -847,6 +940,12 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
       });
     }
 
+    const ketQuaLoc = filterBySearchField(ketQua, searchTerm, searchField);
+const ketQuaSorted = applySort(ketQuaLoc, sortBy, order);  // ⬅️ thêm dòng này
+const ketQuaNormalized = normalizeKetQua(ketQuaSorted);
+
+    console.log("✅ Kết quả cuối cùng:", ketQuaNormalized);
+
     return {
       EM: 'Tính báo cáo tổng kết môn học thành công',
       EC: 0,
@@ -854,7 +953,7 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
         monHoc: tenMonHoc,
         hocKy: tenHocKy,
         namHoc: tenNamHoc,
-        ketQua
+        ketQua: ketQuaNormalized
       }
     };
   } catch (error) {
@@ -868,22 +967,6 @@ const tinhBaoCaoTongKetMon = async (tenMonHoc, tenHocKy, tenNamHoc) => {
   }
 };
 
-const filterBySearchTerm = async (ketQua, searchTerm) => {
-  if (!searchTerm) return ketQua;
-
-  const lowerTerm = searchTerm.toLowerCase();
-
-  return ketQua.filter(row => {
-    return (
-      row.lop?.toLowerCase().includes(lowerTerm) ||
-      row.siSo?.toString().includes(lowerTerm) ||
-      row.soLuongDat?.toString().includes(lowerTerm) ||
-      row.tiLe?.toString().includes(lowerTerm)
-    );
-  });
-};
-
-
 module.exports = { 
   getOptions,
   getSubjectSummary,
@@ -892,5 +975,7 @@ module.exports = {
   editScore,
   tinhBaoCaoTongKetHocKy,
   tinhBaoCaoTongKetMon,
-  filterBySearchTerm,
+  getOptionsReport,
+  filterBySearchField,
+  normalizeKetQua,
 };
