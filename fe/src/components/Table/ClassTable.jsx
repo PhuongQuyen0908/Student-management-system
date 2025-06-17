@@ -203,7 +203,7 @@ const ClassTable = () => {
                           <FaEdit />
                         </button>
                       )}
-                      {canUpdate && (
+                      {canDelete && (
                         <button
                           className="icon-button delete"
                           onClick={() => handleOpenDeleteModal(classItem)}

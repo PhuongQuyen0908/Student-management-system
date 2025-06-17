@@ -20,11 +20,10 @@ const useTestTypeTable = () => {
         setLoading(true);
         try {
             const res = await getAllTests();
-            if (res?.data?.EC === 0) {
-                setTestList(res.data.DT || []);
+            if (res?.data?.data) {
+                setTestList(res.data.data);
             } else {
-                setTestList([]);
-                toast.error(res?.data?.EM || "Lỗi khi tải danh sách loại kiểm tra");
+                toast.error(res?.data?.message || "Lỗi khi tải danh sách loại kiểm tra");
             }
         } catch (error) {
             setTestList([]);
@@ -50,22 +49,24 @@ const useTestTypeTable = () => {
             const id = updatedData.MaLoaiKiemTra;
             const testData = {
                 TenLoaiKiemTra: updatedData.TenLoaiKiemTra,
+                HeSo: updatedData.HeSo,
             };
             const res = await updateTest(id, testData);
-            if (res?.data?.EC === 0) {
-                toast.success("Cập nhật thành công");
+            if (res?.status === 200 && res?.data?.data) {
+                toast.success(res.data.message || "Cập nhật thành công");
                 await fetchTestTypes();
                 updateModal.close();
                 setSelectedTest(null);
             } else {
-                toast.error(res?.data?.EM || "Không thể cập nhật loại kiểm tra");
+                toast.error(res?.data?.message || "Không thể cập nhật loại kiểm tra");
             }
             return res;
         } catch (error) {
             toast.error("Không thể kết nối đến máy chủ");
-            return { data: { EC: -1, EM: "Không thể kết nối đến máy chủ" } };
+            return { data: null, message: "Không thể kết nối đến máy chủ" };
         }
     };
+
 
     const handleOpenDeleteModal = (testItem) => {
         setSelectedTest(testItem);
@@ -76,20 +77,21 @@ const useTestTypeTable = () => {
         if (!id) return;
         try {
             const res = await deleteTest(id);
-            if (res?.data?.EC === 0) {
-                toast.success("Xóa thành công");
+            if (res?.status === 200) {
+                toast.success(res.data.message || "Xóa thành công");
                 await fetchTestTypes();
                 deleteModal.close();
                 setSelectedTest(null);
             } else {
-                toast.error(res?.data?.EM || "Không thể xóa loại kiểm tra");
+                toast.error(res?.data?.message || "Không thể xóa loại kiểm tra");
             }
             return res;
         } catch (error) {
             toast.error("Không thể kết nối đến máy chủ");
-            return { data: { EC: -1, EM: "Không thể kết nối đến máy chủ" } };
+            return { data: null, message: "Không thể kết nối đến máy chủ" };
         }
     };
+
 
     return {
         testList,

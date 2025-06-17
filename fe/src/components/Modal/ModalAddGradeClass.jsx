@@ -6,11 +6,11 @@ import _ from "lodash";
 
 // Dữ liệu mặc định
 const defaultGradeData = {
-    gradeName: "",
+    GradeName: "", // Sửa từ TenKhoi → GradeName
 };
 
 const defaultValidInput = {
-    isValidGradeName: true,
+    isValidGradeName: true, // Sửa từ isValidTenKhoi → isValidGradeName
 };
 
 const ModalAddGradeClass = ({ show, handleClose, onSubmit, fetchGrades }) => {
@@ -33,7 +33,7 @@ const ModalAddGradeClass = ({ show, handleClose, onSubmit, fetchGrades }) => {
     const isValidInputs = () => {
         setObjValidInput(defaultValidInput);
         let isValid = true;
-        if (!gradeData.gradeName) {
+        if (!gradeData.GradeName) {
             toast.error("Tên khối lớp là bắt buộc, không được để trống");
             setObjValidInput({ isValidGradeName: false });
             isValid = false;
@@ -44,10 +44,9 @@ const ModalAddGradeClass = ({ show, handleClose, onSubmit, fetchGrades }) => {
     const confirmAddGrade = async () => {
         let isValid = isValidInputs();
         if (!isValid) return;
+        console.log("Grade gửi đi:", gradeData);
         try {
-            const response = await onSubmit?.({
-                TenKhoi: gradeData.gradeName,
-            });
+            const response = await onSubmit?.(gradeData);
             if (response?.data?.EC === 0) {
                 await fetchGrades(); // Cập nhật danh sách khối lớp
                 handleClose();
@@ -70,7 +69,7 @@ const ModalAddGradeClass = ({ show, handleClose, onSubmit, fetchGrades }) => {
             </Modal.Header>
             <Modal.Body>
                 <div className="mb-3">
-                    <label htmlFor="gradeName" className="form-label">
+                    <label htmlFor="GradeName" className="form-label">
                         Tên khối lớp
                     </label>
                     <input
@@ -80,11 +79,11 @@ const ModalAddGradeClass = ({ show, handleClose, onSubmit, fetchGrades }) => {
                                 ? "form-control"
                                 : "form-control is-invalid"
                         }
-                        id="gradeName"
+                        id="GradeName"
                         placeholder="Ví dụ: Khối 10"
-                        value={gradeData.gradeName}
+                        value={gradeData.GradeName}
                         onChange={(event) =>
-                            handleOnChangeInput(event.target.value, "gradeName")
+                            handleOnChangeInput(event.target.value, "GradeName")
                         }
                     />
                 </div>

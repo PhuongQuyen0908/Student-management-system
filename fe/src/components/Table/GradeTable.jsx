@@ -7,13 +7,20 @@ import ModalDeleteGradeClass from "../Modal/ModalDeleteGradeClass";
 import TableHeaderAction from "../TableHeaderAction";
 import useGradeTable from "../../hooks/useGradeTable";
 import ReactPaginate from "react-paginate";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { fetchAllGrades } from "../../services/gradeService";
 import { toast } from 'react-toastify';
+import { UserContext } from "../../context/UserContext";
 
 const GradeTable = () => {
+    const { user } = useContext(UserContext);
+    const userPermissions = user?.account?.groupWithPermissions?.chucnangs || []
+
+    const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/classGrade/create");
+    const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/classGrade/update");
+    const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/classGrade/delete");
     const {
         gradeList,
         addModal,
@@ -112,6 +119,7 @@ const GradeTable = () => {
                 placeholder="Tìm kiếm khối lớp..."
                 addLabel="Thêm khối lớp"
                 onExportClick={exportToExcel}
+                hideAdd={!canCreate}
             />
 
             <div className="table-container">
@@ -141,12 +149,17 @@ const GradeTable = () => {
                                     <td>{highlightText(grade.TenKhoi, searchTerm)}</td>
                                     <td>
                                         <div className="action-buttons">
-                                            <button className="icon-button edit" onClick={() => handleOpenUpdateModal(grade)}>
-                                                <FaEdit />
-                                            </button>
-                                            <button className="icon-button delete" onClick={() => handleOpenDeleteModal(grade)}>
-                                                <FaTrash />
-                                            </button>
+                                            {canUpdate && (
+                                                <button className="icon-button edit" onClick={() => handleOpenUpdateModal(grade)}>
+                                                    <FaEdit />
+                                                </button>
+                                            )}
+
+                                            {canDelete && (
+                                                <button className="icon-button delete" onClick={() => handleOpenDeleteModal(grade)}>
+                                                    <FaTrash />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>

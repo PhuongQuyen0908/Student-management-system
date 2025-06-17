@@ -68,11 +68,12 @@ const ModalUpdateTestType = ({
                 HeSo: Number(formData.coefficient),
             });
 
-            if (response?.data?.EC === 0) {
-                toast.success("Cập nhật loại kiểm tra thành công");
+            if (response?.status === 200 && response?.data?.data) {
                 handleClose();
                 setFormData(defaultDataForm);
                 setObjValidInput(defaultValidInput);
+            } else {
+                toast.error(response?.data?.message || "Không thể cập nhật loại kiểm tra");
             }
         } catch {
             toast.error("Không thể kết nối đến máy chủ");

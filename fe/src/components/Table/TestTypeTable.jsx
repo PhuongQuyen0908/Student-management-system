@@ -6,9 +6,15 @@ import ModalUpdateTestType from "../Modal/ModalUpdateTestType";
 import ModalDeleteTestType from "../Modal/ModalDeleteTestType";
 import TableHeaderAction from "../TableHeaderAction";
 import useTestTypeTable from "../../hooks/useTestTypeTable";
-import { useEffect } from "react";
+import { useEffect, useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const TestTypeTable = () => {
+    const { user } = useContext(UserContext);
+    const userPermissions = user?.account?.groupWithPermissions?.chucnangs || []
+
+    const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/test/update");
+    const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/test/delete");
     const {
         testList,
         updateModal,
@@ -51,13 +57,19 @@ const TestTypeTable = () => {
                                     <td>{test.TenLoaiKiemTra}</td>
                                     <td>{test.HeSo}</td>
                                     <td>
+
                                         <div className="action-buttons">
-                                            <button className="icon-button edit" onClick={() => handleOpenUpdateModal(test)}>
-                                                <FaEdit />
-                                            </button>
-                                            <button className="icon-button delete" onClick={() => handleOpenDeleteModal(test)}>
-                                                <FaTrash />
-                                            </button>
+                                            {canUpdate && (
+                                                <button className="icon-button edit" onClick={() => handleOpenUpdateModal(test)}>
+                                                    <FaEdit />
+                                                </button>
+                                            )}
+
+                                            {canDelete && (
+                                                <button className="icon-button delete" onClick={() => handleOpenDeleteModal(test)}>
+                                                    <FaTrash />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
