@@ -7,8 +7,7 @@ import {
   getClassListByNameAndYear,
 } from "../../services/classListService";
 import { toast } from "react-toastify";
-import ReactPaginate from 'react-paginate';
-
+import ReactPaginate from "react-paginate";
 
 const ModalStudentList = ({
   show,
@@ -45,11 +44,22 @@ const ModalStudentList = ({
 
     try {
       // Then, get all students
-      const response = await fetchAllStudent(currentPage, currentLimit, searchTerm, "MaHocSinh", "asc");
+      const response = await fetchAllStudent(
+        currentPage,
+        currentLimit,
+        searchTerm,
+        "MaHocSinh",
+        "asc"
+      );
       if (response?.data?.DT?.users) {
         // Filter out students already in the class
         const allStudents = response.data.DT.users;
-        const availableStudents = allStudents.filter(
+        // Chỉ lấy học sinh có trạng thái "Đang học" hoặc null
+        const filteredByStatus = allStudents.filter(
+          (student) =>
+            student.TrangThaiHoc === "Đang học" || student.TrangThaiHoc == null
+        );
+        const availableStudents = filteredByStatus.filter(
           (student) => !existingStudentIds.includes(student.MaHocSinh)
         );
         if (response && response.data && response.data.EC === 0) {
@@ -124,7 +134,7 @@ const ModalStudentList = ({
     (student) =>
       student.HoTen?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       student.Email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       student.MaHocSinh?.toString().includes(searchTerm)
+      student.MaHocSinh?.toString().includes(searchTerm)
   );
 
   return (
@@ -211,33 +221,32 @@ const ModalStudentList = ({
             </tbody>
           </table>
         </div>
-          {/* pagination */}
-            {totalPages > 0 &&
-                <div className="student-footer">
-                    <ReactPaginate
-                        onPageChange={handlePageClick}
-                        pageRangeDisplayed={3}
-                        marginPagesDisplayed={2}
-                        pageCount={totalPages}
-                        previousLabel="Previous"
-                        pageClassName="page-item"
-                        pageLinkClassName="number page-link"
-                        previousClassName="page-item"
-                        previousLinkClassName="prev page-link"
-                        nextClassName="page-item"
-                        nextLinkClassName="next page-link"
-                        nextLabel="Next"
-                        breakLabel="..."
-                        breakClassName="page-item"
-                        breakLinkClassName="break page-link"
-                        containerClassName="pagination"
-                        activeClassName="active"
-                        renderOnZeroPageCount={null}
-                        forcePage={currentPage - 1} // reset trang hiện tại khi sort 
-                    />
-                </div>
-            }
-
+        {/* pagination */}
+        {totalPages > 0 && (
+          <div className="student-footer">
+            <ReactPaginate
+              onPageChange={handlePageClick}
+              pageRangeDisplayed={3}
+              marginPagesDisplayed={2}
+              pageCount={totalPages}
+              previousLabel="Previous"
+              pageClassName="page-item"
+              pageLinkClassName="number page-link"
+              previousClassName="page-item"
+              previousLinkClassName="prev page-link"
+              nextClassName="page-item"
+              nextLinkClassName="next page-link"
+              nextLabel="Next"
+              breakLabel="..."
+              breakClassName="page-item"
+              breakLinkClassName="break page-link"
+              containerClassName="pagination"
+              activeClassName="active"
+              renderOnZeroPageCount={null}
+              forcePage={currentPage - 1} // reset trang hiện tại khi sort
+            />
+          </div>
+        )}
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={handleClose}>
