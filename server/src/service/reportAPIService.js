@@ -295,8 +295,11 @@ const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc, page = 
 
     const allTestTypes = await db.loaikiemtra.findAll({ attributes: ['TenLoaiKiemTra'], raw: true });
     const testTypeNames = allTestTypes.map(t => t.TenLoaiKiemTra.trim());
-
-    if (testTypeNames.includes(sortField)) {
+    if (sortField === 'MaHocSinh') {
+      // Sort by MaHocSinh directly
+      orderClause.push([db.hocsinh, 'MaHocSinh', safeSortOrder]);
+    }
+    else if (testTypeNames.includes(sortField)) {
         // Sắp xếp theo cột điểm thành phần bằng subquery
         const subQuery = `(
             SELECT AVG(DiemTPMonHoc) FROM bdchitietmonhoc AS bdct

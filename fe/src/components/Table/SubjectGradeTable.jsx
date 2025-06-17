@@ -139,6 +139,7 @@ const SubjectGradeTable = ({ filters }) => {
 
         const formattedData = rows.map((student) => {
           const row = {
+            "Mã học sinh": student.MaHocSinh,
             "Họ và tên": student.HoTen,
           };
 
@@ -201,6 +202,17 @@ const SubjectGradeTable = ({ filters }) => {
             <thead>
               <tr>
                 <th>
+                  Mã học sinh
+                  <button
+                    className="sort-button"
+                    title="Sắp xếp"
+                    value="MaHocSinh"
+                    onClick={() => handleSort("MaHocSinh")}
+                  >
+                    <FaSort />
+                  </button>
+                </th>
+                <th>
                   Họ và tên
                   <button
                     className="sort-button"
@@ -258,11 +270,12 @@ const SubjectGradeTable = ({ filters }) => {
             <tbody>
               {grades.length === 0 && (
                 <tr>
-                  <td colSpan={testTypes.length + 3}>Không có dữ liệu điểm</td>
+                  <td colSpan={testTypes.length + 4}>Không có dữ liệu điểm</td>
                 </tr>
               )}
               {grades.map((student, idx) => (
                 <tr key={student.id || idx}>
+                  <td>{highlightText(student.id, searchTerm)}</td>
                   <td>{highlightText(student.name, searchTerm)} </td>
                   {testTypes.map((type) => (
                     <td key={type.MaLoaiKiemTra}>
