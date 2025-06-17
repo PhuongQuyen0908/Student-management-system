@@ -38,7 +38,7 @@ const useClassTable = () => {
     setLoadingGrades(true);
     try {
       const res = await fetchAllGrades();
-      
+
       if (res?.data?.EC === 0) {
         setGradesList(res.data.DT || []);
       } else {
@@ -97,7 +97,7 @@ const useClassTable = () => {
         toast.success("Thêm lớp học thành công");
         await fetchClasses();
         addModal.close();
-      } else if(res?.data.EC === 1) {
+      } else if (res?.data.EC === 1) {
         toast.error(res?.data.EM || "Lớp học đã tồn tại");
       }
       else {
@@ -106,18 +106,19 @@ const useClassTable = () => {
       return res;
     } catch (error) {
       // Backend trả về HTTP status 409 - Conflict nếu lớp đã tồn tại
-      if(error?.response?.status === 409) {
+      if (error?.response?.status === 409) {
         // toast.error(error?.response?.data?.EM || "Lớp học đã tồn tại");
         toast.error("Lớp học đã tồn tại. Bạn không thể thêm lớp học với tên này");
-        return {data: { EC: 1, EM: error?.response?.data?.EM || "Lớp học đã tồn tại" }};
+        return { data: { EC: 1, EM: error?.response?.data?.EM || "Lớp học đã tồn tại" } };
       }
       // Backend trả về HTTP status 500 - Internal Server Error nếu có lỗi khác
       console.error("Lỗi khi thêm lớp:", error);
       toast.error("Không thể kết nối đến máy chủ");
-      return {data: { EC: -1, EM: "Không thể kết nối đến máy chủ" }
+      return {
+        data: { EC: -1, EM: "Không thể kết nối đến máy chủ" }
+      };
     };
-  };
-}
+  }
 
   // Open update modal
   const handleOpenUpdateModal = (classItem) => {
@@ -140,7 +141,7 @@ const useClassTable = () => {
         await fetchClasses();
         updateModal.close();
         setSelectedClass(null);
-      } else if(res?.data.EC === 1) {
+      } else if (res?.data.EC === 1) {
         toast.error(res?.data.EM || "Lớp học đã tồn tại. Bạn không thể cập nhật lớp học với tên này");
       } else {
         toast.error(res?.EM || "Không thể cập nhật lớp");
@@ -150,11 +151,11 @@ const useClassTable = () => {
       if (error?.response?.status === 409) {
         // Nếu backend trả về HTTP status 409 - Conflict, có nghĩa là lớp đã tồn tại
         toast.error(error?.response?.data?.EM || "Lớp học đã tồn tại. Bạn không thể cập nhật lớp học với tên này");
-        return { EC: 1, EM: error?.response?.data?.EM ||" Lớp học đã tồn tại. Bạn không thể cập nhật lớp học với tên này" };
+        return { EC: 1, EM: error?.response?.data?.EM || " Lớp học đã tồn tại. Bạn không thể cập nhật lớp học với tên này" };
       }
       // Nếu có lỗi khác, backend sẽ trả về HTTP status 500 - Internal Server Error
       toast.error("Không thể kết nối đến máy chủ", error);
-      return { EC: -1, EM: error?.response?.data?.EM || "Không thể kết nối đến máy chủ"};
+      return { EC: -1, EM: error?.response?.data?.EM || "Không thể kết nối đến máy chủ" };
     }
   };
 
@@ -176,7 +177,7 @@ const useClassTable = () => {
         setSelectedClass(null);
       } else if (res?.data.EC === 1) {
         if (res?.data.EM && res?.data.EM.toLowerCase().includes("ràng buộc")) {
-          toast.error(res.data.EM + ".\nVui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa lớp học này.");
+          toast.error("Lớp học này đang có học sinh không thể xoá");
         } else {
           toast.error(res?.data.EM || "Lỗi khi xóa lớp học");
         }
@@ -195,7 +196,7 @@ const useClassTable = () => {
     setCurrentPage(1); // Reset to first page on search
   }
 
-  const handleSortChange = (field) => { 
+  const handleSortChange = (field) => {
     if (field === sortField) {
       setSortOrder(prev => prev === "asc" ? "desc" : "asc");
     } else {
@@ -228,7 +229,7 @@ const useClassTable = () => {
     searchTerm,
     sortField,
     sortOrder,
-    handleSortChange,    
+    handleSortChange,
   };
 };
 

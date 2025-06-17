@@ -1,4 +1,4 @@
-import { fetchAllSubject, deleteSubject,createSubject, updateCurrentSubject  } from "../services/subjectServices";
+import { fetchAllSubject, deleteSubject, createSubject, updateCurrentSubject } from "../services/subjectServices";
 import ReactPaginate from "react-paginate";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
@@ -14,7 +14,7 @@ const useSubjectTable = () => {
     const [listSubjects, setListSubjects] = useState([]);
     //Pagination hooks
     const [totalPages, setTotalPages] = useState(0);
-    const [currentPage, setCurrentPage] = useState(1);   
+    const [currentPage, setCurrentPage] = useState(1);
     // eslint-disable-next-line no-unused-vars
     const [currentLimit, setCurrentLimit] = useState(7);
     //Delete Modal
@@ -58,27 +58,27 @@ const useSubjectTable = () => {
     }
 
     const confirmAddSubject = async (subjectData) => {
-        try{
+        try {
             let response = await createSubject(subjectData);
             if (response.data.EC === 0) {
                 toast.success(response.data.EM);
                 console.log("Thêm thành công");
                 await fetchSubjects();
                 addModal.close();
-            } else if(response.data.EC === 1) {
+            } else if (response.data.EC === 1) {
                 // Nếu môn học đã tồn tại, hiển thị thông báo lỗi
                 toast.error(response.data.EM || "Môn học đã tồn tại");
             }
             return response;
-        }catch (error) {
+        } catch (error) {
             // HTTP status 409 - Conflict nếu môn học đã tồn tại
-            if(error?.response?.status === 409) {
+            if (error?.response?.status === 409) {
                 toast.error("Môn học đã tồn tại");
-                return {data: {EC: error.data.EC, EM: error.data.EM}};
+                return { data: { EC: error.data.EC, EM: error.data.EM } };
             }
             // Nếu có lỗi khác, hiển thị thông báo lỗi chung
             toast.error("Lỗi khi thêm môn học");
-            return {data: {EC: -1, EM: "Lỗi khi thêm môn học"}};
+            return { data: { EC: -1, EM: "Lỗi khi thêm môn học" } };
         }
     }
 
@@ -88,24 +88,24 @@ const useSubjectTable = () => {
     }
 
     const confirmDeleteSubject = async () => {
-        try{
+        try {
             let response = await deleteSubject(dataModal);
-            if(response?.data?.EC === 0) {
+            if (response?.data?.EC === 0) {
                 toast.success("Xóa môn học thành công");
                 await fetchSubjects(); // cập nhật lại danh sách môn học
                 setDataModal({}); // reset dữ liệu trong modal
                 deleteModal.close(); // đóng modal
             }
-            else if(response?.data?.EC === 1) {
+            else if (response?.data?.EC === 1) {
                 //Nếu lỗi do ràng buộc khóa ngoại
                 if (response?.data?.EM && response?.data?.EM.toLowerCase().includes("ràng buộc")) {
-                    toast.error("Vui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa môn học này.");
+                    toast.error("Môn học này đang có bảng điểm nên không thể xoá");
                 }
-                toast.error(response?.data?.EM || "Môn học không tồn tại");
-            }else {
+                // toast.error(response?.data?.EM || "Môn học không tồn tại");
+            } else {
                 toast.error(response?.data?.EM || "Lỗi khi xóa môn học");
             }
-        }catch (error) {
+        } catch (error) {
             console.error("Lỗi khi xóa môn học:", error);
             toast.error("Lỗi khi xóa môn học");
         }
@@ -142,7 +142,7 @@ const useSubjectTable = () => {
             else if (error?.response?.status === 400) {
                 const errorMessage = error?.response?.data?.EM || "Dữ liệu không hợp lệ";
                 // toast.error(errorMessage);
-                return { data: { EC: error.response.data.EC, EM: errorMessage } };   
+                return { data: { EC: error.response.data.EC, EM: errorMessage } };
             }
             toast.error("Lỗi khi cập nhật môn học");
             return { data: { EC: -1, EM: "Lỗi khi cập nhật môn học" } };

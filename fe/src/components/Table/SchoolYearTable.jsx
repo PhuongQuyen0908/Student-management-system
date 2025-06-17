@@ -11,12 +11,12 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from 'react-toastify';
 import { UserContext } from '../../context/UserContext';
-import { fetchAllSchoolYears} from "../../services/schoolYearService";
+import { fetchAllSchoolYears } from "../../services/schoolYearService";
 
 const SchoolYearTable = () => {
   const { user } = useContext(UserContext);
   const userPermissions = user?.account?.groupWithPermissions?.chucnangs || [];
-  
+
   // Check permissions
   const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/year/create");
   const canUpdate = userPermissions.some(p => p.TenManHinhDuocLoad === "/year/update");
@@ -236,7 +236,7 @@ const SchoolYearTable = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="5">Không có dữ liệu</td>
+                <td colSpan="5">Không tìm thấy năm học</td>
               </tr>
             )}
           </tbody>

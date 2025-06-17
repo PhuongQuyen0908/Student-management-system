@@ -252,7 +252,7 @@ const StudentTable = () => {
                             )
                             : (
                                 <tr>
-                                    <td colSpan="7">Bạn không có quyền xem danh sách</td>
+                                    <td colSpan="5">Không tìm thấy học sinh</td>
                                 </tr>
                             )
                             }

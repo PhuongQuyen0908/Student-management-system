@@ -34,7 +34,7 @@ const DecentralizationTable = () => {
 
     const addRoleModal = useModal();
     const assignModal = useModal();
-    const  deleteModal = useModal();
+    const deleteModal = useModal();
 
     const [selectedGroup, setSelectedGroup] = useState(null);
     //Tìm kiếm nhóm quyền
@@ -159,22 +159,22 @@ const DecentralizationTable = () => {
         }
     };
 
-    
-const confirmDeleteGroup = async (MaNhom ) => {
-    try {
-        const response = await deleteGroup(MaNhom);
-        if (response && response.data && response.data.EC === 0) {
-            toast.success("Xóa nhóm thành công");
-        } else {
-            toast.error(response.data.EM || "Xóa nhóm thất bại");
+
+    const confirmDeleteGroup = async (MaNhom) => {
+        try {
+            const response = await deleteGroup(MaNhom);
+            if (response && response.data && response.data.EC === 0) {
+                toast.success("Xóa nhóm thành công");
+            } else {
+                toast.error(response.data.EM || "Xóa nhóm thất bại");
+            }
+        } catch (error) {
+            console.error("Lỗi khi xóa nhóm:", error);
+            toast.error(response.data.EM || "Lỗi trong quá trình xóa nhóm");
         }
-    } catch (error) {
-        console.error("Lỗi khi xóa nhóm:", error);
-        toast.error(response.data.EM || "Lỗi trong quá trình xóa nhóm");
+        deleteModal.close(); // Đóng modal sau khi xóa
+        fetchGroups(); // Cập nhật lại danh sách nhóm sau khi xóa
     }
-    deleteModal.close(); // Đóng modal sau khi xóa
-    fetchGroups(); // Cập nhật lại danh sách nhóm sau khi xóa
-}
 
     return (
         <div className="student-table-wrapper">
@@ -226,11 +226,11 @@ const confirmDeleteGroup = async (MaNhom ) => {
                                                     <FaPuzzlePiece />
                                                 </button>
                                             )}
-                                            {canDelete &&(
-                                           <button className="icon-button lock" 
-                                           onClick={() => handleDeleteGroup(group.MaNhom)} title="Xóa">
-                                            <FaTrash />
-                                                                                              
+                                            {canDelete && (
+                                                <button className="icon-button lock"
+                                                    onClick={() => handleDeleteGroup(group.MaNhom)} title="Xóa">
+                                                    <FaTrash />
+
                                                 </button>
                                             )}
                                         </div>
@@ -239,7 +239,7 @@ const confirmDeleteGroup = async (MaNhom ) => {
                             ))
                         ) : (
                             <tr>
-                                <td colSpan="5">Bạn không có quyền xem danh sách</td>
+                                <td colSpan="5">Không tìm thấy nhóm quyền</td>
                             </tr>
                         )}
                     </tbody>

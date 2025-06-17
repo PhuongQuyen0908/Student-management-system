@@ -277,7 +277,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
               ) : (
                 <tr>
                   <td colSpan="7" className="text-center">
-                    Không có học sinh nào trong lớp này
+                    Không có học sinh trong lớp này
                   </td>
                 </tr>
               )}
