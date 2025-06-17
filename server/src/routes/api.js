@@ -138,6 +138,7 @@ const initApiRoutes = (app) => {
   router.post('/report/delete-score', gradesController.deleteScore);
   router.post('/report/edit-score', gradesController.editScore);
   router.post('/report/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
+
   router.post('/report/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
   router.post('/report/sort-subject-report', sortSubjectController.sortSubjectReport);
 

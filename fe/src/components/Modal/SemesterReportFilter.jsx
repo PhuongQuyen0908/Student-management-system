@@ -3,7 +3,7 @@ import reportService from '../../services/reportService';
 import '../../styles/FilterGroup.scss';
 import '../../styles/Button.scss';
 
-const SemesterReportFilter = ({ onSubmit }) => {
+const SemesterReportFilter = ({ onSubmit, onDefaultsLoaded }) => {
   const [yearOptions, setYearOptions] = useState([]);
   const [semesterOptions, setSemesterOptions] = useState([]);
 
@@ -11,9 +11,10 @@ const SemesterReportFilter = ({ onSubmit }) => {
   const [selectedSemester, setSelectedSemester] = useState('');
 
   useEffect(() => {
-    reportService.getOptions()
-      .then((res) => {
-        const { namHoc, hocKy } = res.data.DT;
+    const fetchOptions = async () => {
+      try {
+        const res = await reportService.getOptions();
+        const { namHoc = [], hocKy = [] } = res.data?.DT || {};
 
         setYearOptions(namHoc);
         setSemesterOptions(hocKy);
@@ -24,36 +25,29 @@ const SemesterReportFilter = ({ onSubmit }) => {
         setSelectedYear(defaultYear);
         setSelectedSemester(defaultSemester);
 
-<<<<<<< BeTL
-    })
-    .catch((err) => {
-      console.error(err);
-      setYearOptions([]);
-      setSemesterOptions([]);
-    });
-}, []);
-=======
-        // 👇 Gọi báo cáo ban đầu luôn
         if (defaultYear && defaultSemester) {
-          onSubmit({
+          onDefaultsLoaded?.({
             tenHocKy: defaultSemester,
             tenNamHoc: defaultYear,
-          });
+          }); // ✅ chỉ báo về default, không gọi API
         }
-      })
-      .catch((err) => {
-        console.error(err);
+      } catch (err) {
+        console.error('Lỗi khi lấy danh sách năm học / học kỳ:', err);
         setYearOptions([]);
         setSemesterOptions([]);
-      });
-  }, []);
->>>>>>> main
+      }
+    };
+
+    fetchOptions();
+  }, [onDefaultsLoaded]);
 
   const handleClick = () => {
-    onSubmit({
-      tenHocKy: selectedSemester,
-      tenNamHoc: selectedYear,
-    });
+    if (selectedSemester && selectedYear) {
+      onSubmit({
+        tenHocKy: selectedSemester,
+        tenNamHoc: selectedYear,
+      });
+    }
   };
 
   return (

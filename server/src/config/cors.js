@@ -37,12 +37,21 @@ import cors from "cors";
 // };
 
 const configCors = (app) => {
+  const whitelist = ['http://localhost:5173', 'http://localhost:5174'];
+
   app.use(cors({
-    origin: process.env.REACT_URL || "http://localhost:5174" ,
+    origin: function (origin, callback) {
+      if (!origin || whitelist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"]
   }));
 };
+
 
 export default configCors;

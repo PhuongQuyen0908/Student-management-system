@@ -23,12 +23,47 @@ const reportService = {
     axios.post('/api/report/edit-score', { HoTen, TenLop, TenMonHoc, TenHocKy, TenNamHoc, DiemTP }),
 
   // 6. Tính báo cáo tổng kết học kỳ (BM5.2)
-  getSemesterReport: ({ tenHocKy, tenNamHoc, searchTerm}) =>
-    axios.post('/api/report/semester-report', { tenHocKy, tenNamHoc, searchTerm, }),
+  // 6. Tính báo cáo tổng kết học kỳ (BM5.2)
+getSemesterReport: ({
+  tenHocKy,
+  tenNamHoc,
+  searchTerm = '',
+  searchField = 'all',
+  sortBy = null,
+  order = 'asc'
+}) =>
+  axios.post('/api/report/semester-report', {
+    tenHocKy,
+    tenNamHoc,
+    searchTerm,
+    searchField,  // ✅ thêm dòng này
+    sortBy,
+    order,
+  }),
 
-  // 7. Tính báo cáo tổng kết môn học (BM5.1)
-  getSubjectReport: ({ tenMonHoc, tenHocKy, tenNamHoc }) =>
-    axios.post('/api/report/subject-report', { tenMonHoc, tenHocKy, tenNamHoc }),
+
+
+
+  getSubjectReport: ({
+  tenMonHoc,
+  tenHocKy,
+  tenNamHoc,
+  searchTerm = '',
+  searchField = 'all',  // ✅ THÊM DÒNG NÀY
+  sortBy = null,
+  order = 'asc'
+}) =>
+  axios.post('/api/report/subject-report', {
+    tenMonHoc,
+    tenHocKy,
+    tenNamHoc,
+    searchTerm,
+    searchField,         // ✅ THÊM DÒNG NÀY
+    sortBy,
+    order,
+  }),
+
+
 
   sortSubjectReport: ({ data, sortBy, order }) =>
      axios.post('/api/report/sort-subject-report', {

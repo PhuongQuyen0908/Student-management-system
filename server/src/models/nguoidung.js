@@ -19,11 +19,7 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.STRING(50),
       allowNull: false
     },
-     Avatar: {
-      type: DataTypes.STRING(250),
-      allowNull: true,
-      field: 'Avatar',
-    },
+ 
     MaNhom: {
       type: DataTypes.INTEGER,
       allowNull: false

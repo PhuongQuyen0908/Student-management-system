@@ -1,5 +1,6 @@
 import db from '../models/index.js';
-const buildRepsponse = (EM, EC, DT) => ({EM,EC, DT});
+const buildRepsponse = (EM, EC, DT) => ({ EM, EC, DT });
+
 // Hàm lấy tất cả các năm học
 const getAllSchoolYears = async () => {
   try {
@@ -32,9 +33,7 @@ const checkSchoolYearExists = async (SchoolYearName) => {
     const existingSchoolYear = await db.namhoc.findOne({
       where: { TenNamHoc: SchoolYearName }
     });
-    if( existingSchoolYear ) {
-      return true; // Năm học đã tồn tại
-    } else return false; // Năm học chưa tồn tại
+    return !!existingSchoolYear;
   } catch (error) {
     throw new Error('Lỗi khi kiểm tra năm học: ' + error.message);
   }
@@ -45,40 +44,31 @@ const createSchoolYear = async (data) => {
   try {
     const { TenNamHoc } = data;
 
-    // 1. Validate the format (optional but highly recommended)
     if (!TenNamHoc || !/^\d{4}-\d{4}$/.test(TenNamHoc)) {
       return buildRepsponse('Tên năm học không hợp lệ. Vui lòng nhập theo định dạng YYYY-YYYY', 1, null);
     }
 
-    // 2. Split the string to get the two years
-    const years = TenNamHoc.split('-');
-    const nam1 = years[0];
-    const nam2 = years[1];
+    const [nam1, nam2] = TenNamHoc.split('-');
 
-    //Kiểm tra năm bắt đầu phải nhỏ hơn năm kết thúc
     if (parseInt(nam1) >= parseInt(nam2)) {
-
-    if(nam1 >= nam2){
-
       return buildRepsponse('Năm bắt đầu phải nhỏ hơn năm kết thúc', 1, null);
     }
-    // 3. Create the complete data object to be saved
+
     const schoolYearDataToCreate = {
-      TenNamHoc: TenNamHoc,
+      TenNamHoc,
       Nam1: nam1,
-      Nam2: nam2,
+      Nam2: nam2
     };
 
-    // 4. Create the new record using the complete object
     const newSchoolYear = await db.namhoc.create(schoolYearDataToCreate);
     return buildRepsponse('Tạo năm học thành công', 0, newSchoolYear);
 
   } catch (error) {
-    // The original error message from the DB will be caught and re-thrown
-    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);}
+    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);
+  }
 };
 
-// Hàm cập nhật năm học học
+// Hàm cập nhật năm học
 const updateSchoolYear = async (id, data) => {
   try {
     const SchoolYearToUpdate = await db.namhoc.findByPk(id);
@@ -92,7 +82,7 @@ const updateSchoolYear = async (id, data) => {
   }
 };
 
-// Hàm xóa năm học học
+// Hàm xóa năm học
 const deleteSchoolYear = async (id) => {
   try {
     const deleted = await db.namhoc.destroy({ where: { MaNam: id } });
@@ -105,11 +95,11 @@ const deleteSchoolYear = async (id) => {
   }
 };
 
-module.exports = { 
+export {
   getAllSchoolYears,
   getSchoolYearById,
   checkSchoolYearExists,
   createSchoolYear,
   updateSchoolYear,
-  deleteSchoolYear 
+  deleteSchoolYear
 };
