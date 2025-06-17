@@ -130,39 +130,16 @@ const RulesChangePage = () => {
   return (
     <div className="ruleschange-page-container">
       <div className="ruleschange-card full">
-        <div className="ruleschange-two-column">
-          <div className="half">
-            <h3>Thêm năm học</h3>
-            <label>Năm học</label>
-            <div className="input-group">
-              <input
-                type="text"
-                placeholder="VD: 2025-2026"
-                value={newYear}
-                onChange={(e) => setNewYear(e.target.value)}
-                // disabled={!canCreateYear || loadingYears}
-              />
-              <button
-                onClick={handleAddNewYear}
-                // disabled={!canCreateYear || loadingYears}
-              >
-                {loadingYears ? "Đang xử lý..." : "Thêm"}
-              </button>
-            </div>
-          </div>
-          <div className="half align-right">
-            <h3>Danh sách năm học đã có</h3>
-            <div className="filter-group">
-              <select>
-                <option value="">-- Chọn năm học --</option>
-                {yearList.map((year) => (
-                  <option key={year.MaNamHoc} value={year.TenNamHoc}>
-                    {year.TenNamHoc}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+        <h3>Danh sách năm học đã có</h3>
+        <div className="filter-group">
+          <select>
+            <option value="">-- Chọn năm học --</option>
+            {yearList.map((year) => (
+              <option key={year.MaNamHoc} value={year.TenNamHoc}>
+                {year.TenNamHoc}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

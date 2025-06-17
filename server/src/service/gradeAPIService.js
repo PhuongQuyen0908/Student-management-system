@@ -122,14 +122,31 @@ const updateGrade = async (id, data) => {
 // Xoá khối
 const deleteGrade = async (id) => {
   try {
-    const deleted = await db.khoi.destroy({ where: { MaKhoi: id } });
-    if (!deleted) {
-      return buildResponse("Khối không tồn tại để xóa", 1, []);
+    const isExist = await db.khoi.findByPk(id);
+    if (!isExist) {
+      return buildResponse("Không tìm thấy khối nào", 1, []);
     }
-    return buildResponse("Xóa khối thành công", 0, { id });
+    const deletedGrade = await db.khoi.destroy({ where: { MaKhoi: id } });
+    if (deletedGrade === 1) {
+      return buildResponse("Xóa khối học thành công", 0, []);
+    } else {
+      return buildResponse("Xóa khối học thất bại", 1, []);
+    }
   } catch (error) {
-    console.error("Lỗi khi xóa khối:", error);
-    return buildResponse("Lỗi phía server. Xóa khối thất bại", -1, []);
+    if (
+      error.name === "SequelizeForeignKeyConstraintError" ||
+      (error.parent && error.parent.code === "ER_ROW_IS_REFERENCED_2")
+    ) {
+      const msg = error.parent?.sqlMessage || error.message || "";
+      const [, foreignTable = "không xác định", constraintName = "không xác định"] =
+        msg.match(/a foreign key constraint fails \(`[^`]+`\.`([^`]+)`, CONSTRAINT `([^`]+)`/) || [];
+      return buildResponse(
+        `Không thể xóa khối vì đang được tham chiếu ở bảng: ${foreignTable} (ràng buộc: ${constraintName})`,
+        2,
+        { foreignTable, constraintName }
+      );
+    }
+    return buildResponse("Lỗi phía server: " + error.message, -1, []);
   }
 };
 

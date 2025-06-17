@@ -120,8 +120,20 @@ const useGradeTable = () => {
             }
             return res;
         } catch (error) {
-            toast.error("Không thể kết nối đến máy chủ");
-            return { data: { EC: -1, EM: "Không thể kết nối đến máy chủ" } };
+            const ec = error?.response?.data?.EC;
+            const em = error?.response?.data?.EM;
+            if (ec === 1) {
+                toast.error(em || "Không tìm thấy khối hoặc lỗi khác");
+            } else if (ec === 2) {
+                toast.error(
+                    em ||
+                    "Không thể xóa khối vì đang được tham chiếu ở bảng khác. Vui lòng xóa hoặc cập nhật dữ liệu liên quan trước."
+                );
+            } else {
+                toast.error("Không thể kết nối đến máy chủ");
+            }
+            deleteModal.close();
+
         }
     };
 
@@ -135,17 +147,26 @@ const useGradeTable = () => {
         try {
             const res = await deleteGrade(id);
             if (res?.data?.EC === 0) {
-                toast.success("Xóa khối lớp thành công");
-                await fetchGrades(false);
-                deleteModal.close();
-                setSelectedGrade(null);
+            toast.success(res.data.EM || "Xóa khối thành công");
+            await fetchGrades();
+            deleteModal.close();
             } else {
-                toast.error(res.data.EM || "Xóa khối lớp thất bại");
+            toast.error(res?.data?.EM || "Xóa khối thất bại");
+            deleteModal.close();
             }
             return res;
         } catch (error) {
-            toast.error("Không thể kết nối đến máy chủ");
-            return { data: { EC: -1, EM: "Không thể kết nối đến máy chủ" } };
+             if (error?.response?.data?.EC === 1) {
+            toast.error(error?.response?.data?.EM || "Không tìm thấy khối hoặc lỗi khác");
+                } else if (error?.response?.data?.EC === 2) {
+                    toast.error(
+                        error?.response?.data?.EM ||
+                        "Không thể xóa khối vì đang được tham chiếu ở bảng khác. Vui lòng xóa hoặc cập nhật dữ liệu liên quan trước."
+                    );
+                } else {
+                    toast.error("Không thể kết nối đến máy chủ");
+                }
+                deleteModal.close();
         }
     };
 
