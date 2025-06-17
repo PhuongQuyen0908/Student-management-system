@@ -1,6 +1,6 @@
 import '../../styles/Table.scss';
 import TableHeaderAction from '../TableHeaderAction';
-import { FaPuzzlePiece, FaSort } from 'react-icons/fa';
+import { FaPuzzlePiece, FaSort, FaTrash } from 'react-icons/fa';
 import ModalAssignFunction from '../Modal/ModalAssignFunction';
 import ModalAddUserGroup from '../Modal/ModalAddUserGroup';
 import useModal from '../../hooks/useModal';
@@ -15,6 +15,9 @@ import { set } from 'lodash';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from 'react-toastify';
+import { deleteGroup } from '../../services/userServices';
+
+import ModalDeleteGroup from '../Modal/ModalDeleteGroup';
 
 
 const DecentralizationTable = () => {
@@ -25,11 +28,13 @@ const DecentralizationTable = () => {
     const canCreate = userPermissions.some(p => p.TenManHinhDuocLoad === "/group/create");
     const canReadPermission = userPermissions.some(p => p.TenManHinhDuocLoad === "/permission/read");
     const canAssignPermission = userPermissions.some(p => p.TenManHinhDuocLoad === "/permission/assign");
+    const canDelete = userPermissions.some(p => p.TenManHinhDuocLoad === "/group/delete");
 
     const [userGroup, setUserGroup] = useState([]);
 
     const addRoleModal = useModal();
     const assignModal = useModal();
+    const  deleteModal = useModal();
 
     const [selectedGroup, setSelectedGroup] = useState(null);
     //Tìm kiếm nhóm quyền
@@ -72,6 +77,10 @@ const DecentralizationTable = () => {
         addRoleModal.close();
     };
 
+    const handleDeleteGroup = (MaNhom) => {
+        setSelectedGroup(MaNhom);
+        deleteModal.open();
+    };
     //hàm highlightText để làm nổi bật từ khóa tìm kiếm trong bảng
     const removeAccents = (str) => {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -150,6 +159,23 @@ const DecentralizationTable = () => {
         }
     };
 
+    
+const confirmDeleteGroup = async (MaNhom ) => {
+    try {
+        const response = await deleteGroup(MaNhom);
+        if (response && response.data && response.data.EC === 0) {
+            toast.success("Xóa nhóm thành công");
+        } else {
+            toast.error(response.data.EM || "Xóa nhóm thất bại");
+        }
+    } catch (error) {
+        console.error("Lỗi khi xóa nhóm:", error);
+        toast.error(response.data.EM || "Lỗi trong quá trình xóa nhóm");
+    }
+    deleteModal.close(); // Đóng modal sau khi xóa
+    fetchGroups(); // Cập nhật lại danh sách nhóm sau khi xóa
+}
+
     return (
         <div className="student-table-wrapper">
             <TableHeaderAction
@@ -200,6 +226,13 @@ const DecentralizationTable = () => {
                                                     <FaPuzzlePiece />
                                                 </button>
                                             )}
+                                            {canDelete &&(
+                                           <button className="icon-button lock" 
+                                           onClick={() => handleDeleteGroup(group.MaNhom)} title="Xóa">
+                                            <FaTrash />
+                                                                                              
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
@@ -213,7 +246,18 @@ const DecentralizationTable = () => {
                 </table>
             </div>
 
+            {
+                deleteModal.isOpen && selectedGroup && (
+                    <ModalDeleteGroup
+                        show={deleteModal.isOpen}
+                        handleClose={deleteModal.close}
+                        MaNhom={selectedGroup}
+                        fetchGroups={fetchGroups}
+                        confirmDeleteGroup={confirmDeleteGroup}
 
+                    />
+                )
+            }
 
             {addRoleModal.isOpen && (
                 <ModalAddUserGroup
