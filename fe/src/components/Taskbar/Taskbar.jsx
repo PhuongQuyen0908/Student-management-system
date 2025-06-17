@@ -105,6 +105,12 @@ const Taskbar = () => {
                     Bảng điểm môn học
                   </NavLink>
                 }
+                <NavLink
+                  to="/admin/testtype"
+                  className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+                >
+                  Loại kiểm tra
+                </NavLink>
               </div>
             )}
           </>

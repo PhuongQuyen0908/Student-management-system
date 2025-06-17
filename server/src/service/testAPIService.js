@@ -30,7 +30,7 @@ const checkTestExists = async (typeOfTestName) => {
     const existingTest = await db.loaikiemtra.findOne({
       where: { TenLoaiKiemTra: typeOfTestName }
     });
-    return existingTest !== null; 
+    return existingTest !== null;
   } catch (error) {
     throw new Error('Lỗi khi kiểm tra loại kiểm tra: ' + error.message);
   }
@@ -72,11 +72,11 @@ const deleteTest = async (id) => {
   }
 };
 
-module.exports = { 
+module.exports = {
   getAllTests,
   getTestById,
   checkTestExists,
   createTest,
   updateTest,
-  deleteTest 
+  deleteTest
 };

@@ -5,7 +5,7 @@ import '../../styles/Page/GradesPage.scss'
 const GradesPage = () => {
     return (
         <div className="grades-page-container">
-            <h2 className="grades-title">Quản lý lớp học</h2>
+            <h2 className="grades-title">Quản lý khối lớp</h2>
             <GradeTable />
         </div>
     );
