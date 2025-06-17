@@ -13,7 +13,10 @@ import {
   faSignOutAlt,
   faChevronDown,
   faChevronRight,
-  faClipboardList
+  faClipboardList,
+  faSchoolCircleCheck,
+  faScaleBalanced,
+  faSchoolFlag
 } from '@fortawesome/free-solid-svg-icons';
 import useTaskbar from '../../hooks/useTaskbar';
 import logo from '../../assets/School-logo.png';
@@ -102,6 +105,12 @@ const Taskbar = () => {
                     Bảng điểm môn học
                   </NavLink>
                 }
+                <NavLink
+                  to="/admin/testtype"
+                  className={({ isActive }) => `taskbar-subitem ${isActive ? 'active-taskbar' : ''}`}
+                >
+                  Loại kiểm tra
+                </NavLink>
               </div>
             )}
           </>
@@ -136,6 +145,13 @@ const Taskbar = () => {
             )}
           </>
         )}
+
+        <NavLink
+          to="/admin/grademanagement"
+          className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
+        >
+          <FontAwesomeIcon icon={faSchoolFlag} /> Quản lý khối lớp
+        </NavLink>
 
         {(isAvailable.BaoCaoMonHoc || isAvailable.BaoCaoHocKy) && (
           <>

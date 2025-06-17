@@ -14,6 +14,8 @@ import AccountsPage from '../pages/Admin/AccountsPage';
 import DecentralizationPage from '../pages/Admin/DecentralizationPage';
 //import 04/06/2025
 import PrivateRoutes from './PrivateRoutes';
+import GradesPage from '../pages/Admin/GradesPage';
+import TestTypePage from '../pages/Admin/TestTypePage';
 const AdminRoutes = {
     path: '/admin',
     element: (
@@ -73,6 +75,14 @@ const AdminRoutes = {
         {
             path: 'decentralization',
             element: <DecentralizationPage />,
+        },
+        {
+            path: 'grademanagement',
+            element: <GradesPage />,
+        },
+        {
+            path: 'testtype',
+            element: <TestTypePage />,
         },
     ],
 };
