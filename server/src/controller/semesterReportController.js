@@ -2,32 +2,49 @@ import reportAPIService from '../service/reportAPIService.js';
 
 const tinhBaoCaoTongKetHocKy = async (req, res) => {
   try {
-    const { tenHocKy, tenNamHoc, searchTerm} = req.body;
+    const {
+      tenHocKy,
+      tenNamHoc,
+      searchTerm = '',
+      searchField = 'all',
+      sortBy = null,
+      order = 'asc'
+    } = req.body;
 
-    const result = await reportAPIService.tinhBaoCaoTongKetHocKy(tenHocKy, tenNamHoc);
+    const result = await reportAPIService.tinhBaoCaoTongKetHocKy({
+      tenHocKy,
+      tenNamHoc,
+      searchTerm,
+      searchField,
+      sortBy,
+      order
+    });
 
-    if (searchTerm && searchTerm.trim() !== '') {
-      const ketQuaLoc = await reportAPIService.filterBySearchTerm(result.DT.ketQua, searchTerm);
-      result.DT.ketQua = ketQuaLoc;
+    if (result.EC !== 0) {
+      return res.status(400).json({
+        EM: result.EM,
+        EC: result.EC,
+        DT: {}
+      });
     }
 
-
     return res.status(200).json({
-      EM: 'Tính báo cáo tổng kết học kỳ thành công',
-      EC: 0,
-      DT: result
+      EM: result.EM,
+      EC: result.EC,
+      DT: result.DT
     });
+
   } catch (err) {
-    console.error('❌ Lỗi tính báo cáo học kỳ:', err);
+    console.error('Lỗi tính báo cáo học kỳ:', err);
     return res.status(500).json({
       EM: 'Lỗi khi tính toán báo cáo',
       EC: -1,
       DT: {},
-      error: err.message 
+      error: err.message
     });
   }
 };
 
-module.exports = {
+export default {
   tinhBaoCaoTongKetHocKy
 };

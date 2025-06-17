@@ -142,6 +142,7 @@ const initApiRoutes = (app) => {
   router.post('/report/semester-report', semesterReportController.tinhBaoCaoTongKetHocKy);
   router.post('/report/subject-report', subjectreportController.tinhBaoCaoTongKetMon);
   router.post('/report/sort-subject-report', sortSubjectController.sortSubjectReport);
+  router.get('/report/options-report', gradesController.getOptionsReport);
 
   return app.use("/api/", router);
 };
