@@ -212,6 +212,7 @@ const StudentTable = () => {
                                     <FaSort />
                                 </button>
                             </th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -250,12 +251,12 @@ const StudentTable = () => {
                                     <td colSpan="5">Không có học sinh thỏa điều kiện</td>
                                 </tr>
                             )
-                            : (
-                                <tr>
-                                    <td colSpan="5">Không tìm thấy học sinh</td>
-                                </tr>
-                            )
-                            }
+                                : (
+                                    <tr>
+                                        <td colSpan="5">Không tìm thấy học sinh</td>
+                                    </tr>
+                                )
+                        }
                     </tbody>
                 </table>
             </div>

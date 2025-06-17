@@ -22,20 +22,29 @@ const TableHeaderActionReport = ({
         />
 
         <select
-          
+
           value={searchField}
           onChange={(e) => onSearchFieldChange(e.target.value)}
           style={{
-                borderRadius: '6px',
-                border: '1px solid #ccc',
-                backgroundColor: '#fff',
-                color: '#333',
-                fontSize: '14px',
-                cursor: 'pointer',
-                minWidth: '150px',
-                padding: '10px 30px 10px 12px',  // tăng padding phải
-    height: '42px',
-            }}
+            appearance: 'none',
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 20 20' fill='%236b7280' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.293l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E")`,
+            backgroundRepeat: 'no-repeat',
+            backgroundPosition: 'right 10px center',
+            backgroundSize: '14px',
+            padding: '8px 14px',
+            paddingRight: '28px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '12px',
+            backgroundColor: '#fff',
+            color: '#374151',
+            fontSize: '15px',
+            height: '40px',
+            lineHeight: '1.5',
+            boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+            transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+            outline: 'none',
+            cursor: 'pointer',
+          }}
         >
           {searchOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
