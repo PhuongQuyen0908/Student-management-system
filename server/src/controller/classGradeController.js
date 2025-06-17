@@ -100,22 +100,21 @@ const updateClassGrade = async (req, res) => {
 const deleteClassGrade = async (req, res) => {
   try {
     const { id } = req.params;
-    const grade = await gradeAPIService.getGradeByName(id); // hoặc getGradeById nếu có
-    if (!grade || grade.EC === 1) {
-      return res.status(404).json({
-        EM: "Khối học không tồn tại",
-        EC: 1,
-        DT: [],
-      });
+    const result = await gradeAPIService.deleteGrade(id);
+    if (result.EC === 0) {
+      return res.status(200).json(result);
+    } else if (result.EC === 1) {
+      return res.status(404).json(result);
+    } else if (result.EC === 2) {
+      return res.status(409).json(result);
+    } else {
+      return res.status(400).json(result);
     }
-
-    const data = await gradeAPIService.deleteGrade(id);
-    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({
       EM: error.message,
       EC: -1,
-      DT: [],
+      DT: "",
     });
   }
 };
