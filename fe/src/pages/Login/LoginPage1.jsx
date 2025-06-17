@@ -56,11 +56,6 @@ const Login1 = props => {
                         </div>
                         <button className="btn btn-primary" onClick={handleLogin}>Đăng nhập</button>
 
-                        <span className="text-center">
-                            <Link className="forgot-password" to="/forgot-password">
-                                Quên mật khẩu
-                            </Link>
-                        </span>
                     </div>
 
                     <div className="main-image d-none d-xl-block col-xl-8 d-flex justify-content-center align-items-center">

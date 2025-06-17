@@ -5,16 +5,42 @@ import {
     getAllTests,
     getTestById,
     deleteTest,
-    updateTest
+    updateTest,
+    createTest,
 } from "../services/testService";
 
 const useTestTypeTable = () => {
     const updateModal = useModal();
     const deleteModal = useModal();
+    const addTestTypeModal = useModal();
 
     const [testList, setTestList] = useState([]);
     const [loading, setLoading] = useState(false);
     const [selectedTest, setSelectedTest] = useState(null);
+
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
+
+    const [sortConfig, setSortConfig] = useState({ key: "", direction: "asc" });
+
+    const handleSort = (field) => {
+        setSortConfig((prev) => {
+            if (prev.key === field) {
+                // Đảo chiều sort nếu click lại
+                return {
+                    key: field,
+                    direction: prev.direction === "asc" ? "desc" : "asc",
+                };
+            }
+            return {
+                key: field,
+                direction: "asc",
+            };
+        });
+    };
 
     const fetchTestTypes = useCallback(async () => {
         setLoading(true);
@@ -36,7 +62,6 @@ const useTestTypeTable = () => {
     useEffect(() => {
         fetchTestTypes();
     }, [fetchTestTypes]);
-
 
     const handleOpenUpdateModal = (testItem) => {
         setSelectedTest(testItem);
@@ -67,7 +92,6 @@ const useTestTypeTable = () => {
         }
     };
 
-
     const handleOpenDeleteModal = (testItem) => {
         setSelectedTest(testItem);
         deleteModal.open();
@@ -92,18 +116,42 @@ const useTestTypeTable = () => {
         }
     };
 
+    const handleAddTestType = async (newTestType) => {
+        try {
+            const res = await createTest(newTestType);
+            if (res?.status === 200 || res?.status === 201) {
+                toast.success(res.data.message || "Thêm loại kiểm tra thành công");
+                await fetchTestTypes();
+                addTestTypeModal.close();
+                return true;
+            } else {
+                toast.error(res?.data?.message || "Không thể thêm loại kiểm tra");
+                return false;
+            }
+        } catch (error) {
+            console.error("Error adding test type:", error);
+            toast.error("Không thể kết nối đến máy chủ");
+            return false;
+        }
+    };
 
     return {
         testList,
         selectedTest,
+        searchTerm,
         loading,
         updateModal,
         deleteModal,
+        addTestTypeModal,
         handleOpenUpdateModal,
         handleUpdateTest,
         handleOpenDeleteModal,
         handleDeleteTest,
         fetchTestTypes,
+        handleAddTestType,
+        handleSearchChange,
+        handleSort,
+        sortConfig,
     };
 };
 

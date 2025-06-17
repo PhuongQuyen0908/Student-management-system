@@ -54,6 +54,18 @@ const StudentTable = () => {
 
     // highlightText function để làm nổi bật từ khóa tìm kiếm trong bảng
     // Hàm remove dấu tiếng Việt
+    const formatDate = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        if (isNaN(date)) return "";
+
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
     const removeAccents = (str) => {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     };
@@ -109,7 +121,7 @@ const StudentTable = () => {
                 const data = allStudents.map(student => ({
                     'Mã học sinh': student.MaHocSinh,
                     'Họ và tên': student.HoTen,
-                    'Ngày sinh': student.NgaySinh,
+                    'Ngày sinh': formatDate(student.NgaySinh),
                     'Giới tính': student.GioiTinh,
                     'Địa chỉ': student.DiaChi,
                     'Email': student.Email
@@ -203,7 +215,7 @@ const StudentTable = () => {
                                     <tr key={`row ${index}`}>
                                         <td>{highlightText(student.MaHocSinh, searchTerm)}</td>
                                         <td>{highlightText(student.HoTen, searchTerm)}</td>
-                                        <td>{highlightText(student.NgaySinh, searchTerm)}</td>
+                                        <td>{highlightText(formatDate(student.NgaySinh), searchTerm)}</td>
                                         <td>{highlightText(student.GioiTinh, searchTerm)}</td>
                                         <td>{highlightText(student.DiaChi, searchTerm)}</td>
                                         <td>{highlightText(student.Email, searchTerm)}</td>

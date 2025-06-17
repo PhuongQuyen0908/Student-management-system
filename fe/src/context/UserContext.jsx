@@ -64,7 +64,7 @@ const UserProvider = ({ children }) => {
     TiepNhanHocSinh: ['/student/create', '/student/read'],
     DanhSachMonHoc: ['/subject/read', '/subject/create', '/subject/update', '/subject/delete'],
     BangDiemMonHoc: ['/report/subject-summary', '/report/add-score', '/report/edit-score', '/report/delete-score', '/test/create'],
-    LoaiKiemTra: ['/test/read', '/test/update', '/test/delete'],
+    LoaiKiemTra: ['/test/read', '/test/update', '/test/delete', '/test/create'],
     DanhSachLopHoc: ['/class/read', '/class/create', '/class/update', '/class/delete'],
     DanhSachLop: ['/classList/read', '/classList/addStudent', '/classList/removeStudent'],
     QuanLyKhoiLop: ['/classGrade/read', '/classGrade/update', '/classGrade/delete', '/classGrade/create'],
@@ -72,10 +72,10 @@ const UserProvider = ({ children }) => {
     BaoCaoHocKy: ['/report/semester-report'],
     ThayDoiQuyDinh: ['/paramenter/read', '/paramenter/update'],
     QuanLyTaiKhoan: ['/user/read', '/user/create', '/user/update', '/user/delete'],
-    QuanLyPhanQuyen: ['/group/read-for-admin' , '/group/create', 'permission/read','permission/assign'],
+    QuanLyPhanQuyen: ['/group/read-for-admin', '/group/create', 'permission/read', 'permission/assign'],
     QuanLyNamHoc: ['/year/paginated', '/year/create', '/year/update', '/year/delete'],
-}
-    
+  }
+
   useEffect(() => {
     if (user.account && user.account.groupWithPermissions) {
       setUserPermissions(user.account.groupWithPermissions.chucnangs.map(permission => permission.TenManHinhDuocLoad));
