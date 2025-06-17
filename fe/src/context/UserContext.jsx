@@ -71,7 +71,7 @@ const UserProvider = ({ children }) => {
     ThayDoiQuyDinh: ['/paramenter/read', '/paramenter/update'],
     QuanLyTaiKhoan: ['/user/read', '/user/create', '/user/update', '/user/delete'],
     QuanLyPhanQuyen: ['/group/read-for-admin' , '/group/create', 'permission/read','permission/assign'],
-
+    QuanLyNamHoc: ['/year/paginated', '/year/create', '/year/update', '/year/delete'],
 }
     
   useEffect(() => {
@@ -91,6 +91,7 @@ const UserProvider = ({ children }) => {
     ThayDoiQuyDinh: userPermissions.some(permission => loadPage.ThayDoiQuyDinh.includes(permission)),
     QuanLyTaiKhoan: userPermissions.some(permission => loadPage.QuanLyTaiKhoan.includes(permission)),
     QuanLyPhanQuyen: userPermissions.some(permission => loadPage.QuanLyPhanQuyen.includes(permission)),
+    QuanLyNamHoc: userPermissions.some(permission => loadPage.QuanLyNamHoc.includes(permission))
   })}, [userPermissions]);
 
 

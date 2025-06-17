@@ -34,7 +34,7 @@ const buildStudentSearchClause = (search) => {
 const getAllStudentOfClass = async (MaDanhSachLop, page, limit, sortField, sortOrder, search) => {
   //Hiển thị danh sách học sinh có tìm kiếm, phân trang, sắp xếp
   try{
-    const validFields = ['HoTen', 'Email', 'DiaChi', 'GioiTinh', 'NgaySinh']; // Các trường hợp hợp lệ để sắp xếp
+    const validFields = ['MaHocSinh', 'HoTen', 'Email', 'DiaChi', 'GioiTinh', 'NgaySinh']; // Các trường hợp hợp lệ để sắp xếp
     // Kiểm tra xem sortField có hợp lệ không
     if (!validFields.includes(sortField)) {
       sortField = 'HoTen'; // Mặc định sắp xếp theo HoTen nếu trường không hợp lệ

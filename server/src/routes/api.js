@@ -125,6 +125,7 @@ const initApiRoutes = (app) => {
 
   //năm học
   router.get('/year/read', yearController.readSchoolYear);
+  router.get('/year/paginated', yearController.getSchoolYearsWithPagination);
   router.get('/year/getById/:id', yearController.getSchoolYearById);
   router.post('/year/create', yearController.createSchoolYear);
   router.put('/year/update/:id', yearController.updateSchoolYear);
