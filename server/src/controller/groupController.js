@@ -60,9 +60,29 @@ const getGroupsForAdmin = async (req, res) => {
         });
     }
 }
+
+const deleteGroup = async (req, res) => {
+    try {
+        let MaNhom = req.params.id;
+        let data = await groupApiService.DeleteGroup(MaNhom);
+        return res.status(200).json({
+            EM: data.EM,
+            EC: data.EC, // error code
+            DT: data.DT, // data
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            EM: "Lỗi từ server", // error message
+            EC: "-1", // error code
+            DT: "", // data
+        });
+    }
+};
 module.exports = {
   createFunc,
   readFunc,
-  getGroupsForAdmin
+  getGroupsForAdmin,
+  deleteGroup
 
 };

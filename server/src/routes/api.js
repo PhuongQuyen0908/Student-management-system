@@ -55,6 +55,7 @@ const initApiRoutes = (app) => {
   router.get("/permission/read", permissionController.getAllPermissions); // lấy tất cả quyền
   router.post("/permission/assign", permissionController.assignPermissionToGroup); // gán quyền cho nhóm người dùng
   router.get("/group/read-for-admin", groupController.getGroupsForAdmin); // lấy danh sách nhóm cho admin
+  router.delete("/group/delete/:id", groupController.deleteGroup); // xóa nhóm người dùng
 
 
   //CRUD user

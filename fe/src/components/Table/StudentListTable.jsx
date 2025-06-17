@@ -1,3 +1,5 @@
+//import 29/05/2025
+import { FaSort, FaPuzzlePiece } from 'react-icons/fa';
 import TableHeaderAction from '../TableHeaderAction';
 import '../../styles/Table.scss';
 
@@ -5,9 +7,8 @@ import { useState, useEffect, useContext } from "react";
 import ReactPaginate from 'react-paginate';
 import useStudentListTable from '../../hooks/useStudentListTable';
 import { fetchStudentWithYear } from "../../services/studentServices";
+import ModalStudentGrade from '../Modal/ModalStudentGrade'; // modal hiển thị điểm
 
-//import 29/05/2025
-import { FaSort } from 'react-icons/fa';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { toast } from 'react-toastify';
@@ -15,7 +16,7 @@ import { toast } from 'react-toastify';
 // import context
 import { UserContext } from '../../context/UserContext';
 
-const StudentListTable = ({ selectedYear }) => {
+const StudentListTable = ({ selectedYear, yearName }) => {
     const { isAvailable } = useContext(UserContext); // lấy phân quyền
 
     const {
@@ -31,16 +32,19 @@ const StudentListTable = ({ selectedYear }) => {
         sortOrder // thứ tự sắp xếp
     } = useStudentListTable(selectedYear);
 
+    const [showModal, setShowModal] = useState(false);
+    const [selectedStudent, setSelectedStudent] = useState(null);
+
     useEffect(() => {
         fetchStudents();
     }, [currentPage, selectedYear, searchTerm, sortField, sortOrder]);
 
-    // highlightText function để làm nổi bật từ khóa tìm kiếm trong bảng
     // Hàm remove dấu tiếng Việt
     const removeAccents = (str) => {
         return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     };
 
+    // highlightText function để làm nổi bật từ khóa tìm kiếm trong bảng
     const highlightText = (text, keyword) => {
         if (!keyword || !text) return text;
         if (typeof text !== "string") text = String(text);
@@ -51,7 +55,6 @@ const StudentListTable = ({ selectedYear }) => {
         let result = [];
         let lastIndex = 0;
 
-        // Tìm vị trí match trong normalizedText
         const regex = new RegExp(normalizedKeyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), "gi");
         let match;
 
@@ -59,12 +62,10 @@ const StudentListTable = ({ selectedYear }) => {
             const start = match.index;
             const end = start + match[0].length;
 
-            // Phần trước match (chuỗi gốc)
             if (lastIndex < start) {
                 result.push(text.slice(lastIndex, start));
             }
 
-            // Phần match (chuỗi gốc)
             //màu highlight
             result.push(
                 <b key={start} style={{ color: "red" }}>
@@ -75,7 +76,6 @@ const StudentListTable = ({ selectedYear }) => {
             lastIndex = end;
         }
 
-        // Phần còn lại sau cùng
         if (lastIndex < text.length) {
             result.push(text.slice(lastIndex));
         }
@@ -145,7 +145,7 @@ const StudentListTable = ({ selectedYear }) => {
                                 </button>
                             </th>
                             <th>Họ và tên
-                                <button className="sort-button" title="Sắp xếp" value="HoTen" //nút sort
+                                <button className="sort-button" title="Sắp xếp" value="HoTen"
                                     onClick={() => handleSort('HoTen')}
                                 >
                                     <FaSort />
@@ -172,6 +172,7 @@ const StudentListTable = ({ selectedYear }) => {
                                     <FaSort />
                                 </button>
                             </th>
+                            <th>Chi Tiết</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -185,17 +186,27 @@ const StudentListTable = ({ selectedYear }) => {
                                             <td>{highlightText(student.TenLop, searchTerm)}</td>
                                             <td>{highlightText(student.DiemTB_HK1, searchTerm)}</td>
                                             <td>{highlightText(student.DiemTB_HK2, searchTerm)}</td>
+                                            <td>
+                                                <button className="icon-button lock"
+                                                    onClick={() => {
+                                                        setSelectedStudent(student);
+                                                        setShowModal(true);
+                                                    }}>
+                                                    <FaPuzzlePiece />
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </>
                                 :
                                 <tr>
-                                    <td colSpan="5">Không có học sinh nào</td>
+                                    <td colSpan="6">Không có học sinh nào</td>
                                 </tr>
                         }
                     </tbody>
                 </table>
             </div>
+
             {/* pagination */}
             {totalPages > 0 &&
                 <div className="student-footer">
@@ -222,6 +233,16 @@ const StudentListTable = ({ selectedYear }) => {
                     />
                 </div>
             }
+
+            {/* Modal chi tiết bảng điểm */}
+            {showModal && selectedStudent && yearName && 
+            <ModalStudentGrade
+                show={showModal}
+                onHide={() => {setShowModal(false); setSelectedStudent(null);}}
+                student={selectedStudent}
+                yearName={yearName}
+            />
+}
         </div>
     );
 };
