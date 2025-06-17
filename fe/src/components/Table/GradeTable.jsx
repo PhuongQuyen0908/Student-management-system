@@ -165,7 +165,7 @@ const GradeTable = () => {
                                 </tr>
                             ))
                         ) : (
-                            <tr><td colSpan="3">Không có dữ liệu</td></tr>
+                            <tr><td colSpan="3">Không tìm thấy khối lớp</td></tr>
                         )}
                     </tbody>
                 </table>

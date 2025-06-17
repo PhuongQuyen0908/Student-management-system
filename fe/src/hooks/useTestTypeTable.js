@@ -111,7 +111,7 @@ const useTestTypeTable = () => {
             }
             return res;
         } catch (error) {
-            toast.error("Không thể kết nối đến máy chủ");
+            toast.error("Loại kiểm tra này đang có bảng điểm nên không thể xoá");
             return { data: null, message: "Không thể kết nối đến máy chủ" };
         }
     };

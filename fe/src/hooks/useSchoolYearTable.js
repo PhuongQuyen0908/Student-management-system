@@ -8,24 +8,24 @@ const useSchoolYearTable = () => {
   const addModal = useModal();
   const updateModal = useModal();
   const deleteModal = useModal();
-  
+
   // Data hooks
   const [listSchoolYears, setListSchoolYears] = useState([]);
-  
+
   // Pagination hooks
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentLimit, setCurrentLimit] = useState(7);
-  
+
   // Delete Modal
   const [dataModal, setDataModal] = useState({});
-  
+
   // Modal update/create data
   const [dataModalSchoolYear, setDataModalSchoolYear] = useState({});
-  
+
   // Search
   const [searchTerm, setSearchTerm] = useState("");
-  
+
   // Sort
   const [sortField, setSortField] = useState("MaNamHoc");
   const [sortOrder, setSortOrder] = useState("asc");
@@ -62,7 +62,7 @@ const useSchoolYearTable = () => {
   const confirmAddSchoolYear = async (schoolYearData) => {
     try {
       const response = await createSchoolYear(schoolYearData);
-      
+
       if (response.data.EC === 0) {
         toast.success(response.data.EM || "Thêm năm học thành công");
         await fetchSchoolYears();
@@ -85,7 +85,7 @@ const useSchoolYearTable = () => {
   const confirmDeleteSchoolYear = async () => {
     try {
       const response = await deleteSchoolYear(dataModal);
-      
+
       // Handle success case
       if (response?.data?.EC === 0 || response?.data?.message === "Xóa năm học thành công") {
         toast.success(response.data?.EM || response.data?.message || "Xóa năm học thành công");
@@ -94,40 +94,40 @@ const useSchoolYearTable = () => {
         deleteModal.close();
         return;
       }
-      
+
       // Handle error - look for foreign key constraint error pattern
       const errorMsg = response?.data?.message || response?.data?.EM || "";
-      
+
       if (errorMsg.includes("foreign key constraint fails")) {
         // Extract the table name from the error message
         const tableMatch = errorMsg.match(/`([^`]+)`\.`([^`]+)`/);
         const constraintMatch = errorMsg.match(/CONSTRAINT `([^`]+)`/);
-        
+
         const tableName = tableMatch ? tableMatch[2] : "unknown";
         const constraintName = constraintMatch ? constraintMatch[1] : "unknown";
-        
+
         toast.error(
-          `Không thể xóa năm học vì có ràng buộc với bảng ${tableName} (constraint: ${constraintName}).\nVui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa năm học này.`
+          `Năm học này đang có báo cáo tổng kết môn nên không thể xoá`
         );
       } else {
         toast.error(errorMsg || "Lỗi khi xóa năm học");
       }
     } catch (error) {
       console.error("Lỗi khi xóa năm học:", error);
-      
+
       // Check if the error is a foreign key constraint error
       const errorMsg = error.response?.data?.message || error.message || "";
-      
+
       if (errorMsg.includes("foreign key constraint fails")) {
         // Extract the table name from the error message
         const tableMatch = errorMsg.match(/`([^`]+)`\.\`([^`]+)`/);
         const constraintMatch = errorMsg.match(/CONSTRAINT `([^`]+)`/);
-        
+
         const tableName = tableMatch ? tableMatch[2] : "unknown";
         const constraintName = constraintMatch ? constraintMatch[1] : "unknown";
-        
+
         toast.error(
-          `Không thể xóa năm học vì có ràng buộc với bảng ${tableName} (constraint: ${constraintName}).\nVui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa năm học này.`
+          `Năm học này đang có báo cáo tổng kết môn nên không thể xoá`
         );
       } else {
         toast.error("Không thể kết nối đến máy chủ");
@@ -143,12 +143,12 @@ const useSchoolYearTable = () => {
   const confirmUpdateSchoolYear = async (schoolYearData) => {
     try {
       const response = await updateSchoolYear(schoolYearData.MaNamHoc, schoolYearData);
-      if (response?.data?.EC ===0){
+      if (response?.data?.EC === 0) {
         toast.success(response.data.EM || "Cập nhật năm học thành công");
         await fetchSchoolYears();
         updateModal.close();
         setDataModalSchoolYear({});
-      }else {
+      } else {
         toast.error(response.data.EM || "Lỗi khi cập nhật năm học");
         updateModal.close();
         setDataModalSchoolYear({});
@@ -156,13 +156,13 @@ const useSchoolYearTable = () => {
     } catch (error) {
       const ec = error?.response?.data?.EC;
       const em = error?.response?.data?.EM;
-      if (ec ===1){
+      if (ec === 1) {
         toast.error(em || "Lỗi khi cập nhật năm học");
       }
-      else if (ec===2){
+      else if (ec === 2) {
         toast.error(em || "Lỗi khi cập nhật năm học");
       }
-      else{
+      else {
         toast.error("Không thể kết nối đến máy chủ");
       }
     }

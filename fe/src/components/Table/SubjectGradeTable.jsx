@@ -191,7 +191,7 @@ const SubjectGradeTable = ({ filters }) => {
         placeholder="Tìm kiếm học sinh..."
         addLabel="Thêm cột điểm"
         onAddClick={openAddTestTypeModal}
-        hideAdd={!canManageTestTypes}
+        hideAdd
         onExportClick={() => exportToExcel(filters, testTypes, searchTerm, sortConfig)}
       />
       {loading && <p>Đang tải dữ liệu...</p>}

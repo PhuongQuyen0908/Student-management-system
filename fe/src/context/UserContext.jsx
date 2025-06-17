@@ -83,21 +83,25 @@ const UserProvider = ({ children }) => {
   }, [user]);
 
   useEffect(() => {
+    const checkPermission = (key) => {
+      const readPermission = loadPage[key]?.find(p => p.endsWith('/read') || p.endsWith('/paginated') || p.endsWith('/subject-summary') || p.endsWith('/read-for-admin'));
+      return userPermissions.includes(readPermission);
+    }
     setIsAvailable({ // kiểm tra quyền của user để ẩn khỏi taskbar
-      DanhSachHocSinh: userPermissions.some(permission => loadPage.DanhSachHocSinh.includes(permission)),
-      TiepNhanHocSinh: userPermissions.some(permission => loadPage.TiepNhanHocSinh.includes(permission)),
-      DanhSachMonHoc: userPermissions.some(permission => loadPage.DanhSachMonHoc.includes(permission)),
-      BangDiemMonHoc: userPermissions.some(permission => loadPage.BangDiemMonHoc.includes(permission)),
-      LoaiKiemTra: userPermissions.some(permission => loadPage.LoaiKiemTra.includes(permission)),
-      QuanLyLopHoc: userPermissions.some(permission => loadPage.DanhSachLopHoc.includes(permission)),
-      DanhSachLop: userPermissions.some(permission => loadPage.DanhSachLop.includes(permission)),
-      QuanLyKhoiLop: userPermissions.some(permission => loadPage.QuanLyKhoiLop.includes(permission)),
+      DanhSachHocSinh: checkPermission("DanhSachHocSinh"),
+      TiepNhanHocSinh: checkPermission("TiepNhanHocSinh"),
+      DanhSachMonHoc: checkPermission("DanhSachMonHoc"),
+      BangDiemMonHoc: checkPermission("BangDiemMonHoc"),
+      LoaiKiemTra: checkPermission("LoaiKiemTra"),
+      QuanLyLopHoc: checkPermission("DanhSachLopHoc"),
+      DanhSachLop: checkPermission("DanhSachLop"),
+      QuanLyKhoiLop: checkPermission("QuanLyKhoiLop"),
       BaoCaoMonHoc: userPermissions.some(permission => loadPage.BaoCaoMonHoc.includes(permission)),
       BaoCaoHocKy: userPermissions.some(permission => loadPage.BaoCaoHocKy.includes(permission)),
-      ThayDoiQuyDinh: userPermissions.some(permission => loadPage.ThayDoiQuyDinh.includes(permission)),
-      QuanLyTaiKhoan: userPermissions.some(permission => loadPage.QuanLyTaiKhoan.includes(permission)),
-      QuanLyPhanQuyen: userPermissions.some(permission => loadPage.QuanLyPhanQuyen.includes(permission)),
-      QuanLyNamHoc: userPermissions.some(permission => loadPage.QuanLyNamHoc.includes(permission))
+      ThayDoiQuyDinh: checkPermission("ThayDoiQuyDinh"),
+      QuanLyTaiKhoan: checkPermission("QuanLyTaiKhoan"),
+      QuanLyPhanQuyen: checkPermission("QuanLyPhanQuyen"),
+      QuanLyNamHoc: checkPermission("QuanLyNamHoc")
     })
   }, [userPermissions]);
 

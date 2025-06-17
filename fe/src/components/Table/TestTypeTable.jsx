@@ -218,7 +218,7 @@ const TestTypeTable = () => {
                                 </tr>
                             ))
                         ) : (
-                            <tr><td colSpan="4">Không có dữ liệu</td></tr>
+                            <tr><td colSpan="4">Không tìm thấy loại kiểm tra</td></tr>
                         )}
                     </tbody>
                 </table>
