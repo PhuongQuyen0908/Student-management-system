@@ -16,7 +16,8 @@ import {
   faClipboardList,
   faSchoolCircleCheck,
   faScaleBalanced,
-  faSchoolFlag
+  faSchoolFlag,
+  faCalendarAlt
 } from '@fortawesome/free-solid-svg-icons';
 import useTaskbar from '../../hooks/useTaskbar';
 import logo from '../../assets/School-logo.png';
@@ -158,6 +159,15 @@ const Taskbar = () => {
           </NavLink>
         }
 
+        {isAvailable.QuanLyNamHoc &&
+          <NavLink
+            to="/admin/schoolyears"
+            className={({ isActive }) => `taskbar-item ${isActive ? 'active-taskbar' : ''}`}
+          >
+            <FontAwesomeIcon icon={faCalendarAlt} /> Quản lý năm học
+          </NavLink>
+        }
+        
         {(isAvailable.BaoCaoMonHoc || isAvailable.BaoCaoHocKy) && (
           <>
             <NavLink className="taskbar-item" onClick={() => toggleMenu('reportManagement')}>

@@ -16,6 +16,7 @@ import DecentralizationPage from '../pages/Admin/DecentralizationPage';
 import PrivateRoutes from './PrivateRoutes';
 import GradesPage from '../pages/Admin/GradesPage';
 import TestTypePage from '../pages/Admin/TestTypePage';
+import SchoolYearsPage from '../pages/Admin/SchoolYearsPage';
 const AdminRoutes = {
     path: '/admin',
     element: (
@@ -84,6 +85,10 @@ const AdminRoutes = {
             path: 'testtype',
             element: <TestTypePage />,
         },
+        {
+            path: 'schoolyears',
+            element: <SchoolYearsPage />,
+        }
     ],
 };
 

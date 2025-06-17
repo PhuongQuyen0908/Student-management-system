@@ -23,6 +23,8 @@ const getOptions = async () => {
 
     const lop = lopRaw.map(obj => obj.get({ plain: true }));
     const namHoc = namHocRaw.map(obj => obj.get({ plain: true }));
+    //Sắp xếp năm học mới nhất lên trước 
+    namHoc.sort((a, b) => b.TenNamHoc.localeCompare(a.TenNamHoc));
     const hocKy = hocKyRaw.map(obj => obj.get({ plain: true }));
     const monHoc = monHocRaw.map(obj => obj.get({ plain: true }));
 
@@ -73,11 +75,25 @@ const calculateAndUpdateDiemTB = async (MaBDMonHoc) => {
   console.log(weight);
   const diemTB = weight ? parseFloat((total / weight).toFixed(2)) : null;
 
+  //Cập nhật điểm tb môn học
   await db.bdmonhoc.update(
     { DiemTBMonHoc: diemTB },
     { where: { MaBDMonHoc } }
   );
 
+  //Cập nhật điểm tb học kỳ
+  const bdMonhoc = await db.bdmonhoc.findByPk(MaBDMonHoc);
+  if (bdMonhoc){
+    const maQuaTrinhHoc = bdMonhoc.MaQuaTrinhHoc;
+    //Lấy tất cả điểm TB môn học của quá trình học này
+    const allBDMonHoc = await db.bdmonhoc.findAll({ where: { MaQuaTrinhHoc: maQuaTrinhHoc } }); 
+    const diemTBs = allBDMonHoc.map(bd => bd.DiemTBMonHoc).filter(diem => diem !== null && diem !== undefined);
+    const diemTBHocKy = diemTBs.length > 0 ? parseFloat((diemTBs.reduce((a, b) => a + b, 0) / diemTBs.length).toFixed(2)) : null;
+    await db.quatrinhhoc.update(
+      { DiemTBHocKy: diemTBHocKy },
+      { where: { MaQuaTrinhHoc: maQuaTrinhHoc } }
+    );
+  }
   return diemTB;
 };
  
@@ -279,8 +295,11 @@ const getSubjectSummary = async (tenLop, tenHocKy, tenNamHoc, tenMonHoc, page = 
 
     const allTestTypes = await db.loaikiemtra.findAll({ attributes: ['TenLoaiKiemTra'], raw: true });
     const testTypeNames = allTestTypes.map(t => t.TenLoaiKiemTra.trim());
-
-    if (testTypeNames.includes(sortField)) {
+    if (sortField === 'MaHocSinh') {
+      // Sort by MaHocSinh directly
+      orderClause.push([db.hocsinh, 'MaHocSinh', safeSortOrder]);
+    }
+    else if (testTypeNames.includes(sortField)) {
         // Sắp xếp theo cột điểm thành phần bằng subquery
         const subQuery = `(
             SELECT AVG(DiemTPMonHoc) FROM bdchitietmonhoc AS bdct

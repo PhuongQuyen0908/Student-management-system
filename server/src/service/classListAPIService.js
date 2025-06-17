@@ -34,7 +34,7 @@ const buildStudentSearchClause = (search) => {
 const getAllStudentOfClass = async (MaDanhSachLop, page, limit, sortField, sortOrder, search) => {
   //Hiển thị danh sách học sinh có tìm kiếm, phân trang, sắp xếp
   try{
-    const validFields = ['HoTen', 'Email', 'DiaChi', 'GioiTinh', 'NgaySinh']; // Các trường hợp hợp lệ để sắp xếp
+    const validFields = ['MaHocSinh', 'HoTen', 'Email', 'DiaChi', 'GioiTinh', 'NgaySinh']; // Các trường hợp hợp lệ để sắp xếp
     // Kiểm tra xem sortField có hợp lệ không
     if (!validFields.includes(sortField)) {
       sortField = 'HoTen'; // Mặc định sắp xếp theo HoTen nếu trường không hợp lệ
@@ -360,9 +360,10 @@ const addStudentToClass = async ({MaDanhSachLop, MaHocSinh, TenLop, TenNamHoc })
     }
     // 4. Kiểm tra tình trạng học sinh (thêm một cột mới vào model học sinh)
     const hs = await db.hocsinh.findByPk(MaHocSinh, { transaction: t });
-    if (!hs || hs.TrangThaiHoc !== 'Đang học') { 
+    if (!hs || ( hs.TrangThaiHoc !== 'Đang học' && hs.TrangThaiHoc !== null)) { 
       await t.rollback();
-      return buildResponse('Học sinh không hợp lệ hoặc đã nghỉ học. Không thể thêm vào lớp', 1, null);
+      const trangThaiHoc = hs ? hs.TrangThaiHoc : null;
+      return buildResponse(`Học sinh có tình trạng học: ${trangThaiHoc}. Không thể thêm`, 1, null);
     }
 
     // Kiểm tra sỉ số tối đa

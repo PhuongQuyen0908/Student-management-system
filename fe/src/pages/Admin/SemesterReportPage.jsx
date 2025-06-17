@@ -56,17 +56,27 @@ const SemesterReportPage = () => {
 
   return (
     <div className="semesterreport-page-container">
-      <div className="semesterreport-table-wrapper">
+      <div className="semesterreport-header">
+        {reportMeta.hocKy && (
+          <div className="semesterreport-title">
+            <p>Báo cáo học kỳ: {reportMeta.hocKy} - Năm học: {reportMeta.namHoc} (Điểm đạt: {reportMeta.diemDat})</p>
+          </div>
+        )}
+        {!reportMeta.hocKy && (
+          <div className="semesterreport-title">
+            <p>Báo cáo tổng kết học kỳ</p>
+          </div>
+        )}
         <SemesterReportFilter onSubmit={handleFilterSubmit} />
-
-        <SemesterReportTable
-          data={reportData}
-          meta={reportMeta}
-          sortConfig={sortConfig}
-          onSort={handleSort}
-          onSearchChange={setSearchTerm}
-        />
       </div>
+      
+      <SemesterReportTable
+        data={reportData}
+        meta={reportMeta}
+        sortConfig={sortConfig}
+        onSort={handleSort}
+        onSearchChange={setSearchTerm}
+      />
     </div>
   );
 };

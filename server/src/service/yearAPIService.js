@@ -1,4 +1,5 @@
 import db from '../models/index.js';
+import { Op } from 'sequelize';
 const buildRepsponse = (EM, EC, DT) => ({ EM, EC, DT });
 // Hàm lấy tất cả các năm học
 const getAllSchoolYears = async () => {
@@ -95,7 +96,7 @@ const updateSchoolYear = async (id, data) => {
 // Hàm xóa năm học học
 const deleteSchoolYear = async (id) => {
   try {
-    const deleted = await db.namhoc.destroy({ where: { MaNam: id } });
+    const deleted = await db.namhoc.destroy({ where: { MaNamHoc: id } });
     if (!deleted) {
       throw new Error('Năm học không tồn tại');
     }
@@ -105,11 +106,60 @@ const deleteSchoolYear = async (id) => {
   }
 };
 
+const getSchoolYearsWithPagination = async (search = "", page = 1, limit = 10, sortField = "MaNamHoc", sortOrder = "ASC") => {
+  try {
+    const offset = (page - 1) * limit;
+    
+    // Build search clause
+    const searchClause = search
+      ? {
+          [Op.or]: [
+            { TenNamHoc: { [Op.like]: `%${search}%` } },
+            { Nam1: { [Op.like]: `%${search}%` } },
+            { Nam2: { [Op.like]: `%${search}%` } },
+          ],
+        }
+      : {};
+    
+    // Validate sort field
+    const validFields = ['MaNamHoc', 'TenNamHoc', 'Nam1', 'Nam2'];
+    if (!validFields.includes(sortField)) {
+      sortField = 'MaNamHoc';
+    }
+    
+    sortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+    
+    const { count, rows } = await db.namhoc.findAndCountAll({
+      where: searchClause,
+      offset,
+      limit,
+      order: [[sortField, sortOrder]],
+      attributes: ['MaNamHoc', 'TenNamHoc', 'Nam1', 'Nam2'],
+    });
+    
+    const totalPages = Math.ceil(count / limit);
+    const data = {
+      totalItems: count,
+      totalPages,
+      currentPage: page,
+      schoolYears: rows,
+      sortField,
+      sortOrder
+    };
+    
+    return buildRepsponse("Lấy danh sách năm học thành công", 0, data);
+  } catch (error) {
+    console.error("Error fetching school years:", error);
+    return buildRepsponse("Lỗi server khi lấy danh sách năm học", -1, []);
+  }
+};
+
 module.exports = {
   getAllSchoolYears,
   getSchoolYearById,
   checkSchoolYearExists,
   createSchoolYear,
   updateSchoolYear,
-  deleteSchoolYear
+  deleteSchoolYear,
+  getSchoolYearsWithPagination
 };

@@ -115,7 +115,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
 
         // Format data for Excel
         const formattedData = students.map((student, index) => ({
-          'STT': index + 1,
+          'Mã học sinh': student.MaHocSinh || '',
           'Họ và tên': student.HoTen || '',
           'Giới tính': student.GioiTinh || '',
           'Ngày sinh': student.NgaySinh || '',
@@ -166,7 +166,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
             <thead>
               <tr>
                 <th>
-                  STT
+                  Mã học sinh
                   <button
                     className="sort-button"
                     title="Sắp xếp"
@@ -238,11 +238,7 @@ const ClassListTable = ({ selectedYear, selectedClass, setStudentCount }) => {
               {students.length > 0 ? (
                 students.map((student, index) => (
                   <tr key={student.MaCT_DSL || student.id || index}>
-                    <td>
-                      {(pagination.currentPage - 1) * pagination.limit +
-                        index +
-                        1}
-                    </td>
+                    <td>{highlightText(student.MaHocSinh, searchTerm)}</td>
                     <td>{highlightText(student.HoTen, searchTerm)}</td>
                     <td>{highlightText(student.GioiTinh, searchTerm)}</td>
                     <td>{highlightText(student.NgaySinh, searchTerm)}</td>

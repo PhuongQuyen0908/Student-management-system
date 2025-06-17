@@ -68,11 +68,33 @@ const deleteSchoolYear = async (req, res) => {
   }
 };
 
+const getSchoolYearsWithPagination = async (req, res) => {
+  try {
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const sortField = req.query.sortField || 'MaNamHoc';
+    const sortOrder = req.query.sortOrder || 'ASC';
+    const search = req.query.search || '';
+
+    const data = await yearAPIService.getSchoolYearsWithPagination(search, page, limit, sortField, sortOrder);
+    
+    return res.status(200).json(data);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ 
+      EM: "Lỗi server khi lấy danh sách năm học", 
+      EC: -1, 
+      DT: [] 
+    });
+  }
+};
+
 // Export các hàm
 module.exports = {
   readSchoolYear,
   getSchoolYearById,
   createSchoolYear,
   updateSchoolYear,
-  deleteSchoolYear
+  deleteSchoolYear,
+  getSchoolYearsWithPagination
 };
