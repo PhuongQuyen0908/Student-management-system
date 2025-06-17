@@ -1,9 +1,9 @@
-import testAPIService from "../service/testAPIService"; 
+import testAPIService from "../service/testAPIService";
 
 // Hàm xử lý lấy tất cả loại kiểm tra
 const readTest = async (req, res) => {
   try {
-    const tests = await testAPIService.getAllTests(); 
+    const tests = await testAPIService.getAllTests();
     if (tests.length === 0) {
       return res.status(404).json({ message: 'Không có loại kiểm tra nào trong cơ sở dữ liệu' });
     }
@@ -17,7 +17,7 @@ const readTest = async (req, res) => {
 const getTestById = async (req, res) => {
   try {
     const id = req.params.id;
-    const test = await testAPIService.getTestById(id); 
+    const test = await testAPIService.getTestById(id);
     res.json({ message: 'Loại kiểm tra tìm thấy', data: test });
   } catch (error) {
     res.status(404).json({ message: error.message });

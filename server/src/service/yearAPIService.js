@@ -1,5 +1,5 @@
 import db from '../models/index.js';
-const buildRepsponse = (EM, EC, DT) => ({EM,EC, DT});
+const buildRepsponse = (EM, EC, DT) => ({ EM, EC, DT });
 // Hàm lấy tất cả các năm học
 const getAllSchoolYears = async () => {
   try {
@@ -32,7 +32,7 @@ const checkSchoolYearExists = async (SchoolYearName) => {
     const existingSchoolYear = await db.namhoc.findOne({
       where: { TenNamHoc: SchoolYearName }
     });
-    if( existingSchoolYear ) {
+    if (existingSchoolYear) {
       return true; // Năm học đã tồn tại
     } else return false; // Năm học chưa tồn tại
   } catch (error) {
@@ -58,9 +58,10 @@ const createSchoolYear = async (data) => {
     //Kiểm tra năm bắt đầu phải nhỏ hơn năm kết thúc
     if (parseInt(nam1) >= parseInt(nam2)) {
 
-    if(nam1 >= nam2){
+      if (nam1 >= nam2) {
 
-      return buildRepsponse('Năm bắt đầu phải nhỏ hơn năm kết thúc', 1, null);
+        return buildRepsponse('Năm bắt đầu phải nhỏ hơn năm kết thúc', 1, null);
+      }
     }
     // 3. Create the complete data object to be saved
     const schoolYearDataToCreate = {
@@ -75,7 +76,8 @@ const createSchoolYear = async (data) => {
 
   } catch (error) {
     // The original error message from the DB will be caught and re-thrown
-    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);}
+    return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);
+  }
 };
 
 // Hàm cập nhật năm học học
@@ -105,11 +107,11 @@ const deleteSchoolYear = async (id) => {
   }
 };
 
-module.exports = { 
+module.exports = {
   getAllSchoolYears,
   getSchoolYearById,
   checkSchoolYearExists,
   createSchoolYear,
   updateSchoolYear,
-  deleteSchoolYear 
+  deleteSchoolYear
 };

@@ -24,22 +24,6 @@ const SemesterReportFilter = ({ onSubmit }) => {
         setSelectedYear(defaultYear);
         setSelectedSemester(defaultSemester);
 
-<<<<<<< BeTL
-    })
-    .catch((err) => {
-      console.error(err);
-      setYearOptions([]);
-      setSemesterOptions([]);
-    });
-}, []);
-=======
-        // 👇 Gọi báo cáo ban đầu luôn
-        if (defaultYear && defaultSemester) {
-          onSubmit({
-            tenHocKy: defaultSemester,
-            tenNamHoc: defaultYear,
-          });
-        }
       })
       .catch((err) => {
         console.error(err);
@@ -47,7 +31,22 @@ const SemesterReportFilter = ({ onSubmit }) => {
         setSemesterOptions([]);
       });
   }, []);
->>>>>>> main
+  // =======
+  //         // 👇 Gọi báo cáo ban đầu luôn
+  //         if (defaultYear && defaultSemester) {
+  //           onSubmit({
+  //             tenHocKy: defaultSemester,
+  //             tenNamHoc: defaultYear,
+  //           });
+  //         }
+  //       })
+  //       .catch((err) => {
+  //         console.error(err);
+  //         setYearOptions([]);
+  //         setSemesterOptions([]);
+  //       });
+  //   }, []);
+  // >>>>>>> main
 
   const handleClick = () => {
     onSubmit({

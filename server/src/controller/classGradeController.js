@@ -1,105 +1,125 @@
 import gradeAPIService from '../service/gradeAPIService.js';
 
+// Lấy danh sách khối học (có tìm kiếm & phân trang nếu có)
 const readClassGrade = async (req, res) => {
   try {
-    const data = await gradeAPIService.getAllGrades();
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const sortField = req.query.sortField || 'MaKhoi';
+    const sortOrder = req.query.sortOrder || 'ASC';
+    const search = req.query.search || '';
+
+    let data;
+    if (search) {
+      data = await gradeAPIService.getAllGradesWithSearch(search, page, limit, sortField, sortOrder);
+    } else if (req.query.page && req.query.limit) {
+      data = await gradeAPIService.getAllGradesWithSearch('', page, limit, sortField, sortOrder);
+    } else {
+      data = await gradeAPIService.getAllGrades();
+    }
+
     return res.status(200).json(data);
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
+      EM: 'Lỗi phía server',
       EC: -1,
-      EM: error.message,
+      DT: [],
     });
   }
-}
+};
 
+// Lấy khối theo tên
 const getClassGradeByName = async (req, res) => {
   try {
     const { GradeName } = req.params;
     const data = await gradeAPIService.getGradeByName(GradeName);
     if (data.EC === 1) {
-      return res.status(404).json({
-        EC: 1,
-        EM: "Khối không tồn tại",
-      });
+      return res.status(404).json(data);
     }
     return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({
-      EC: -1,
       EM: error.message,
+      EC: -1,
+      DT: [],
     });
   }
-}
+};
 
+// Tạo khối học mới
 const createClassGrade = async (req, res) => {
   try {
     const { GradeName } = req.body;
     const isExists = await gradeAPIService.checkGradeExists(GradeName);
     if (isExists) {
-      return res.status(400).json({
-        EC: 1,
+      return res.status(409).json({
         EM: "Khối học đã tồn tại",
+        EC: 1,
+        DT: "",
       });
     }
-    const newGrade = await gradeAPIService.createGrade({ TenKhoi: GradeName });
-    return res.status(201).json({
-      EC: 0,
-      EM: "Tạo khối học thành công",
-      DT: newGrade,
-    });
+    const data = await gradeAPIService.createGrade({ GradeName });
+    return res.status(201).json(data);
   } catch (error) {
     return res.status(500).json({
-      EC: -1,
       EM: error.message,
+      EC: -1,
+      DT: "",
     });
   }
-}   
+};
+
+// Cập nhật khối học
 const updateClassGrade = async (req, res) => {
   try {
     const { id } = req.params;
     const { GradeName } = req.body;
+
     const isExists = await gradeAPIService.checkGradeExists(GradeName);
     if (isExists) {
-      return res.status(400).json({
+      return res.status(409).json({
+        EM: "Khối học đã tồn tại. Bạn không thể cập nhật khối học với tên này.",
         EC: 1,
-        EM: "Khối học đã tồn tại",
+        DT: "",
       });
     }
-    const updatedGrade = await gradeAPIService.updateGrade(id, { TenKhoi: GradeName });
-    return res.status(200).json({
-      EC: 0,
-      EM: "Cập nhật khối học thành công",
-      DT: updatedGrade,
-    });
+
+    const data = await gradeAPIService.updateGrade(id, { GradeName });
+    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({
-      EC: -1,
       EM: error.message,
+      EC: -1,
+      DT: "",
     });
   }
-}
+};
+
+// Xoá khối học
 const deleteClassGrade = async (req, res) => {
   try {
     const { id } = req.params;
-    const gradeToDelete = await gradeAPIService.getGradeById(id);
-    if (!gradeToDelete) {
+    const grade = await gradeAPIService.getGradeByName(id); // hoặc getGradeById nếu có
+    if (!grade || grade.EC === 1) {
       return res.status(404).json({
-        EC: 1,
         EM: "Khối học không tồn tại",
+        EC: 1,
+        DT: [],
       });
     }
-    await gradeToDelete.destroy();
-    return res.status(200).json({
-      EC: 0,
-      EM: "Xóa khối học thành công",
-    });
+
+    const data = await gradeAPIService.deleteGrade(id);
+    return res.status(200).json(data);
   } catch (error) {
     return res.status(500).json({
-      EC: -1,
       EM: error.message,
+      EC: -1,
+      DT: [],
     });
   }
-}
+};
+
 export default {
   readClassGrade,
   getClassGradeByName,
