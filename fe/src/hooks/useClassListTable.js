@@ -154,7 +154,7 @@ const handleRemoveStudent = (maCT_DSL) => {
         } catch (error) {
             console.log(error);
             console.error('Error removing student:', error);
-            toast.error('Lỗi kết nối máy chủ');
+            toast.error(error.response?.data?.EM || 'Lỗi kết nối máy chủ');
         } finally {
             deleteModal.close();
         }

@@ -73,7 +73,7 @@ const createSchoolYear = async (data) => {
     const newSchoolYear = await db.namhoc.create(schoolYearDataToCreate);
     return buildRepsponse('Tạo năm học thành công', 0, newSchoolYear);
 
-  } catch (error) {
+  } }catch (error) {
     // The original error message from the DB will be caught and re-thrown
     return buildRepsponse('Lỗi khi tạo năm học: ' + error.message, -1, null);}
 };

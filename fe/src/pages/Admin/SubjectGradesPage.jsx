@@ -24,6 +24,7 @@ const SubjectGradesPage = () => {
                 const res = await reportService.getOptions();
                 if (res.data && res.data.EC === 0) {
                     setOptions(res.data.DT);
+                    console.log('Options fetched:', res.data.DT);
                     // Set default filters to first available option
                     setFilters({
                         year: res.data.DT.namHoc[0]?.value || '',

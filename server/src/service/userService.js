@@ -228,6 +228,22 @@ const updateUser = async (data) => {
 
 const deleteUser = async (TenDangNhap) => {
   try {
+    const user = await db.nguoidung.findOne({
+      where: { TenDangNhap: TenDangNhap },
+      include: { model: db.nhomnguoidung, attributes: ["MaNhom", "TenNhom"] },
+    });
+    console.log("Tên nhóm là" ,user.nhomnguoidung.TenNhom);
+    if(user.nhomnguoidung.TenNhom === "Super Admin") {
+      const count = await db.nguoidung.count({
+        where: { MaNhom: user.MaNhom },
+      });
+      if(count ===1){
+        return {
+          EM: "Không thể xóa người dùng cuối cùng trong nhóm Super Admin",
+          EC: 1,
+          DT: [],
+        };
+      }}
     const deleteCount = await db.nguoidung.destroy({
       where: { TenDangNhap: TenDangNhap },
     });

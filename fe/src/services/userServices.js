@@ -51,6 +51,10 @@ const fetchGroup = ()=>{ //dùng để lấy danh sách nhóm người dùng cho
   return axios.get('api/group/read');
 }
 
+const deleteGroup = (MaNhom) => {
+  return axios.delete(`/api/group/delete/${MaNhom}`);
+};
+
 const uploadAvatar = (formData) =>{
   return axios.post('/api/user/upload-avatar', formData, {
     headers: {
@@ -58,4 +62,4 @@ const uploadAvatar = (formData) =>{
     },
   });
 }
-export { loginUser , getUserAccount , logoutUser , fetchAllUsers, createUser, fetchGroup , deleteUser, updateUser,changePassword ,uploadAvatar};
+export { loginUser , getUserAccount , logoutUser , fetchAllUsers, createUser, fetchGroup , deleteGroup,deleteUser, updateUser,changePassword ,uploadAvatar};
