@@ -61,7 +61,8 @@ const useSchoolYearTable = () => {
 
   const confirmAddSchoolYear = async (schoolYearData) => {
     try {
-      let response = await createSchoolYear(schoolYearData);
+      const response = await createSchoolYear(schoolYearData);
+      
       if (response.data.EC === 0) {
         toast.success(response.data.EM || "Thêm năm học thành công");
         await fetchSchoolYears();
@@ -71,12 +72,8 @@ const useSchoolYearTable = () => {
       }
       return response;
     } catch (error) {
-      if (error?.response?.status === 400) {
-        toast.error(error.response.data.EM || "Năm học đã tồn tại");
-      } else {
-        toast.error("Lỗi khi thêm năm học");
-      }
-      return { data: { EC: -1, EM: "Lỗi khi thêm năm học" } };
+      console.error("Error adding school year:", error);
+      return error.response || { data: { EC: -1, EM: "Lỗi khi thêm năm học" } };
     }
   };
 
@@ -89,23 +86,49 @@ const useSchoolYearTable = () => {
     try {
       const response = await deleteSchoolYear(dataModal);
       
-      // Handle both standard and non-standard response formats
-      if (response?.data?.EC === 0 || response?.data?.message) {
+      // Handle success case
+      if (response?.data?.EC === 0 || response?.data?.message === "Xóa năm học thành công") {
         toast.success(response.data?.EM || response.data?.message || "Xóa năm học thành công");
-        
-        // Refresh the data
         await fetchSchoolYears();
-        
-        // Reset state and close modal
         setDataModal({});
         deleteModal.close();
+        return;
+      }
+      
+      // Handle error - look for foreign key constraint error pattern
+      const errorMsg = response?.data?.message || response?.data?.EM || "";
+      
+      if (errorMsg.includes("foreign key constraint fails")) {
+        // Extract the table name from the error message
+        const tableMatch = errorMsg.match(/`([^`]+)`\.\`([^`]+)`/);
+        const constraintMatch = errorMsg.match(/CONSTRAINT `([^`]+)`/);
+        
+        const tableName = tableMatch ? tableMatch[2] : "unknown";
+        const constraintName = constraintMatch ? constraintMatch[1] : "unknown";
+        
+        toast.error(
+          `Không thể xóa năm học vì có ràng buộc với bảng ${tableName} (constraint: ${constraintName}).\nVui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa năm học này.`
+        );
       } else {
-        toast.error(response?.data?.EM || response?.data?.message || "Lỗi khi xóa năm học");
+        toast.error(errorMsg || "Lỗi khi xóa năm học");
       }
     } catch (error) {
       console.error("Lỗi khi xóa năm học:", error);
-      if (error.response && error.response.data) {
-        toast.error(error.response.data.EM || error.response.data.message || "Lỗi khi xóa năm học");
+      
+      // Check if the error is a foreign key constraint error
+      const errorMsg = error.response?.data?.message || error.message || "";
+      
+      if (errorMsg.includes("foreign key constraint fails")) {
+        // Extract the table name from the error message
+        const tableMatch = errorMsg.match(/`([^`]+)`\.\`([^`]+)`/);
+        const constraintMatch = errorMsg.match(/CONSTRAINT `([^`]+)`/);
+        
+        const tableName = tableMatch ? tableMatch[2] : "unknown";
+        const constraintName = constraintMatch ? constraintMatch[1] : "unknown";
+        
+        toast.error(
+          `Không thể xóa năm học vì có ràng buộc với bảng ${tableName} (constraint: ${constraintName}).\nVui lòng xóa hoặc cập nhật các thông tin liên quan trước khi xóa năm học này.`
+        );
       } else {
         toast.error("Không thể kết nối đến máy chủ");
       }
