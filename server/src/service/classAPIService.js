@@ -142,13 +142,38 @@ const createClass = async (data) => {
 };
 
 const updateClass = async (id, data) => {
-  console.log("Check data", data)
-  console.log("Check id", id)
   try {
     const classToUpdate = await db.lop.findByPk(id);
     if (!classToUpdate) {
       return buildResponse("Lớp không tồn tại", 1, []);
     }
+
+    // Nếu không thay đổi gì thì cho phép cập nhật
+    if (
+      classToUpdate.TenLop === data.className &&
+      classToUpdate.MaKhoi === data.classGrade
+    ) {
+      await classToUpdate.update({
+        TenLop: data.className,
+        MaKhoi: data.classGrade,
+      });
+      return buildResponse("Cập nhật lớp học thành công", 0, classToUpdate);
+    }
+
+    // Kiểm tra tên lớp mới đã tồn tại trong khối mới chưa (trừ chính lớp này)
+    const existed = await db.lop.findOne({
+      where: {
+        TenLop: data.className,
+        MaKhoi: data.classGrade,
+        MaLop: { [db.Sequelize.Op.ne]: id }
+      }
+    });
+
+    if (existed) {
+      return buildResponse("Trong khối này đã có lớp học với tên này.", 1, []);
+    }
+
+    // Nếu không trùng, cho phép cập nhật
     await classToUpdate.update({
       TenLop: data.className,
       MaKhoi: data.classGrade,
@@ -211,7 +236,8 @@ const getClassById = async (id) => {
 
 const checkClassExists = async (className) => {
   try {
-    const existed = await db.lop.findOne({ where: { TenLop: className } });
+    const existed = await db.lop.findOne({ where: { TenLop: className }
+     });
     return !!existed; // Trả về true nếu lớp tồn tại, false nếu không
   } catch (error) {
     console.error(error);

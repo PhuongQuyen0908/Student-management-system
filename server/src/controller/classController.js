@@ -98,31 +98,24 @@ const readClass = async (req, res) => {
 
 
   // Hàm xử lý cập nhật lớp học
-  const updateClass = async (req, res) => {
-    try {
-      let  id = req.params.id;
-      // Kiểm tra xem lớp học có tồn tại không
-      let isExisted = await classAPIService.checkClassExists(req.body.className);
-      if (isExisted) {
-        // 409 Conflict: Lớp học đã tồn tại
-        return res.status(409).json({
-          EM: "Lớp học đã tồn tại. Bạn không thể cập nhật lớp học với tên này.",
-          EC: 1,
-          DT: ""
-        });
-      }
-      // Nếu lớp học chưa tồn tại, gọi service để cập nhật lớp học
-      let data = await classAPIService.updateClass(id, req.body);
-      return res.status(200).json(data);
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({
-        EM: "Lỗi phía server",
-        EC: -1,
-        DT: ""
-      });
-    }
-  };
+const updateClass = async (req, res) => {
+  try {
+    let id = req.params.id;
+    let data = await classAPIService.updateClass(id, req.body);
+    return res.status(200).json({
+      EM: data.EM,
+      EC: data.EC,
+      DT: data.DT
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      EM: 'Lỗi phía server',
+      EC: -1,
+      DT: ""
+    });
+  }
+};
 
   // Hàm xử lý xóa lớp học
   const deleteClass = async (req, res) => {
