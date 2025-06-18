@@ -431,7 +431,7 @@ const addStudentToClass = async ({
     const siSoToiDa = parseInt(siSoToiDaParam.GiaTri, 10);
 
     // 4. Lấy thông tin lớp học hiện tại và khóa nó lại để tránh race condition
-    const classListLock = await db.danhsachlop.findByPk(MaDanhSachLop, {
+    const classListLock = await db.danhsachlop.findByPk(classList.MaDanhSachLop, {
       transaction: t,
       lock: t.LOCK.UPDATE,
     });
@@ -453,7 +453,7 @@ const addStudentToClass = async ({
 
     // 6. Kiểm tra học sinh đã có trong lớp chưa
     const existingRecord = await db.ct_dsl.findOne({
-      where: { MaDanhSachLop, MaHocSinh },
+      where: { MaDanhSachLop: classList.MaDanhSachLop, MaHocSinh },
       transaction: t,
     });
 
@@ -469,7 +469,7 @@ const addStudentToClass = async ({
     // 7. Thêm học sinh vào lớp (ct_dsl)
     const newRecord = await db.ct_dsl.create(
       {
-        MaDanhSachLop,
+        MaDanhSachLop: classList.MaDanhSachLop,
         MaHocSinh,
       },
       { transaction: t }
