@@ -52,7 +52,6 @@ const SubjectReportFilters = ({ onSubmit }) => {
   return (
     <div className="filter-group">
       <label>
-        Năm học:
         <select value={selectedYear} onChange={(e) => setSelectedYear(e.target.value)}>
           {yearOptions.map((item, idx) => (
             <option key={idx} value={item.value}>{item.label}</option>
@@ -61,7 +60,6 @@ const SubjectReportFilters = ({ onSubmit }) => {
       </label>
 
       <label>
-        Học kỳ:
         <select value={selectedSemester} onChange={(e) => setSelectedSemester(e.target.value)}>
           {semesterOptions.map((item, idx) => (
             <option key={idx} value={item.value}>{item.label}</option>
@@ -70,7 +68,6 @@ const SubjectReportFilters = ({ onSubmit }) => {
       </label>
 
       <label>
-        Môn học:
         <select value={selectedSubject} onChange={(e) => setSelectedSubject(e.target.value)}>
           {subjectOptions.map((item, idx) => (
             <option key={idx} value={item.value}>{item.label}</option>

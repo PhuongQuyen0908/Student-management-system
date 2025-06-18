@@ -77,28 +77,28 @@ const SemesterReportPage = () => {
       <div className="semesterreport-header">
         {reportMeta.hocKy && (
           <div className="semesterreport-title">
-            <p>BÁO CÁO TỔNG KẾT HỌC KỲ</p>
+            <p>Báo cáo tổng kết học kỳ</p>
           </div>
         )}
         {!reportMeta.hocKy && (
           <div className="semesterreport-title">
-            <p>BÁO CÁO TỔNG KẾT HỌC KỲ</p>
+            <p>Báo cáo tổng kết học kỳ</p>
           </div>
         )}
         <SemesterReportFilter onSubmit={handleFilterSubmit} />
       </div>
-      
+
       <SemesterReportTable
-          data={reportData}
-          meta={reportMeta}
-          sortConfig={sortConfig}
-          onSort={handleSort}
-          onSearchChange={setSearchTerm}
-          onSearchFieldChange={setSearchField}
-          searchTerm={searchTerm}
-          searchField={searchField}
-          onExportClick={handleExport}
-        />
+        data={reportData}
+        meta={reportMeta}
+        sortConfig={sortConfig}
+        onSort={handleSort}
+        onSearchChange={setSearchTerm}
+        onSearchFieldChange={setSearchField}
+        searchTerm={searchTerm}
+        searchField={searchField}
+        onExportClick={handleExport}
+      />
     </div>
   );
 };
