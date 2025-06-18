@@ -724,10 +724,14 @@ const tinhBaoCaoTongKetHocKy = async ({
   order = 'asc'
 }) => {
   try {
+    // Lấy học kỳ, năm học, các ngưỡng điểm
     const namHoc = await db.namhoc.findOne({ where: { TenNamHoc: tenNamHoc } });
     const hocKy = await db.hocky.findOne({ where: { TenHocKy: tenHocKy } });
     const diemDatRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDat' } });
+    const diemDatMonRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDatMon' } });
+
     const diemDat = parseFloat(diemDatRecord?.GiaTri) || 5;
+    const diemDatMon = parseFloat(diemDatMonRecord?.GiaTri) || 5;
 
     if (!namHoc || !hocKy) {
       return {
@@ -757,21 +761,62 @@ const tinhBaoCaoTongKetHocKy = async ({
         });
         if (!qt) continue;
 
-        const diemTBHK = await tinhDiemTBHocKy(qt.MaQuaTrinhHoc);
+        // Lấy tất cả điểm môn
+        const allDiemMon = await db.bdmonhoc.findAll({
+          where: { MaQuaTrinhHoc: qt.MaQuaTrinhHoc },
+          include: [{ model: db.monhoc, attributes: ['HeSo'] }]
+        });
+
+        // Nếu có môn không đạt → bỏ qua
+        const coMonKhongDat = allDiemMon.some(mon => {
+          const diem = parseFloat(mon?.DiemTBMonHoc) || 0;
+          return diem < diemDatMon;
+        });
+        if (coMonKhongDat) continue;
+
+        // Tính điểm TBHK từ các môn đã đạt
+        let tongDiem = 0, tongHeSo = 0;
+        for (const mon of allDiemMon) {
+          const diem = parseFloat(mon?.DiemTBMonHoc) || 0;
+          const heSo = mon.monhoc?.HeSo || 1;
+          tongDiem += diem * heSo;
+          tongHeSo += heSo;
+        }
+
+        const diemTBHK = tongHeSo > 0 ? tongDiem / tongHeSo : null;
+
+        // Cập nhật vào bảng quatrinhhoc
+        await db.quatrinhhoc.update(
+          { DiemTBHocKy: diemTBHK },
+          { where: { MaQuaTrinhHoc: qt.MaQuaTrinhHoc } }
+        );
+
+        // So sánh với ngưỡng đạt
         if (diemTBHK !== null && diemTBHK >= diemDat) {
           soLuongDat++;
         }
       }
 
       const siSo = dsCT.length;
-      const tiLe = siSo > 0 ? ((soLuongDat / siSo) * 100).toFixed(2) : '0.00';
+      const tiLeValue = siSo > 0 ? ((soLuongDat / siSo) * 100).toFixed(2) : '0.00';
 
+      // Ghi dữ liệu vào báo cáo
+      await db.bctk_hocky.create({
+        MaHocKy: hocKy.MaHocKy,
+        MaNamHoc: namHoc.MaNamHoc,
+        MaDanhSachLop: dsl.MaDanhSachLop,
+        SoLuongHS: siSo,
+        SoLuongDat: soLuongDat,
+        TiLe: parseFloat(tiLeValue)
+      });
+
+      // Thêm vào danh sách trả về
       ketQua.push({
         stt: ketQua.length + 1,
         lop: dsl.lop?.TenLop || '[Không xác định]',
         siSo,
         soLuongDat,
-        tiLe: `${tiLe}%`
+        tiLe: `${tiLeValue}%`
       });
     }
 
@@ -799,6 +844,7 @@ const tinhBaoCaoTongKetHocKy = async ({
     };
   }
 };
+
 
 
 const tinhDiemTBMonHoc = async (maBDMonHoc) => {
@@ -851,14 +897,14 @@ function normalizeKetQua(ketQuaRaw) {
       tiLe: tiLeNum.toFixed(2) + '%' // luôn ở dạng 'xx.xx%'
     };
   });
-}
+};
 
 const tinhBaoCaoTongKetMon = async (
   tenMonHoc,
   tenHocKy,
   tenNamHoc,
   searchTerm = '',
-  searchField = 'all', // 👈 thêm searchField
+  searchField = 'all',
   sortBy = null,
   order = 'asc'
 ) => {
@@ -886,14 +932,13 @@ const tinhBaoCaoTongKetMon = async (
       MaMonHoc: monHoc.MaMonHoc
     });
 
-    const diemDatRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDat' } });
-    const diemDat = parseFloat(diemDatRecord?.GiaTri) || 5;
+    const diemDatMonRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDatMon' } });
+    const diemDatMon = parseFloat(diemDatMonRecord?.GiaTri) || 5;
 
     const ketQua = [];
 
     for (const dsl of danhSachLopList) {
       const dsCT = await db.ct_dsl.findAll({ where: { MaDanhSachLop: dsl.MaDanhSachLop } });
-
       let soLuongDat = 0;
 
       for (const ct of dsCT) {
@@ -902,19 +947,19 @@ const tinhBaoCaoTongKetMon = async (
         });
         if (!qtHoc) continue;
 
-        const diemTBMonHoc = await calculateAndUpdateDiemTB(qtHoc.MaQuaTrinhHoc);
+        // Tính hoặc lấy điểm TB môn học
+        await calculateAndUpdateDiemTB(qtHoc.MaQuaTrinhHoc); // đảm bảo đã cập nhật
+
         const bdMon = await db.bdmonhoc.findOne({
           where: { MaQuaTrinhHoc: qtHoc.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc }
         });
+
         if (!bdMon) continue;
 
-        const diemMon = await db.bdchitietmonhoc.findOne({
-          where: { MaBDMonHoc: bdMon.MaBDMonHoc }
-        });
+        const diemTBMonHoc = parseFloat(bdMon?.DiemTBMonHoc) || 0;
 
-        const diemTPMonHoc = diemMon?.DiemTPMonHoc || 0;
-
-        if (diemTPMonHoc >= diemDat && diemTBMonHoc >= diemDat) {
+        // ✅ Chỉ so sánh với DiemDatMon
+        if (diemTBMonHoc >= diemDatMon) {
           soLuongDat++;
         }
       }
@@ -927,24 +972,21 @@ const tinhBaoCaoTongKetMon = async (
         lop: dsl.lop?.TenLop || '[Không xác định]',
         siSo,
         soLuongDat,
-        tiLe: tiLe + '%'
+        tiLe: `${tiLe}%`
       });
 
-      console.log(ketQua);
       await db.ctbctk_mon.create({
         MaBCTKMonHoc: baoCao.MaBCTKMonHoc,
         MaDanhSachLop: dsl.MaDanhSachLop,
         SoLuongHS: siSo,
         SoLuongDat: soLuongDat,
-        TiLe: tiLe
+        TiLe: parseFloat(tiLe)
       });
     }
 
     const ketQuaLoc = filterBySearchField(ketQua, searchTerm, searchField);
-const ketQuaSorted = applySort(ketQuaLoc, sortBy, order);  // ⬅️ thêm dòng này
-const ketQuaNormalized = normalizeKetQua(ketQuaSorted);
-
-    console.log("✅ Kết quả cuối cùng:", ketQuaNormalized);
+    const ketQuaSorted = applySort(ketQuaLoc, sortBy, order);
+    const ketQuaNormalized = normalizeKetQua(ketQuaSorted);
 
     return {
       EM: 'Tính báo cáo tổng kết môn học thành công',
@@ -966,6 +1008,7 @@ const ketQuaNormalized = normalizeKetQua(ketQuaSorted);
     };
   }
 };
+
 
 module.exports = { 
   getOptions,
