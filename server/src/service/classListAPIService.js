@@ -476,7 +476,7 @@ const addStudentToClass = async ({
     );
 
     // 8. Cập nhật lại sĩ số của lớp
-    await classList.increment("SiSo", { by: 1, transaction: t });
+    //await classList.increment("SiSo", { by: 1, transaction: t });
 
     // 9. Tạo quá trình học (quatrinhhoc) cho học sinh mới
     const allHocKy = await db.hocky.findAll({ transaction: t });
@@ -596,9 +596,9 @@ const removeStudentFromClass = async (MaCT_DSL) => {
       const classList = await db.danhsachlop.findByPk(ct.MaDanhSachLop, {
         transaction: t,
       });
-      if (classList) {
-        await classList.decrement("SiSo", { by: 1, transaction: t });
-      }
+      // if (classList) {
+      //   await classList.decrement("SiSo", { by: 1, transaction: t });
+      // }
       // Commit the transaction
       await t.commit();
       // Return success response

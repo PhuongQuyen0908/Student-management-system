@@ -52,7 +52,7 @@ const ClassesListPage = () => {
               <option value="">Không có lớp học</option>
             )}
           </select>
-          {/* <input type="text" value={`Sĩ số: ${studentCount}`} readOnly /> */}
+          <input type="text" value={`Sĩ số: ${studentCount}`} readOnly />
         </div>
       </div>
       <ClassListTable
