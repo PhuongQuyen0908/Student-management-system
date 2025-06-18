@@ -211,7 +211,8 @@ const getClassById = async (id) => {
 
 const checkClassExists = async (className) => {
   try {
-    const existed = await db.lop.findOne({ where: { TenLop: className } });
+    const existed = await db.lop.findOne({ where: { TenLop: className }
+     });
     return !!existed; // Trả về true nếu lớp tồn tại, false nếu không
   } catch (error) {
     console.error(error);

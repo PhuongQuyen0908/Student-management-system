@@ -858,7 +858,7 @@ const tinhBaoCaoTongKetMon = async (
   tenHocKy,
   tenNamHoc,
   searchTerm = '',
-  searchField = 'all', // 👈 thêm searchField
+  searchField = 'all',
   sortBy = null,
   order = 'asc'
 ) => {
@@ -886,14 +886,13 @@ const tinhBaoCaoTongKetMon = async (
       MaMonHoc: monHoc.MaMonHoc
     });
 
-    const diemDatRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDat' } });
-    const diemDat = parseFloat(diemDatRecord?.GiaTri) || 5;
+    const diemDatMonRecord = await db.thamso.findOne({ where: { TenThamSo: 'DiemDatMon' } });
+    const diemDatMon = parseFloat(diemDatMonRecord?.GiaTri) || 5;
 
     const ketQua = [];
 
     for (const dsl of danhSachLopList) {
       const dsCT = await db.ct_dsl.findAll({ where: { MaDanhSachLop: dsl.MaDanhSachLop } });
-
       let soLuongDat = 0;
 
       for (const ct of dsCT) {
@@ -902,19 +901,19 @@ const tinhBaoCaoTongKetMon = async (
         });
         if (!qtHoc) continue;
 
-        const diemTBMonHoc = await calculateAndUpdateDiemTB(qtHoc.MaQuaTrinhHoc);
+        // Tính hoặc lấy điểm TB môn học
+        await calculateAndUpdateDiemTB(qtHoc.MaQuaTrinhHoc); // đảm bảo đã cập nhật
+
         const bdMon = await db.bdmonhoc.findOne({
           where: { MaQuaTrinhHoc: qtHoc.MaQuaTrinhHoc, MaMonHoc: monHoc.MaMonHoc }
         });
+
         if (!bdMon) continue;
 
-        const diemMon = await db.bdchitietmonhoc.findOne({
-          where: { MaBDMonHoc: bdMon.MaBDMonHoc }
-        });
+        const diemTBMonHoc = parseFloat(bdMon?.DiemTBMonHoc) || 0;
 
-        const diemTPMonHoc = diemMon?.DiemTPMonHoc || 0;
-
-        if (diemTPMonHoc >= diemDat && diemTBMonHoc >= diemDat) {
+        // ✅ Chỉ so sánh với DiemDatMon
+        if (diemTBMonHoc >= diemDatMon) {
           soLuongDat++;
         }
       }
@@ -927,24 +926,21 @@ const tinhBaoCaoTongKetMon = async (
         lop: dsl.lop?.TenLop || '[Không xác định]',
         siSo,
         soLuongDat,
-        tiLe: tiLe + '%'
+        tiLe: `${tiLe}%`
       });
 
-      console.log(ketQua);
       await db.ctbctk_mon.create({
         MaBCTKMonHoc: baoCao.MaBCTKMonHoc,
         MaDanhSachLop: dsl.MaDanhSachLop,
         SoLuongHS: siSo,
         SoLuongDat: soLuongDat,
-        TiLe: tiLe
+        TiLe: parseFloat(tiLe)
       });
     }
 
     const ketQuaLoc = filterBySearchField(ketQua, searchTerm, searchField);
-const ketQuaSorted = applySort(ketQuaLoc, sortBy, order);  // ⬅️ thêm dòng này
-const ketQuaNormalized = normalizeKetQua(ketQuaSorted);
-
-    console.log("✅ Kết quả cuối cùng:", ketQuaNormalized);
+    const ketQuaSorted = applySort(ketQuaLoc, sortBy, order);
+    const ketQuaNormalized = normalizeKetQua(ketQuaSorted);
 
     return {
       EM: 'Tính báo cáo tổng kết môn học thành công',

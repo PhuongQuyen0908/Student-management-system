@@ -289,12 +289,25 @@ const getStudentWithPagination = async (page, limit, sortField, sortOrder) => {
 
 const createNewStudent = async (rawStudentData) => {
   try {
+    const existingStudent = await db.hocsinh.findOne({
+      where: { 
+         Email: rawStudentData.studentEmail
+    },
+    });
+    if (existingStudent) {
+      return {
+        EM: "Email học sinh đã tồn tại",
+        EC: 1,
+        DT: [],
+      };
+    }
     await db.hocsinh.create({
       HoTen: rawStudentData.studentName,
       DiaChi: rawStudentData.studentAddress,
       Email: rawStudentData.studentEmail,
       NgaySinh: rawStudentData.studentBirth,
       GioiTinh: rawStudentData.studentGender,
+      TrangThaiHoc: "Đang học"
     });
     return {
       EM: "Tạo học sinh thành công",
