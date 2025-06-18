@@ -30,7 +30,7 @@ module.exports = function(sequelize, DataTypes) {
     TrangThaiHoc: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      defaultValue: "Đang học"
+      defaultValue: 'Đang học'
     }
   }, {
     sequelize,
