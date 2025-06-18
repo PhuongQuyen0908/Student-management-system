@@ -50,7 +50,7 @@ const Login1 = props => {
                                 style={{ cursor: "pointer", top: "50%", right: "10px", transform: "translateY(-50%)" }}
                                 onClick={() => setShowPassword(!showPassword)}
                             >
-                                {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                {showPassword ? <FaEye /> : <FaEyeSlash />}
                             </span>
 
                         </div>
