@@ -41,14 +41,15 @@ const SemesterReportTable = ({
   const totalPassed = data.reduce((acc, curr) => acc + curr.soLuongDat, 0);
 
   const percentPassedByClass = data.map(item => ({
-    lop: item.danhsachlop?.lop?.TenLop || '[?]',
-    tiLe: item.SoLuongHS ? Number(((item.SoLuongDat / item.SoLuongHS) * 100).toFixed(2)) : 0
-  }));
+  lop: item.danhsachlop?.lop?.TenLop || item.lop || '[?]',
+  tiLe: item.siSo ? Number(((item.soLuongDat / item.siSo) * 100).toFixed(2)) : 0
+}));
 
-  const percentOfPassedTotal = data.map(item => ({
-    lop: item.danhsachlop?.lop?.TenLop || '[?]',
-    tiLe: totalPassed ? Number(((item.SoLuongDat / totalPassed) * 100).toFixed(2)) : 0
-  }));
+const percentOfPassedTotal = data.map(item => ({
+  lop: item.danhsachlop?.lop?.TenLop || item.lop || '[?]',
+  tiLe: totalPassed ? Number(((item.soLuongDat / totalPassed) * 100).toFixed(2)) : 0
+}));
+
 
   const shouldHighlight = (field) =>
     searchField === 'all' || searchField === field;
